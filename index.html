@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400;500;600;700;800&family=Inconsolata:wght@400;600&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
   <style>
     :root {
@@ -142,11 +141,31 @@
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
-const { useState, useMemo } = React;
-const { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis,
-        CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart,
-        RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } = Recharts;
+<script>
+const {
+  useState,
+  useMemo
+} = React;
+const {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ComposedChart,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis
+} = Recharts;
 
 /* ══════════════════════════════════════════════════
    REAL SPIKEATTENTIV DATA LAYER
@@ -155,23 +174,87 @@ const { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis,
 // Real benchmarks from 247 Douyin live sessions (Thorne n=97, KC n=150)
 const BM = {
   Thorne: {
-    s1: { p25:.0922, p50:.1115, p75:.1813 },  // exposed → entered
-    s2: { p25:.1645, p50:.2249, p75:.3190 },  // entered → product exposed
-    s3: { p25:.0507, p50:.0833, p75:.2116 },  // product exposed → clicked
-    s4: { p25:.0500, p50:.0952, p75:.1570 },  // clicked → ordered
-    s5: { p25:1.000, p50:1.000, p75:1.000 },  // ordered → paid
-    cvr:{ p25:.0004, p50:.0010, p75:.0059 },  // overall CVR
-    aov:{ p25:271.2, p50:279.0, p75:498.0 },  // AOV (¥)
+    s1: {
+      p25: .0922,
+      p50: .1115,
+      p75: .1813
+    },
+    // exposed → entered
+    s2: {
+      p25: .1645,
+      p50: .2249,
+      p75: .3190
+    },
+    // entered → product exposed
+    s3: {
+      p25: .0507,
+      p50: .0833,
+      p75: .2116
+    },
+    // product exposed → clicked
+    s4: {
+      p25: .0500,
+      p50: .0952,
+      p75: .1570
+    },
+    // clicked → ordered
+    s5: {
+      p25: 1.000,
+      p50: 1.000,
+      p75: 1.000
+    },
+    // ordered → paid
+    cvr: {
+      p25: .0004,
+      p50: .0010,
+      p75: .0059
+    },
+    // overall CVR
+    aov: {
+      p25: 271.2,
+      p50: 279.0,
+      p75: 498.0
+    },
+    // AOV (¥)
     n: 97
   },
   KC: {
-    s1: { p25:.0845, p50:.1003, p75:.1874 },
-    s2: { p25:.0814, p50:.3702, p75:.8699 },  // bimodal: self-op ≈88%, partner ≈8%
-    s3: { p25:.0734, p50:.1811, p75:.3094 },
-    s4: { p25:.0625, p50:.0996, p75:.1250 },
-    s5: { p25:.9740, p50:1.000, p75:1.000 },
-    cvr:{ p25:.0006, p50:.0026, p75:.0248 },
-    aov:{ p25:256.2, p50:269.0, p75:286.0 },
+    s1: {
+      p25: .0845,
+      p50: .1003,
+      p75: .1874
+    },
+    s2: {
+      p25: .0814,
+      p50: .3702,
+      p75: .8699
+    },
+    // bimodal: self-op ≈88%, partner ≈8%
+    s3: {
+      p25: .0734,
+      p50: .1811,
+      p75: .3094
+    },
+    s4: {
+      p25: .0625,
+      p50: .0996,
+      p75: .1250
+    },
+    s5: {
+      p25: .9740,
+      p50: 1.000,
+      p75: 1.000
+    },
+    cvr: {
+      p25: .0006,
+      p50: .0026,
+      p75: .0248
+    },
+    aov: {
+      p25: 256.2,
+      p50: 269.0,
+      p75: 286.0
+    },
     n: 150
   }
 };
@@ -180,31 +263,31 @@ const BM = {
 const DIAG = {
   s1: {
     WEAK: "CRITICAL — Entry CTR is below P25. The live room cover image and title are failing to pull in feed traffic. Refresh the thumbnail with a product-forward visual, a clear price anchor, or a bold benefit hook. Ensure Qianchuan ad creatives match live room content to reduce expectation mismatch.",
-    MID:  "Entry CTR below median. A/B test a new cover thumbnail — include the product name or a concrete benefit hook in the title. Check if competing broadcasts or time-of-day are reducing visibility.",
+    MID: "Entry CTR below median. A/B test a new cover thumbnail — include the product name or a concrete benefit hook in the title. Check if competing broadcasts or time-of-day are reducing visibility.",
     GOOD: "Entry CTR above median. Cover image and title are reasonably optimized. Minor gains possible via seasonal creative refresh.",
     STAR: "Top-quartile entry CTR. Cover image and title are strong traffic drivers — use this session as a creative reference."
   },
   s2: {
     WEAK: "CRITICAL — Product card exposure is below P25. Fewer than 1 in 4 room entrants ever see a product. Check card placement in carousel; ensure the hero product is pinned to slot #1 within the first 5 minutes. Reduce intro length — viewers are leaving before host surfaces products. Consider a cold open that leads directly with the hero product.",
-    MID:  "Product card exposure below median. Some traffic exits before seeing a product card. Review shelf order: top 3 products should be visible without scrolling. Reduce dead-air time and tighten intro pacing.",
+    MID: "Product card exposure below median. Some traffic exits before seeing a product card. Review shelf order: top 3 products should be visible without scrolling. Reduce dead-air time and tighten intro pacing.",
     GOOD: "Product exposure solid — above median. Minor gains via card sequencing.",
     STAR: "Excellent product exposure. Products are surfacing to nearly all room entrants."
   },
   s3: {
     WEAK: "CRITICAL — Product CTR below P25. Products are shown but not clicked. Audit product thumbnail quality, price visibility, and label clarity. Add urgency triggers: limited stock badge, time-limited discount overlay. Improve verbal CTA at the moment the product card appears. Confirm the price shown matches the host's spoken price.",
-    MID:  "Product CTR below median — the funnel's most common bottleneck. A/B test product card cover images. Add 'swipe up' + product name callout to verbal script. Confirm price is visible and competitive vs. search results.",
+    MID: "Product CTR below median — the funnel's most common bottleneck. A/B test product card cover images. Add 'swipe up' + product name callout to verbal script. Confirm price is visible and competitive vs. search results.",
     GOOD: "Product CTR above median. Incremental gains via better thumbnails or flash-sale mechanics.",
     STAR: "Top-quartile product CTR. Product cards and host CTAs are well-aligned."
   },
   s4: {
     WEAK: "LOW click-to-order conversion. Users click through but don't commit. Investigate: (1) price competitiveness vs. search; (2) PDP quality — images, reviews, shipping clarity; (3) host not closing — missing urgency language or limited-stock scarcity cues. Consider live-only coupon codes or bundle deal incentives.",
-    MID:  "Click-to-order slightly below median. Tighten PDP copy; confirm fulfilment promise is prominent (delivery date, return policy). Reinforce closing language in host script at key product moments.",
+    MID: "Click-to-order slightly below median. Tighten PDP copy; confirm fulfilment promise is prominent (delivery date, return policy). Reinforce closing language in host script at key product moments.",
     GOOD: "Conversion from click to order is healthy. Fine-tune with urgency mechanics.",
     STAR: "Excellent purchase intent from clickers. Product-market fit and host closing are strong."
   },
   s5: {
     WEAK: "LOW payment completion. Orders placed but not paid. High drop-off here often signals: (1) price shock at checkout; (2) payment friction — unsupported methods, page errors; (3) buyer remorse from impulse ordering. Verify checkout flow on mobile. Check if discount codes apply correctly. Investigate refund spikes.",
-    MID:  "Payment rate slightly below median. Review checkout UX for friction points. Confirm coupon/promotion redemption is working correctly.",
+    MID: "Payment rate slightly below median. Review checkout UX for friction points. Confirm coupon/promotion redemption is working correctly.",
     GOOD: "Payment completion rate above median. Checkout experience is solid.",
     STAR: "Near-perfect payment completion. Minimal buyer drop-off post-order."
   }
@@ -212,678 +295,1576 @@ const DIAG = {
 
 // Representative real sessions — actual data from thorne_kc_livestream table
 const SESSIONS = [
-  // ── THORNE ──────────────────────────────────────────────────
-  { id:'T001', brand:'Thorne', kol:'LisaWang (Apr·L3)', type:'Partner', date:'2026-04-11',
-    s1:.1628, s2:.4283, s3:.3183, s4:.1891, s5:.6346, cvr:.0164,
-    gmv:147171, aov:2230, orders:104, paid:66, duration:130,
-    exposed:24788, entered:4035, prod_exp:1728, clicked:550,
-    refund_rate:.2497, watch_sec:224 },
-  { id:'T002', brand:'Thorne', kol:'LisaWang (Mar·L3)', type:'Partner', date:'2026-03-01',
-    s1:.1854, s2:.2975, s3:.3089, s4:.1268, s5:.8519, cvr:.0099,
-    gmv:138537, aov:3012, orders:54, paid:46, duration:120,
-    exposed:25002, entered:4635, prod_exp:1379, clicked:426,
-    refund_rate:.2157, watch_sec:183 },
-  { id:'T003', brand:'Thorne', kol:'LisaWang (Apr·L3)', type:'Partner', date:'2026-04-13',
-    s1:.2028, s2:.2207, s3:.3076, s4:.1570, s5:.8000, cvr:.0085,
-    gmv:90498, aov:1740, orders:65, paid:52, duration:168,
-    exposed:30067, entered:6099, prod_exp:1346, clicked:414,
-    refund_rate:.2142, watch_sec:284 },
-  { id:'T004', brand:'Thorne', kol:'弓老师 (Mar·L4)', type:'Partner', date:'2026-03-07',
-    s1:.1643, s2:.1046, s3:.3353, s4:.2400, s5:.8519, cvr:.0072,
-    gmv:34054, aov:740, orders:54, paid:46, duration:157,
-    exposed:39035, entered:6413, prod_exp:671, clicked:225,
-    refund_rate:.2073, watch_sec:277 },
-  { id:'T005', brand:'Thorne', kol:'Thorne Self-Op (L2)', type:'Self-Op', date:'2026-04-10',
-    s1:.0780, s2:.9620, s3:.3955, s4:.1615, s5:.8730, cvr:.0537,
-    gmv:20438, aov:372, orders:63, paid:55, duration:212,
-    exposed:13141, entered:1025, prod_exp:986, clicked:390,
-    refund_rate:.4183, watch_sec:81 },
-  { id:'T006', brand:'Thorne', kol:'Thorne Self-Op (L2)', type:'Self-Op', date:'2026-04-18',
-    s1:.1075, s2:.9512, s3:.3106, s4:.1486, s5:.9841, cvr:.0432,
-    gmv:16812, aov:271, orders:63, paid:62, duration:451,
-    exposed:13348, entered:1435, prod_exp:1365, clicked:424,
-    refund_rate:.0939, watch_sec:111 },
-  { id:'T007', brand:'Thorne', kol:'文娇和朋友们 (L3)', type:'Partner', date:'2026-03-07',
-    s1:.3288, s2:.1842, s3:.0811, s4:.0991, s5:1.000, cvr:.0015,
-    gmv:3509, aov:319, orders:11, paid:11, duration:170,
-    exposed:22587, entered:7427, prod_exp:1368, clicked:111,
-    refund_rate:.1915, watch_sec:89 },
-  { id:'T008', brand:'Thorne', kol:'Steven·营养师 (L3)', type:'Partner', date:'2026-03-17',
-    s1:.0979, s2:.2021, s3:.0582, s4:.1212, s5:1.000, cvr:.0014,
-    gmv:1116, aov:279, orders:4, paid:4, duration:193,
-    exposed:28651, entered:2805, prod_exp:567, clicked:33,
-    refund_rate:.2500, watch_sec:107 },
-  { id:'T009', brand:'Thorne', kol:'弓老师 (Mar·L4)', type:'Partner', date:'2026-03-08',
-    s1:.1468, s2:.1059, s3:.1115, s4:.0526, s5:1.000, cvr:.0006,
-    gmv:2192, aov:731, orders:3, paid:3, duration:182,
-    exposed:32876, entered:4825, prod_exp:511, clicked:57,
-    refund_rate:.6086, watch_sec:352 },
-  { id:'T010', brand:'Thorne', kol:'Thorne Sport (L1)', type:'Self-Op', date:'2026-03-19',
-    s1:.0850, s2:.9540, s3:.4435, s4:.1618, s5:.9672, cvr:.0662,
-    gmv:14634, aov:248, orders:61, paid:59, duration:356,
-    exposed:10486, entered:891, prod_exp:850, clicked:377,
-    refund_rate:.1020, watch_sec:100 },
-  // ── KELO-COTE (KC) ──────────────────────────────────────────
-  { id:'K001', brand:'KC', kol:'KC Official (L2)', type:'Self-Op', date:'2026-03-07',
-    s1:.0885, s2:.8816, s3:.3548, s4:.1240, s5:.9292, cvr:.0360,
-    gmv:28820, aov:274, orders:113, paid:105, duration:635,
-    exposed:32904, entered:2913, prod_exp:2568, clicked:911,
-    refund_rate:.2815, watch_sec:55 },
-  { id:'K002', brand:'KC', kol:'KC Official (L2)', type:'Self-Op', date:'2026-04-11',
-    s1:.0832, s2:.9001, s3:.3400, s4:.1074, s5:.9703, cvr:.0319,
-    gmv:27897, aov:285, orders:101, paid:98, duration:628,
-    exposed:36905, entered:3072, prod_exp:2765, clicked:940,
-    refund_rate:.2553, watch_sec:67 },
-  { id:'K003', brand:'KC', kol:'KC Official (L2)', type:'Self-Op', date:'2026-04-08',
-    s1:.0902, s2:.8839, s3:.3484, s4:.1248, s5:.9804, cvr:.0377,
-    gmv:27452, aov:275, orders:102, paid:100, duration:601,
-    exposed:29397, entered:2653, prod_exp:2345, clicked:817,
-    refund_rate:.2226, watch_sec:64 },
-  { id:'K004', brand:'KC', kol:'KC Official (L2)', type:'Self-Op', date:'2026-04-14',
-    s1:.0748, s2:.9104, s3:.3390, s4:.1035, s5:.9759, cvr:.0312,
-    gmv:24471, aov:302, orders:83, paid:81, duration:597,
-    exposed:34765, entered:2599, prod_exp:2366, clicked:802,
-    refund_rate:.2450, watch_sec:57 },
-  { id:'K005', brand:'KC', kol:'KC Official (L2)', type:'Self-Op', date:'2026-04-27',
-    s1:.0833, s2:.8742, s3:.3231, s4:.1367, s5:1.000, cvr:.0386,
-    gmv:22850, aov:269, orders:85, paid:85, duration:510,
-    exposed:26438, entered:2202, prod_exp:1925, clicked:622,
-    refund_rate:.2074, watch_sec:63 },
-  { id:'K006', brand:'KC', kol:'我是芒果 (L2)', type:'Partner', date:'2026-03-01',
-    s1:.1937, s2:.4784, s3:.1251, s4:.0455, s5:1.000, cvr:.0027,
-    gmv:2352, aov:294, orders:8, paid:8, duration:211,
-    exposed:15183, entered:2941, prod_exp:1407, clicked:176,
-    refund_rate:.0000, watch_sec:130 },
-  { id:'K007', brand:'KC', kol:'西福芦 (L2)', type:'Partner', date:'2026-03-03',
-    s1:.1875, s2:.1210, s3:.0400, s4:.2222, s5:1.000, cvr:.0011,
-    gmv:538, aov:269, orders:2, paid:2, duration:103,
-    exposed:9915, entered:1859, prod_exp:225, clicked:9,
-    refund_rate:.0000, watch_sec:169 },
-  { id:'K008', brand:'KC', kol:'万子疤痕管理 (L2)', type:'Partner', date:'2026-04-28',
-    s1:.1424, s2:.0765, s3:.1287, s4:.1538, s5:1.000, cvr:.0015,
-    gmv:538, aov:269, orders:2, paid:2, duration:220,
-    exposed:9279, entered:1321, prod_exp:101, clicked:13,
-    refund_rate:.0000, watch_sec:94 },
-  { id:'K009', brand:'KC', kol:'KC Official (L2)', type:'Self-Op', date:'2026-03-05',
-    s1:.0850, s2:.8778, s3:.3320, s4:.1032, s5:.9733, cvr:.0293,
-    gmv:18436, aov:253, orders:75, paid:73, duration:720,
-    exposed:29365, entered:2495, prod_exp:2190, clicked:727,
-    refund_rate:.2490, watch_sec:57 },
-  { id:'K010', brand:'KC', kol:'孙火火甲友 (L2)', type:'Partner', date:'2026-03-22',
-    s1:.1584, s2:.0388, s3:.0599, s4:.0769, s5:1.000, cvr:.0002,
-    gmv:269, aov:269, orders:1, paid:1, duration:173,
-    exposed:35267, entered:5587, prod_exp:217, clicked:13,
-    refund_rate:.0000, watch_sec:76 }
-];
+// ── THORNE ──────────────────────────────────────────────────
+{
+  id: 'T001',
+  brand: 'Thorne',
+  kol: 'LisaWang (Apr·L3)',
+  type: 'Partner',
+  date: '2026-04-11',
+  s1: .1628,
+  s2: .4283,
+  s3: .3183,
+  s4: .1891,
+  s5: .6346,
+  cvr: .0164,
+  gmv: 147171,
+  aov: 2230,
+  orders: 104,
+  paid: 66,
+  duration: 130,
+  exposed: 24788,
+  entered: 4035,
+  prod_exp: 1728,
+  clicked: 550,
+  refund_rate: .2497,
+  watch_sec: 224
+}, {
+  id: 'T002',
+  brand: 'Thorne',
+  kol: 'LisaWang (Mar·L3)',
+  type: 'Partner',
+  date: '2026-03-01',
+  s1: .1854,
+  s2: .2975,
+  s3: .3089,
+  s4: .1268,
+  s5: .8519,
+  cvr: .0099,
+  gmv: 138537,
+  aov: 3012,
+  orders: 54,
+  paid: 46,
+  duration: 120,
+  exposed: 25002,
+  entered: 4635,
+  prod_exp: 1379,
+  clicked: 426,
+  refund_rate: .2157,
+  watch_sec: 183
+}, {
+  id: 'T003',
+  brand: 'Thorne',
+  kol: 'LisaWang (Apr·L3)',
+  type: 'Partner',
+  date: '2026-04-13',
+  s1: .2028,
+  s2: .2207,
+  s3: .3076,
+  s4: .1570,
+  s5: .8000,
+  cvr: .0085,
+  gmv: 90498,
+  aov: 1740,
+  orders: 65,
+  paid: 52,
+  duration: 168,
+  exposed: 30067,
+  entered: 6099,
+  prod_exp: 1346,
+  clicked: 414,
+  refund_rate: .2142,
+  watch_sec: 284
+}, {
+  id: 'T004',
+  brand: 'Thorne',
+  kol: '弓老师 (Mar·L4)',
+  type: 'Partner',
+  date: '2026-03-07',
+  s1: .1643,
+  s2: .1046,
+  s3: .3353,
+  s4: .2400,
+  s5: .8519,
+  cvr: .0072,
+  gmv: 34054,
+  aov: 740,
+  orders: 54,
+  paid: 46,
+  duration: 157,
+  exposed: 39035,
+  entered: 6413,
+  prod_exp: 671,
+  clicked: 225,
+  refund_rate: .2073,
+  watch_sec: 277
+}, {
+  id: 'T005',
+  brand: 'Thorne',
+  kol: 'Thorne Self-Op (L2)',
+  type: 'Self-Op',
+  date: '2026-04-10',
+  s1: .0780,
+  s2: .9620,
+  s3: .3955,
+  s4: .1615,
+  s5: .8730,
+  cvr: .0537,
+  gmv: 20438,
+  aov: 372,
+  orders: 63,
+  paid: 55,
+  duration: 212,
+  exposed: 13141,
+  entered: 1025,
+  prod_exp: 986,
+  clicked: 390,
+  refund_rate: .4183,
+  watch_sec: 81
+}, {
+  id: 'T006',
+  brand: 'Thorne',
+  kol: 'Thorne Self-Op (L2)',
+  type: 'Self-Op',
+  date: '2026-04-18',
+  s1: .1075,
+  s2: .9512,
+  s3: .3106,
+  s4: .1486,
+  s5: .9841,
+  cvr: .0432,
+  gmv: 16812,
+  aov: 271,
+  orders: 63,
+  paid: 62,
+  duration: 451,
+  exposed: 13348,
+  entered: 1435,
+  prod_exp: 1365,
+  clicked: 424,
+  refund_rate: .0939,
+  watch_sec: 111
+}, {
+  id: 'T007',
+  brand: 'Thorne',
+  kol: '文娇和朋友们 (L3)',
+  type: 'Partner',
+  date: '2026-03-07',
+  s1: .3288,
+  s2: .1842,
+  s3: .0811,
+  s4: .0991,
+  s5: 1.000,
+  cvr: .0015,
+  gmv: 3509,
+  aov: 319,
+  orders: 11,
+  paid: 11,
+  duration: 170,
+  exposed: 22587,
+  entered: 7427,
+  prod_exp: 1368,
+  clicked: 111,
+  refund_rate: .1915,
+  watch_sec: 89
+}, {
+  id: 'T008',
+  brand: 'Thorne',
+  kol: 'Steven·营养师 (L3)',
+  type: 'Partner',
+  date: '2026-03-17',
+  s1: .0979,
+  s2: .2021,
+  s3: .0582,
+  s4: .1212,
+  s5: 1.000,
+  cvr: .0014,
+  gmv: 1116,
+  aov: 279,
+  orders: 4,
+  paid: 4,
+  duration: 193,
+  exposed: 28651,
+  entered: 2805,
+  prod_exp: 567,
+  clicked: 33,
+  refund_rate: .2500,
+  watch_sec: 107
+}, {
+  id: 'T009',
+  brand: 'Thorne',
+  kol: '弓老师 (Mar·L4)',
+  type: 'Partner',
+  date: '2026-03-08',
+  s1: .1468,
+  s2: .1059,
+  s3: .1115,
+  s4: .0526,
+  s5: 1.000,
+  cvr: .0006,
+  gmv: 2192,
+  aov: 731,
+  orders: 3,
+  paid: 3,
+  duration: 182,
+  exposed: 32876,
+  entered: 4825,
+  prod_exp: 511,
+  clicked: 57,
+  refund_rate: .6086,
+  watch_sec: 352
+}, {
+  id: 'T010',
+  brand: 'Thorne',
+  kol: 'Thorne Sport (L1)',
+  type: 'Self-Op',
+  date: '2026-03-19',
+  s1: .0850,
+  s2: .9540,
+  s3: .4435,
+  s4: .1618,
+  s5: .9672,
+  cvr: .0662,
+  gmv: 14634,
+  aov: 248,
+  orders: 61,
+  paid: 59,
+  duration: 356,
+  exposed: 10486,
+  entered: 891,
+  prod_exp: 850,
+  clicked: 377,
+  refund_rate: .1020,
+  watch_sec: 100
+},
+// ── KELO-COTE (KC) ──────────────────────────────────────────
+{
+  id: 'K001',
+  brand: 'KC',
+  kol: 'KC Official (L2)',
+  type: 'Self-Op',
+  date: '2026-03-07',
+  s1: .0885,
+  s2: .8816,
+  s3: .3548,
+  s4: .1240,
+  s5: .9292,
+  cvr: .0360,
+  gmv: 28820,
+  aov: 274,
+  orders: 113,
+  paid: 105,
+  duration: 635,
+  exposed: 32904,
+  entered: 2913,
+  prod_exp: 2568,
+  clicked: 911,
+  refund_rate: .2815,
+  watch_sec: 55
+}, {
+  id: 'K002',
+  brand: 'KC',
+  kol: 'KC Official (L2)',
+  type: 'Self-Op',
+  date: '2026-04-11',
+  s1: .0832,
+  s2: .9001,
+  s3: .3400,
+  s4: .1074,
+  s5: .9703,
+  cvr: .0319,
+  gmv: 27897,
+  aov: 285,
+  orders: 101,
+  paid: 98,
+  duration: 628,
+  exposed: 36905,
+  entered: 3072,
+  prod_exp: 2765,
+  clicked: 940,
+  refund_rate: .2553,
+  watch_sec: 67
+}, {
+  id: 'K003',
+  brand: 'KC',
+  kol: 'KC Official (L2)',
+  type: 'Self-Op',
+  date: '2026-04-08',
+  s1: .0902,
+  s2: .8839,
+  s3: .3484,
+  s4: .1248,
+  s5: .9804,
+  cvr: .0377,
+  gmv: 27452,
+  aov: 275,
+  orders: 102,
+  paid: 100,
+  duration: 601,
+  exposed: 29397,
+  entered: 2653,
+  prod_exp: 2345,
+  clicked: 817,
+  refund_rate: .2226,
+  watch_sec: 64
+}, {
+  id: 'K004',
+  brand: 'KC',
+  kol: 'KC Official (L2)',
+  type: 'Self-Op',
+  date: '2026-04-14',
+  s1: .0748,
+  s2: .9104,
+  s3: .3390,
+  s4: .1035,
+  s5: .9759,
+  cvr: .0312,
+  gmv: 24471,
+  aov: 302,
+  orders: 83,
+  paid: 81,
+  duration: 597,
+  exposed: 34765,
+  entered: 2599,
+  prod_exp: 2366,
+  clicked: 802,
+  refund_rate: .2450,
+  watch_sec: 57
+}, {
+  id: 'K005',
+  brand: 'KC',
+  kol: 'KC Official (L2)',
+  type: 'Self-Op',
+  date: '2026-04-27',
+  s1: .0833,
+  s2: .8742,
+  s3: .3231,
+  s4: .1367,
+  s5: 1.000,
+  cvr: .0386,
+  gmv: 22850,
+  aov: 269,
+  orders: 85,
+  paid: 85,
+  duration: 510,
+  exposed: 26438,
+  entered: 2202,
+  prod_exp: 1925,
+  clicked: 622,
+  refund_rate: .2074,
+  watch_sec: 63
+}, {
+  id: 'K006',
+  brand: 'KC',
+  kol: '我是芒果 (L2)',
+  type: 'Partner',
+  date: '2026-03-01',
+  s1: .1937,
+  s2: .4784,
+  s3: .1251,
+  s4: .0455,
+  s5: 1.000,
+  cvr: .0027,
+  gmv: 2352,
+  aov: 294,
+  orders: 8,
+  paid: 8,
+  duration: 211,
+  exposed: 15183,
+  entered: 2941,
+  prod_exp: 1407,
+  clicked: 176,
+  refund_rate: .0000,
+  watch_sec: 130
+}, {
+  id: 'K007',
+  brand: 'KC',
+  kol: '西福芦 (L2)',
+  type: 'Partner',
+  date: '2026-03-03',
+  s1: .1875,
+  s2: .1210,
+  s3: .0400,
+  s4: .2222,
+  s5: 1.000,
+  cvr: .0011,
+  gmv: 538,
+  aov: 269,
+  orders: 2,
+  paid: 2,
+  duration: 103,
+  exposed: 9915,
+  entered: 1859,
+  prod_exp: 225,
+  clicked: 9,
+  refund_rate: .0000,
+  watch_sec: 169
+}, {
+  id: 'K008',
+  brand: 'KC',
+  kol: '万子疤痕管理 (L2)',
+  type: 'Partner',
+  date: '2026-04-28',
+  s1: .1424,
+  s2: .0765,
+  s3: .1287,
+  s4: .1538,
+  s5: 1.000,
+  cvr: .0015,
+  gmv: 538,
+  aov: 269,
+  orders: 2,
+  paid: 2,
+  duration: 220,
+  exposed: 9279,
+  entered: 1321,
+  prod_exp: 101,
+  clicked: 13,
+  refund_rate: .0000,
+  watch_sec: 94
+}, {
+  id: 'K009',
+  brand: 'KC',
+  kol: 'KC Official (L2)',
+  type: 'Self-Op',
+  date: '2026-03-05',
+  s1: .0850,
+  s2: .8778,
+  s3: .3320,
+  s4: .1032,
+  s5: .9733,
+  cvr: .0293,
+  gmv: 18436,
+  aov: 253,
+  orders: 75,
+  paid: 73,
+  duration: 720,
+  exposed: 29365,
+  entered: 2495,
+  prod_exp: 2190,
+  clicked: 727,
+  refund_rate: .2490,
+  watch_sec: 57
+}, {
+  id: 'K010',
+  brand: 'KC',
+  kol: '孙火火甲友 (L2)',
+  type: 'Partner',
+  date: '2026-03-22',
+  s1: .1584,
+  s2: .0388,
+  s3: .0599,
+  s4: .0769,
+  s5: 1.000,
+  cvr: .0002,
+  gmv: 269,
+  aov: 269,
+  orders: 1,
+  paid: 1,
+  duration: 173,
+  exposed: 35267,
+  entered: 5587,
+  prod_exp: 217,
+  clicked: 13,
+  refund_rate: .0000,
+  watch_sec: 76
+}];
 
 // Bridge data (short video → live) from File 4
 const BRIDGE = {
   Thorne: {
-    selfOp: { sessions_with: 15, total_video_uv: 3838, avg_uv: 256, p50_share: .2979, avg_videos: 18.1 },
-    partner: { sessions_with: 0, total_video_uv: 0, avg_uv: 0, p50_share: 0, avg_videos: 0 }
+    selfOp: {
+      sessions_with: 15,
+      total_video_uv: 3838,
+      avg_uv: 256,
+      p50_share: .2979,
+      avg_videos: 18.1
+    },
+    partner: {
+      sessions_with: 0,
+      total_video_uv: 0,
+      avg_uv: 0,
+      p50_share: 0,
+      avg_videos: 0
+    }
   },
   KC: {
-    selfOp: { sessions_with: 46, total_video_uv: 7762, avg_uv: 169, p50_share: .0587, avg_videos: 3.5 },
-    partner: { sessions_with: 0, total_video_uv: 0, avg_uv: 0, p50_share: 0, avg_videos: 0 }
+    selfOp: {
+      sessions_with: 46,
+      total_video_uv: 7762,
+      avg_uv: 169,
+      p50_share: .0587,
+      avg_videos: 3.5
+    },
+    partner: {
+      sessions_with: 0,
+      total_video_uv: 0,
+      avg_uv: 0,
+      p50_share: 0,
+      avg_videos: 0
+    }
   }
 };
 
 /* ══════════════════════════════════════════════════
    UTILITIES
 ═══════════════════════════════════════════════════ */
-const pct = v => (v*100).toFixed(2)+'%';
-const pct1 = v => (v*100).toFixed(1)+'%';
-const money = v => v >= 1000000 ? `¥${(v/1000000).toFixed(1)}M` : v >= 1000 ? `¥${(v/1000).toFixed(0)}K` : `¥${v.toFixed(0)}`;
-const num = v => v >= 1000 ? `${(v/1000).toFixed(0)}K` : v.toLocaleString();
-
+const pct = v => (v * 100).toFixed(2) + '%';
+const pct1 = v => (v * 100).toFixed(1) + '%';
+const money = v => v >= 1000000 ? `¥${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `¥${(v / 1000).toFixed(0)}K` : `¥${v.toFixed(0)}`;
+const num = v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v.toLocaleString();
 function tier(val, bm) {
   if (val >= bm.p75) return 'STAR';
   if (val >= bm.p50) return 'GOOD';
   if (val >= bm.p25) return 'MID';
   return 'WEAK';
 }
-function tierScore(t) { return {STAR:4,GOOD:3,MID:2,WEAK:1}[t]||0; }
+function tierScore(t) {
+  return {
+    STAR: 4,
+    GOOD: 3,
+    MID: 2,
+    WEAK: 1
+  }[t] || 0;
+}
 function sessionRating(s) {
   const b = BM[s.brand];
-  const tiers = [tier(s.s1,b.s1),tier(s.s2,b.s2),tier(s.s3,b.s3),tier(s.s4,b.s4),tier(s.s5,b.s5)];
-  const avg = tiers.reduce((a,t)=>a+tierScore(t),0)/5;
-  if (avg>=3.5) return '⭐ STAR';
-  if (avg>=2.5) return '🔷 GOOD';
-  if (avg>=1.5) return '🔶 MID';
+  const tiers = [tier(s.s1, b.s1), tier(s.s2, b.s2), tier(s.s3, b.s3), tier(s.s4, b.s4), tier(s.s5, b.s5)];
+  const avg = tiers.reduce((a, t) => a + tierScore(t), 0) / 5;
+  if (avg >= 3.5) return '⭐ STAR';
+  if (avg >= 2.5) return '🔷 GOOD';
+  if (avg >= 1.5) return '🔶 MID';
   return '⬛ WEAK';
 }
-
-const brandColor = b => b==='Thorne' ? '#3A55FF' : '#009BFF';
-const ttStyle = {background:'#090A0F',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,padding:'8px 12px',color:'#fff',fontSize:11,fontFamily:'Wix Madefor Display,Inter,sans-serif'};
+const brandColor = b => b === 'Thorne' ? '#3A55FF' : '#009BFF';
+const ttStyle = {
+  background: '#090A0F',
+  border: '1px solid rgba(255,255,255,.1)',
+  borderRadius: 8,
+  padding: '8px 12px',
+  color: '#fff',
+  fontSize: 11,
+  fontFamily: 'Wix Madefor Display,Inter,sans-serif'
+};
 
 /* ══════════════════════════════════════════════════
    OVERVIEW TAB
 ═══════════════════════════════════════════════════ */
-const OverviewTab = ({ brand }) => {
-  const sessions = SESSIONS.filter(s => brand==='All'||s.brand===brand);
-  const thSessions = SESSIONS.filter(s=>s.brand==='Thorne');
-  const kcSessions = SESSIONS.filter(s=>s.brand==='KC');
-
-  const totalGMV = sessions.reduce((a,s)=>a+s.gmv,0);
-  const totalOrders = sessions.reduce((a,s)=>a+s.paid,0);
-  const avgAOV = totalGMV/Math.max(1,totalOrders);
-  const avgCVR = sessions.reduce((a,s)=>a+s.cvr,0)/Math.max(1,sessions.length);
+const OverviewTab = ({
+  brand
+}) => {
+  const sessions = SESSIONS.filter(s => brand === 'All' || s.brand === brand);
+  const thSessions = SESSIONS.filter(s => s.brand === 'Thorne');
+  const kcSessions = SESSIONS.filter(s => s.brand === 'KC');
+  const totalGMV = sessions.reduce((a, s) => a + s.gmv, 0);
+  const totalOrders = sessions.reduce((a, s) => a + s.paid, 0);
+  const avgAOV = totalGMV / Math.max(1, totalOrders);
+  const avgCVR = sessions.reduce((a, s) => a + s.cvr, 0) / Math.max(1, sessions.length);
 
   // Session GMV chart data
-  const chartData = [...sessions].sort((a,b)=>new Date(a.date)-new Date(b.date)).map(s=>({
-    date: s.date.slice(5), gmv: Math.round(s.gmv), brand: s.brand, kol: s.kol
+  const chartData = [...sessions].sort((a, b) => new Date(a.date) - new Date(b.date)).map(s => ({
+    date: s.date.slice(5),
+    gmv: Math.round(s.gmv),
+    brand: s.brand,
+    kol: s.kol
   }));
 
   // Tier distribution
-  const tierDist = { STAR:0, GOOD:0, MID:0, WEAK:0 };
+  const tierDist = {
+    STAR: 0,
+    GOOD: 0,
+    MID: 0,
+    WEAK: 0
+  };
   sessions.forEach(s => {
     const b = BM[s.brand];
-    ['s1','s2','s3','s4','s5'].forEach(step => {
+    ['s1', 's2', 's3', 's4', 's5'].forEach(step => {
       tierDist[tier(s[step], b[step])]++;
     });
   });
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-      <div className="pg-hdr">
-        <div>
-          <div className="pg-title">Performance Overview</div>
-          <div className="pg-sub">Douyin Live Commerce · {sessions.length} sessions · Real data from spikeattentiv</div>
-        </div>
-        <span className="src-badge">API + 抖店罗盘</span>
-      </div>
-
-      {/* Brand comparison */}
-      {brand==='All' && (
-        <div className="g2">
-          {[{name:'Thorne',sessions:thSessions,col:'#3A55FF'},{name:'KELO-COTE (KC)',sessions:kcSessions,col:'#009BFF'}].map(({name,sessions:ss,col})=>{
-            const gmv = ss.reduce((a,s)=>a+s.gmv,0);
-            const orders = ss.reduce((a,s)=>a+s.paid,0);
-            return (
-              <div key={name} className="card" style={{borderTop:`3px solid ${col}`}}>
-                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
-                  <div style={{width:10,height:10,borderRadius:'50%',background:col}} />
-                  <span style={{fontWeight:700,fontSize:14}}>{name}</span>
-                  <span style={{fontSize:11,color:'var(--mid)'}}>n={ss.length} sessions</span>
-                </div>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12}}>
-                  {[
-                    {lbl:'Total GMV',val:money(gmv)},
-                    {lbl:'Paid Orders',val:num(orders)},
-                    {lbl:'Median AOV',val:`¥${name==='Thorne'?279:269}`}
-                  ].map(({lbl,val})=>(
-                    <div key={lbl}>
-                      <div style={{fontSize:10,fontWeight:500,color:'var(--mid)',textTransform:'uppercase',letterSpacing:'1px'}}>{lbl}</div>
-                      <div style={{fontSize:20,fontWeight:700,letterSpacing:'-0.5px',marginTop:4,color:'var(--dark)'}}>{val}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{marginTop:14,padding:'10px 12px',background:'var(--gray)',borderRadius:8,fontSize:11}}>
-                  <div style={{fontWeight:600,marginBottom:6,color:'var(--sub)'}}>Benchmark P50 Funnel</div>
-                  <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
-                    {['Entry CTR','Prod Exposure','Product CTR','Order Rate','Pay Rate'].map((lbl,i)=>{
-                      const keys=['s1','s2','s3','s4','s5'];
-                      const b = BM[name==='Thorne'?'Thorne':'KC'][keys[i]];
-                      return (
-                        <div key={lbl} style={{background:'#fff',borderRadius:6,padding:'3px 8px',fontSize:11}}>
-                          <span style={{color:'var(--mid)'}}>{lbl}: </span>
-                          <strong style={{color:col}}>{pct1(b.p50)}</strong>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Single brand KPIs */}
-      {brand!=='All' && (
-        <div className="g5">
-          {[
-            {lbl:'Total GMV',val:money(totalGMV),cls:'b1'},
-            {lbl:'Paid Orders',val:totalOrders.toLocaleString(),cls:'b2'},
-            {lbl:'Avg AOV',val:`¥${Math.round(avgAOV)}`,cls:''},
-            {lbl:'Avg Overall CVR',val:pct1(avgCVR),cls:'b3'},
-            {lbl:'Sessions',val:sessions.length,cls:''}
-          ].map(({lbl,val,cls})=>(
-            <div key={lbl} className={`kpi ${cls}`}>
-              <div className="kpi-lbl">{lbl}</div>
-              <div className="kpi-val">{val}</div>
-              <div className="kpi-period">Across {sessions.length} sessions</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* GMV by session chart */}
-      <div className="card">
-        <div className="gbar" />
-        <div className="sec-row">
-          <div>
-            <div className="sec-title">GMV by Session Date</div>
-            <div className="sec-sub">Individual live session GMV (¥) — sorted by date</div>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData} margin={{top:4,right:12,left:0,bottom:0}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#EBF0F5" />
-            <XAxis dataKey="date" tick={{fontSize:9,fill:'#9badc4'}} axisLine={false} tickLine={false} />
-            <YAxis tick={{fontSize:10,fill:'#9badc4'}} axisLine={false} tickLine={false} tickFormatter={v=>v>=1000?`¥${(v/1000).toFixed(0)}K`:v} />
-            <Tooltip contentStyle={ttStyle} formatter={(v,n,p)=>[`¥${v.toLocaleString()}`, p.payload.kol]} labelFormatter={l=>`Date: ${l}`} />
-            <Bar dataKey="gmv" radius={[4,4,0,0]}
-              fill="url(#barGrad)"
-              label={false} />
-            <defs>
-              <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3A55FF" />
-                <stop offset="100%" stopColor="#009BFF" />
-              </linearGradient>
-            </defs>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Session leaderboard */}
-      <div className="card">
-        <div className="sec-row">
-          <div className="sec-title">Session Leaderboard</div>
-          <div style={{display:'flex',gap:8}}>
-            <span className="src-badge">thorne_kc_livestream</span>
-          </div>
-        </div>
-        <div className="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>KOL / Account</th><th>Brand</th><th>Type</th><th>Date</th>
-                <th>GMV</th><th>Orders</th><th>AOV</th><th>Overall CVR</th><th>Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...sessions].sort((a,b)=>b.gmv-a.gmv).map(s=>(
-                <tr key={s.id}>
-                  <td style={{fontWeight:600}}>{s.kol}</td>
-                  <td><span style={{background:s.brand==='Thorne'?'#eef1ff':'#e6f5ff',color:s.brand==='Thorne'?'#3A55FF':'#0369a1',padding:'2px 8px',borderRadius:12,fontSize:11,fontWeight:600}}>{s.brand==='Thorne'?'Thorne':'KC'}</span></td>
-                  <td><span style={{fontSize:11,color:'var(--sub)'}}>{s.type==='Self-Op'?'自营':'合作'}</span></td>
-                  <td style={{color:'var(--mid)'}}>{s.date.slice(5)}</td>
-                  <td className="mono" style={{fontWeight:700}}>{money(s.gmv)}</td>
-                  <td className="mono">{s.paid}</td>
-                  <td className="mono">¥{Math.round(s.aov)}</td>
-                  <td style={{fontWeight:600,color:s.cvr>=.02?'var(--success)':'var(--mid)'}}>{pct1(s.cvr)}</td>
-                  <td><span style={{fontSize:13}}>{sessionRating(s)}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pg-hdr"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pg-title"
+  }, "Performance Overview"), /*#__PURE__*/React.createElement("div", {
+    className: "pg-sub"
+  }, "Douyin Live Commerce \xB7 ", sessions.length, " sessions \xB7 Real data from spikeattentiv")), /*#__PURE__*/React.createElement("span", {
+    className: "src-badge"
+  }, "API + \u6296\u5E97\u7F57\u76D8")), brand === 'All' && /*#__PURE__*/React.createElement("div", {
+    className: "g2"
+  }, [{
+    name: 'Thorne',
+    sessions: thSessions,
+    col: '#3A55FF'
+  }, {
+    name: 'KELO-COTE (KC)',
+    sessions: kcSessions,
+    col: '#009BFF'
+  }].map(({
+    name,
+    sessions: ss,
+    col
+  }) => {
+    const gmv = ss.reduce((a, s) => a + s.gmv, 0);
+    const orders = ss.reduce((a, s) => a + s.paid, 0);
+    return /*#__PURE__*/React.createElement("div", {
+      key: name,
+      className: "card",
+      style: {
+        borderTop: `3px solid ${col}`
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 14
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 10,
+        height: 10,
+        borderRadius: '50%',
+        background: col
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 700,
+        fontSize: 14
+      }
+    }, name), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--mid)'
+      }
+    }, "n=", ss.length, " sessions")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        gap: 12
+      }
+    }, [{
+      lbl: 'Total GMV',
+      val: money(gmv)
+    }, {
+      lbl: 'Paid Orders',
+      val: num(orders)
+    }, {
+      lbl: 'Median AOV',
+      val: `¥${name === 'Thorne' ? 279 : 269}`
+    }].map(({
+      lbl,
+      val
+    }) => /*#__PURE__*/React.createElement("div", {
+      key: lbl
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        fontWeight: 500,
+        color: 'var(--mid)',
+        textTransform: 'uppercase',
+        letterSpacing: '1px'
+      }
+    }, lbl), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 20,
+        fontWeight: 700,
+        letterSpacing: '-0.5px',
+        marginTop: 4,
+        color: 'var(--dark)'
+      }
+    }, val)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 14,
+        padding: '10px 12px',
+        background: 'var(--gray)',
+        borderRadius: 8,
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600,
+        marginBottom: 6,
+        color: 'var(--sub)'
+      }
+    }, "Benchmark P50 Funnel"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 4,
+        flexWrap: 'wrap'
+      }
+    }, ['Entry CTR', 'Prod Exposure', 'Product CTR', 'Order Rate', 'Pay Rate'].map((lbl, i) => {
+      const keys = ['s1', 's2', 's3', 's4', 's5'];
+      const b = BM[name === 'Thorne' ? 'Thorne' : 'KC'][keys[i]];
+      return /*#__PURE__*/React.createElement("div", {
+        key: lbl,
+        style: {
+          background: '#fff',
+          borderRadius: 6,
+          padding: '3px 8px',
+          fontSize: 11
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: 'var(--mid)'
+        }
+      }, lbl, ": "), /*#__PURE__*/React.createElement("strong", {
+        style: {
+          color: col
+        }
+      }, pct1(b.p50)));
+    }))));
+  })), brand !== 'All' && /*#__PURE__*/React.createElement("div", {
+    className: "g5"
+  }, [{
+    lbl: 'Total GMV',
+    val: money(totalGMV),
+    cls: 'b1'
+  }, {
+    lbl: 'Paid Orders',
+    val: totalOrders.toLocaleString(),
+    cls: 'b2'
+  }, {
+    lbl: 'Avg AOV',
+    val: `¥${Math.round(avgAOV)}`,
+    cls: ''
+  }, {
+    lbl: 'Avg Overall CVR',
+    val: pct1(avgCVR),
+    cls: 'b3'
+  }, {
+    lbl: 'Sessions',
+    val: sessions.length,
+    cls: ''
+  }].map(({
+    lbl,
+    val,
+    cls
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: lbl,
+    className: `kpi ${cls}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "kpi-lbl"
+  }, lbl), /*#__PURE__*/React.createElement("div", {
+    className: "kpi-val"
+  }, val), /*#__PURE__*/React.createElement("div", {
+    className: "kpi-period"
+  }, "Across ", sessions.length, " sessions")))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gbar"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "GMV by Session Date"), /*#__PURE__*/React.createElement("div", {
+    className: "sec-sub"
+  }, "Individual live session GMV (\xA5) \u2014 sorted by date"))), /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 200
+  }, /*#__PURE__*/React.createElement(BarChart, {
+    data: chartData,
+    margin: {
+      top: 4,
+      right: 12,
+      left: 0,
+      bottom: 0
+    }
+  }, /*#__PURE__*/React.createElement(CartesianGrid, {
+    strokeDasharray: "3 3",
+    stroke: "#EBF0F5"
+  }), /*#__PURE__*/React.createElement(XAxis, {
+    dataKey: "date",
+    tick: {
+      fontSize: 9,
+      fill: '#9badc4'
+    },
+    axisLine: false,
+    tickLine: false
+  }), /*#__PURE__*/React.createElement(YAxis, {
+    tick: {
+      fontSize: 10,
+      fill: '#9badc4'
+    },
+    axisLine: false,
+    tickLine: false,
+    tickFormatter: v => v >= 1000 ? `¥${(v / 1000).toFixed(0)}K` : v
+  }), /*#__PURE__*/React.createElement(Tooltip, {
+    contentStyle: ttStyle,
+    formatter: (v, n, p) => [`¥${v.toLocaleString()}`, p.payload.kol],
+    labelFormatter: l => `Date: ${l}`
+  }), /*#__PURE__*/React.createElement(Bar, {
+    dataKey: "gmv",
+    radius: [4, 4, 0, 0],
+    fill: "url(#barGrad)",
+    label: false
+  }), /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
+    id: "barGrad",
+    x1: "0",
+    y1: "0",
+    x2: "0",
+    y2: "1"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#3A55FF"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#009BFF"
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Session Leaderboard"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "src-badge"
+  }, "thorne_kc_livestream"))), /*#__PURE__*/React.createElement("div", {
+    className: "tbl-wrap"
+  }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "KOL / Account"), /*#__PURE__*/React.createElement("th", null, "Brand"), /*#__PURE__*/React.createElement("th", null, "Type"), /*#__PURE__*/React.createElement("th", null, "Date"), /*#__PURE__*/React.createElement("th", null, "GMV"), /*#__PURE__*/React.createElement("th", null, "Orders"), /*#__PURE__*/React.createElement("th", null, "AOV"), /*#__PURE__*/React.createElement("th", null, "Overall CVR"), /*#__PURE__*/React.createElement("th", null, "Rating"))), /*#__PURE__*/React.createElement("tbody", null, [...sessions].sort((a, b) => b.gmv - a.gmv).map(s => /*#__PURE__*/React.createElement("tr", {
+    key: s.id
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontWeight: 600
+    }
+  }, s.kol), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: s.brand === 'Thorne' ? '#eef1ff' : '#e6f5ff',
+      color: s.brand === 'Thorne' ? '#3A55FF' : '#0369a1',
+      padding: '2px 8px',
+      borderRadius: 12,
+      fontSize: 11,
+      fontWeight: 600
+    }
+  }, s.brand === 'Thorne' ? 'Thorne' : 'KC')), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--sub)'
+    }
+  }, s.type === 'Self-Op' ? '自营' : '合作')), /*#__PURE__*/React.createElement("td", {
+    style: {
+      color: 'var(--mid)'
+    }
+  }, s.date.slice(5)), /*#__PURE__*/React.createElement("td", {
+    className: "mono",
+    style: {
+      fontWeight: 700
+    }
+  }, money(s.gmv)), /*#__PURE__*/React.createElement("td", {
+    className: "mono"
+  }, s.paid), /*#__PURE__*/React.createElement("td", {
+    className: "mono"
+  }, "\xA5", Math.round(s.aov)), /*#__PURE__*/React.createElement("td", {
+    style: {
+      fontWeight: 600,
+      color: s.cvr >= .02 ? 'var(--success)' : 'var(--mid)'
+    }
+  }, pct1(s.cvr)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13
+    }
+  }, sessionRating(s))))))))));
 };
 
 /* ══════════════════════════════════════════════════
    LIVE FUNNEL TAB — Core diagnostic view
 ═══════════════════════════════════════════════════ */
-const STEP_LABELS = [
-  '① Exposed → Entered',
-  '② Entered → Prod Exposed',
-  '③ Prod Exposed → Clicked',
-  '④ Clicked → Ordered',
-  '⑤ Ordered → Paid'
-];
-const STEP_KEYS = ['s1','s2','s3','s4','s5'];
-const STEP_BM_KEYS = ['s1','s2','s3','s4','s5'];
-
-const FunnelTab = ({ brand }) => {
-  const sessions = SESSIONS.filter(s => brand==='All'||s.brand===brand);
+const STEP_LABELS = ['① Exposed → Entered', '② Entered → Prod Exposed', '③ Prod Exposed → Clicked', '④ Clicked → Ordered', '⑤ Ordered → Paid'];
+const STEP_KEYS = ['s1', 's2', 's3', 's4', 's5'];
+const STEP_BM_KEYS = ['s1', 's2', 's3', 's4', 's5'];
+const FunnelTab = ({
+  brand
+}) => {
+  const sessions = SESSIONS.filter(s => brand === 'All' || s.brand === brand);
   const [selId, setSelId] = useState(sessions[0]?.id);
-  const sel = sessions.find(s=>s.id===selId) || sessions[0];
+  const sel = sessions.find(s => s.id === selId) || sessions[0];
   const bm = sel ? BM[sel.brand] : BM.Thorne;
-
   const tiers = sel ? STEP_KEYS.map(k => tier(sel[k], bm[k])) : [];
-
-  const composite = tiers.length ? tiers.reduce((a,t)=>a+tierScore(t),0)/tiers.length : 0;
-  const rating = composite>=3.5?'⭐ STAR':composite>=2.5?'🔷 GOOD':composite>=1.5?'🔶 MID':'⬛ WEAK';
-
-  const weakSteps = tiers.map((t,i)=>({t,i})).filter(({t})=>t==='WEAK'||t==='MID');
+  const composite = tiers.length ? tiers.reduce((a, t) => a + tierScore(t), 0) / tiers.length : 0;
+  const rating = composite >= 3.5 ? '⭐ STAR' : composite >= 2.5 ? '🔷 GOOD' : composite >= 1.5 ? '🔶 MID' : '⬛ WEAK';
+  const weakSteps = tiers.map((t, i) => ({
+    t,
+    i
+  })).filter(({
+    t
+  }) => t === 'WEAK' || t === 'MID');
 
   // Heatmap data
-  const heatmap = SESSIONS.filter(s=>brand==='All'||s.brand===brand).slice(0,8);
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-      <div className="pg-hdr">
-        <div>
-          <div className="pg-title">Live Session Funnel Diagnostic</div>
-          <div className="pg-sub">5-step Douyin live funnel · Compare vs P25/P50/P75 benchmarks</div>
-        </div>
-      </div>
-
-      {/* Session selector */}
-      <div className="card card-sm">
-        <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
-          <span style={{fontSize:12,fontWeight:600,color:'var(--sub)',whiteSpace:'nowrap'}}>Select Session:</span>
-          <select className="session-select" style={{flex:1,minWidth:200}} value={selId} onChange={e=>setSelId(e.target.value)}>
-            {sessions.map(s=>(
-              <option key={s.id} value={s.id}>
-                [{s.brand}] {s.kol} · {s.date} · GMV ¥{s.gmv.toLocaleString()}
-              </option>
-            ))}
-          </select>
-          {sel && (
-            <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-              <span style={{fontSize:12,color:'var(--mid)'}}>Type: <strong>{sel.type==='Self-Op'?'自营 Self-Op':'合作 Partner'}</strong></span>
-              <span style={{fontSize:12,color:'var(--mid)'}}>Duration: <strong>{sel.duration}min</strong></span>
-              <span style={{fontSize:12,color:'var(--mid)'}}>AOV: <strong>¥{Math.round(sel.aov)}</strong></span>
-              <span style={{fontSize:14}}>{rating}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {sel && (
-        <>
-          {/* Funnel visualization */}
-          <div className="card">
-            <div className="gbar" />
-            <div className="sec-row">
-              <div>
-                <div className="sec-title">Funnel Performance vs Benchmarks</div>
-                <div className="sec-sub">{sel.brand} benchmarks · n={bm.n} sessions · ¹P25 ²P50 ³P75</div>
-              </div>
-              <div style={{fontSize:12,color:'var(--mid)'}}>Exposed: {sel.exposed?.toLocaleString() || '—'} → Entered: {sel.entered?.toLocaleString() || '—'}</div>
-            </div>
-
-            {STEP_KEYS.map((key, i) => {
-              const val = sel[key];
-              const b = bm[STEP_BM_KEYS[i]];
-              const t = tier(val, b);
-              const maxScale = b.p75 * 1.3;
-              const valPct = Math.min(val/maxScale*100, 100);
-              const p25pct = Math.min(b.p25/maxScale*100, 100);
-              const p50pct = Math.min(b.p50/maxScale*100, 100);
-              const p75pct = Math.min(b.p75/maxScale*100, 100);
-              const colors = { STAR:'#10b981', GOOD:'#009BFF', MID:'#f59e0b', WEAK:'#ef4444' };
-              return (
-                <div key={key} style={{marginBottom:18}}>
-                  <div className="funnel-row">
-                    <div className="fbarlbl">{STEP_LABELS[i]}</div>
-                    <div className="fbarwrap">
-                      <div className="fbar" style={{width:`${valPct}%`, background:colors[t]}} />
-                      <span className="fbar-val">{pct(val)}</span>
-                      {/* Benchmark markers */}
-                      {[{p:p25pct,l:'¹'},{p:p50pct,l:'²'},{p:p75pct,l:'³'}].map(({p,l})=>(
-                        <div key={l} className="fmark" style={{left:`${p}%`,background:'rgba(9,10,15,.3)'}}>
-                          <span className="fmark-lbl">{l}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="fval">{pct(val)}</div>
-                    <div className="fbm">P50: {pct(b.p50)}</div>
-                    <div><span className={`tier tier-${t}`}>{t}</span></div>
-                  </div>
-                  <div style={{paddingLeft:170,fontSize:10,color:'var(--mid)'}}>
-                    ¹P25={pct(b.p25)} &nbsp; ²P50={pct(b.p50)} &nbsp; ³P75={pct(b.p75)}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Overall CVR */}
-            <div style={{marginTop:8,padding:'10px 14px',background:'var(--gray)',borderRadius:8,display:'flex',gap:24,flexWrap:'wrap',fontSize:12}}>
-              {[
-                {lbl:'Overall CVR', val:pct(sel.cvr), bm_val:`P50: ${pct(bm.cvr.p50)}`},
-                {lbl:'AOV', val:`¥${Math.round(sel.aov)}`, bm_val:`P50: ¥${bm.aov.p50}`},
-                {lbl:'GMV', val:money(sel.gmv), bm_val:''},
-                {lbl:'Refund Rate', val:pct1(sel.refund_rate||0), bm_val:''},
-                {lbl:'Avg Watch', val:`${Math.round(sel.watch_sec||0)}s`, bm_val:''}
-              ].map(({lbl,val,bm_val})=>(
-                <div key={lbl}>
-                  <div style={{color:'var(--mid)',fontSize:10,textTransform:'uppercase',letterSpacing:'1px'}}>{lbl}</div>
-                  <div style={{fontWeight:700,fontSize:16,letterSpacing:'-.3px'}}>{val}</div>
-                  {bm_val && <div style={{color:'var(--mid)',fontSize:10}}>{bm_val}</div>}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Diagnostics */}
-          {weakSteps.length > 0 && (
-            <div className="card">
-              <div className="sec-row"><div className="sec-title">Funnel Leak Diagnosis</div></div>
-              {weakSteps.map(({t,i})=>(
-                <div key={i} className={`diag-card diag-${t}`}>
-                  <div style={{fontWeight:700,marginBottom:4,fontSize:13}}>
-                    [Leak] {STEP_LABELS[i]} — <span className={`tier tier-${t}`}>{t}</span> ({pct(sel[STEP_KEYS[i]])})
-                  </div>
-                  <div style={{fontSize:12,lineHeight:1.7}}>{DIAG[STEP_KEYS[i]][t]}</div>
-                </div>
-              ))}
-              {weakSteps.length === 0 && (
-                <div className="diag-card diag-STAR" style={{fontSize:12}}>
-                  ✓ No critical leaks. All tracked stages at P50 or above.
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Batch comparison table */}
-      <div className="card">
-        <div className="sec-row">
-          <div className="sec-title">Batch Session Comparison</div>
-          <div style={{fontSize:11,color:'var(--mid)'}}>Tier based on {brand==='All'?'brand-specific':brand} benchmarks</div>
-        </div>
-        <div className="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>KOL</th><th>Brand</th><th>Date</th>
-                <th>① Entry</th><th>② Prod Exp</th><th>③ CTR</th><th>④ Order</th><th>⑤ Pay</th>
-                <th>CVR</th><th>AOV</th><th>Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map(s => {
-                const b = BM[s.brand];
-                const tArr = STEP_KEYS.map(k=>tier(s[k],b[k]));
-                return (
-                  <tr key={s.id} style={s.id===selId?{background:'#f0f4ff'}:{}}>
-                    <td style={{fontWeight:600,maxWidth:160,overflow:'hidden',textOverflow:'ellipsis'}}>{s.kol.split('(')[0].trim()}</td>
-                    <td style={{fontSize:11}}><span style={{color:brandColor(s.brand),fontWeight:600}}>{s.brand==='Thorne'?'TH':'KC'}</span></td>
-                    <td style={{color:'var(--mid)'}}>{s.date.slice(5)}</td>
-                    {tArr.map((t,i)=>(
-                      <td key={i}><span style={{fontSize:11,fontWeight:600,color:{STAR:'#047857',GOOD:'#0369a1',MID:'#b45309',WEAK:'#b91c1c'}[t]}}>{pct1(s[STEP_KEYS[i]])}</span></td>
-                    ))}
-                    <td className="mono" style={{color:s.cvr>=.02?'var(--success)':'var(--dark)'}}>{pct1(s.cvr)}</td>
-                    <td className="mono">¥{Math.round(s.aov)}</td>
-                    <td><span style={{fontSize:12}}>{sessionRating(s)}</span></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+  const heatmap = SESSIONS.filter(s => brand === 'All' || s.brand === brand).slice(0, 8);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pg-hdr"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pg-title"
+  }, "Live Session Funnel Diagnostic"), /*#__PURE__*/React.createElement("div", {
+    className: "pg-sub"
+  }, "5-step Douyin live funnel \xB7 Compare vs P25/P50/P75 benchmarks"))), /*#__PURE__*/React.createElement("div", {
+    className: "card card-sm"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: 'var(--sub)',
+      whiteSpace: 'nowrap'
+    }
+  }, "Select Session:"), /*#__PURE__*/React.createElement("select", {
+    className: "session-select",
+    style: {
+      flex: 1,
+      minWidth: 200
+    },
+    value: selId,
+    onChange: e => setSelId(e.target.value)
+  }, sessions.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s.id,
+    value: s.id
+  }, "[", s.brand, "] ", s.kol, " \xB7 ", s.date, " \xB7 GMV \xA5", s.gmv.toLocaleString()))), sel && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      alignItems: 'center',
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mid)'
+    }
+  }, "Type: ", /*#__PURE__*/React.createElement("strong", null, sel.type === 'Self-Op' ? '自营 Self-Op' : '合作 Partner')), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mid)'
+    }
+  }, "Duration: ", /*#__PURE__*/React.createElement("strong", null, sel.duration, "min")), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mid)'
+    }
+  }, "AOV: ", /*#__PURE__*/React.createElement("strong", null, "\xA5", Math.round(sel.aov))), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14
+    }
+  }, rating)))), sel && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gbar"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Funnel Performance vs Benchmarks"), /*#__PURE__*/React.createElement("div", {
+    className: "sec-sub"
+  }, sel.brand, " benchmarks \xB7 n=", bm.n, " sessions \xB7 \xB9P25 \xB2P50 \xB3P75")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--mid)'
+    }
+  }, "Exposed: ", sel.exposed?.toLocaleString() || '—', " \u2192 Entered: ", sel.entered?.toLocaleString() || '—')), STEP_KEYS.map((key, i) => {
+    const val = sel[key];
+    const b = bm[STEP_BM_KEYS[i]];
+    const t = tier(val, b);
+    const maxScale = b.p75 * 1.3;
+    const valPct = Math.min(val / maxScale * 100, 100);
+    const p25pct = Math.min(b.p25 / maxScale * 100, 100);
+    const p50pct = Math.min(b.p50 / maxScale * 100, 100);
+    const p75pct = Math.min(b.p75 / maxScale * 100, 100);
+    const colors = {
+      STAR: '#10b981',
+      GOOD: '#009BFF',
+      MID: '#f59e0b',
+      WEAK: '#ef4444'
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      key: key,
+      style: {
+        marginBottom: 18
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "funnel-row"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "fbarlbl"
+    }, STEP_LABELS[i]), /*#__PURE__*/React.createElement("div", {
+      className: "fbarwrap"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "fbar",
+      style: {
+        width: `${valPct}%`,
+        background: colors[t]
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "fbar-val"
+    }, pct(val)), [{
+      p: p25pct,
+      l: '¹'
+    }, {
+      p: p50pct,
+      l: '²'
+    }, {
+      p: p75pct,
+      l: '³'
+    }].map(({
+      p,
+      l
+    }) => /*#__PURE__*/React.createElement("div", {
+      key: l,
+      className: "fmark",
+      style: {
+        left: `${p}%`,
+        background: 'rgba(9,10,15,.3)'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "fmark-lbl"
+    }, l)))), /*#__PURE__*/React.createElement("div", {
+      className: "fval"
+    }, pct(val)), /*#__PURE__*/React.createElement("div", {
+      className: "fbm"
+    }, "P50: ", pct(b.p50)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+      className: `tier tier-${t}`
+    }, t))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        paddingLeft: 170,
+        fontSize: 10,
+        color: 'var(--mid)'
+      }
+    }, "\xB9P25=", pct(b.p25), " \xA0 \xB2P50=", pct(b.p50), " \xA0 \xB3P75=", pct(b.p75)));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      padding: '10px 14px',
+      background: 'var(--gray)',
+      borderRadius: 8,
+      display: 'flex',
+      gap: 24,
+      flexWrap: 'wrap',
+      fontSize: 12
+    }
+  }, [{
+    lbl: 'Overall CVR',
+    val: pct(sel.cvr),
+    bm_val: `P50: ${pct(bm.cvr.p50)}`
+  }, {
+    lbl: 'AOV',
+    val: `¥${Math.round(sel.aov)}`,
+    bm_val: `P50: ¥${bm.aov.p50}`
+  }, {
+    lbl: 'GMV',
+    val: money(sel.gmv),
+    bm_val: ''
+  }, {
+    lbl: 'Refund Rate',
+    val: pct1(sel.refund_rate || 0),
+    bm_val: ''
+  }, {
+    lbl: 'Avg Watch',
+    val: `${Math.round(sel.watch_sec || 0)}s`,
+    bm_val: ''
+  }].map(({
+    lbl,
+    val,
+    bm_val
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: lbl
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--mid)',
+      fontSize: 10,
+      textTransform: 'uppercase',
+      letterSpacing: '1px'
+    }
+  }, lbl), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 16,
+      letterSpacing: '-.3px'
+    }
+  }, val), bm_val && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--mid)',
+      fontSize: 10
+    }
+  }, bm_val))))), weakSteps.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Funnel Leak Diagnosis")), weakSteps.map(({
+    t,
+    i
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: `diag-card diag-${t}`
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      marginBottom: 4,
+      fontSize: 13
+    }
+  }, "[Leak] ", STEP_LABELS[i], " \u2014 ", /*#__PURE__*/React.createElement("span", {
+    className: `tier tier-${t}`
+  }, t), " (", pct(sel[STEP_KEYS[i]]), ")"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      lineHeight: 1.7
+    }
+  }, DIAG[STEP_KEYS[i]][t]))), weakSteps.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "diag-card diag-STAR",
+    style: {
+      fontSize: 12
+    }
+  }, "\u2713 No critical leaks. All tracked stages at P50 or above."))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Batch Session Comparison"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mid)'
+    }
+  }, "Tier based on ", brand === 'All' ? 'brand-specific' : brand, " benchmarks")), /*#__PURE__*/React.createElement("div", {
+    className: "tbl-wrap"
+  }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "KOL"), /*#__PURE__*/React.createElement("th", null, "Brand"), /*#__PURE__*/React.createElement("th", null, "Date"), /*#__PURE__*/React.createElement("th", null, "\u2460 Entry"), /*#__PURE__*/React.createElement("th", null, "\u2461 Prod Exp"), /*#__PURE__*/React.createElement("th", null, "\u2462 CTR"), /*#__PURE__*/React.createElement("th", null, "\u2463 Order"), /*#__PURE__*/React.createElement("th", null, "\u2464 Pay"), /*#__PURE__*/React.createElement("th", null, "CVR"), /*#__PURE__*/React.createElement("th", null, "AOV"), /*#__PURE__*/React.createElement("th", null, "Rating"))), /*#__PURE__*/React.createElement("tbody", null, sessions.map(s => {
+    const b = BM[s.brand];
+    const tArr = STEP_KEYS.map(k => tier(s[k], b[k]));
+    return /*#__PURE__*/React.createElement("tr", {
+      key: s.id,
+      style: s.id === selId ? {
+        background: '#f0f4ff'
+      } : {}
+    }, /*#__PURE__*/React.createElement("td", {
+      style: {
+        fontWeight: 600,
+        maxWidth: 160,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+      }
+    }, s.kol.split('(')[0].trim()), /*#__PURE__*/React.createElement("td", {
+      style: {
+        fontSize: 11
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: brandColor(s.brand),
+        fontWeight: 600
+      }
+    }, s.brand === 'Thorne' ? 'TH' : 'KC')), /*#__PURE__*/React.createElement("td", {
+      style: {
+        color: 'var(--mid)'
+      }
+    }, s.date.slice(5)), tArr.map((t, i) => /*#__PURE__*/React.createElement("td", {
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        fontWeight: 600,
+        color: {
+          STAR: '#047857',
+          GOOD: '#0369a1',
+          MID: '#b45309',
+          WEAK: '#b91c1c'
+        }[t]
+      }
+    }, pct1(s[STEP_KEYS[i]])))), /*#__PURE__*/React.createElement("td", {
+      className: "mono",
+      style: {
+        color: s.cvr >= .02 ? 'var(--success)' : 'var(--dark)'
+      }
+    }, pct1(s.cvr)), /*#__PURE__*/React.createElement("td", {
+      className: "mono"
+    }, "\xA5", Math.round(s.aov)), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12
+      }
+    }, sessionRating(s))));
+  }))))));
 };
 
 /* ══════════════════════════════════════════════════
    BRIDGE TAB (短直联动)
 ═══════════════════════════════════════════════════ */
-const BridgeTab = ({ brand }) => {
-  const brands = brand==='All' ? ['Thorne','KC'] : [brand];
-  const brandKey = brand==='All' ? null : brand;
-
-  const chartData = [
-    { name:'KC Self-Op\n(n=46)', with_video:46, no_video:17, share:13.7, uv:169 },
-    { name:'KC Partner\n(n=87)', with_video:0, no_video:87, share:0, uv:0 },
-    { name:'Thorne Self-Op\n(n=15)', with_video:15, no_video:2, share:34.3, uv:256 },
-    { name:'Thorne Partner\n(n=80)', with_video:0, no_video:80, share:0, uv:0 }
-  ].filter(d => brand==='All' || d.name.startsWith(brand==='Thorne'?'Thorne':'KC'));
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-      <div className="pg-hdr">
-        <div>
-          <div className="pg-title">Short Video → Live Bridge (短直联动)</div>
-          <div className="pg-sub">Video-to-live redirect traffic analysis — self-operated vs partner accounts</div>
-        </div>
-        <span className="src-badge">thorne_kc_shortvideo_* + livestream</span>
-      </div>
-
-      {/* Key insight cards */}
-      <div className="g4">
-        {[
-          { brand:'Thorne', type:'Self-Op', with:15, total:17, uv:3838, share:'34.3%', videos:18.1, color:'#3A55FF', insight:'High short video activity driving ~30% of viewers' },
-          { brand:'Thorne', type:'Partner', with:0, total:80, uv:0, share:'0%', videos:0, color:'#C4D3E3', insight:'Partner KOLs create zero video traffic to live' },
-          { brand:'KC', type:'Self-Op', with:46, total:63, uv:7762, share:'13.7%', videos:3.5, color:'#009BFF', insight:'Self-op generates consistent video bridge traffic' },
-          { brand:'KC', type:'Partner', with:0, total:87, uv:0, share:'0%', videos:0, color:'#C4D3E3', insight:'Partner KOLs create zero video traffic to live' }
-        ].filter(d => brand==='All' || d.brand===brand).map(d=>(
-          <div key={`${d.brand}${d.type}`} className="card" style={{borderTop:`3px solid ${d.color}`}}>
-            <div style={{fontSize:11,fontWeight:600,color:'var(--sub)',marginBottom:8}}>
-              {d.brand} · {d.type}
-            </div>
-            <div style={{fontSize:22,fontWeight:700,letterSpacing:-1,color:d.uv>0?'var(--blue)':'var(--muted)'}}>{d.uv>0?`+${d.uv.toLocaleString()}`:'-'}</div>
-            <div style={{fontSize:11,color:'var(--mid)',marginTop:2}}>Total video → live UV</div>
-            <div className="bridge-bar" style={{margin:'10px 0'}}>
-              <div className="bridge-fill" style={{width:d.share,background:d.color}} />
-            </div>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:11}}>
-              <span>Avg traffic share: <strong>{d.share}</strong></span>
-              <span>Avg {d.videos} videos/session</span>
-            </div>
-            <div style={{fontSize:11,color:'var(--sub)',marginTop:8,lineHeight:1.5}}>{d.insight}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bridge funnel chart */}
-      <div className="card">
-        <div className="gbar" />
-        <div className="sec-row">
-          <div className="sec-title">Sessions with Video Bridge Traffic</div>
-          <div className="sec-sub">Number of sessions that received short video redirect traffic</div>
-        </div>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={chartData} margin={{top:4,right:12,left:0,bottom:0}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#EBF0F5" />
-            <XAxis dataKey="name" tick={{fontSize:10,fill:'#9badc4'}} axisLine={false} tickLine={false} />
-            <YAxis tick={{fontSize:10,fill:'#9badc4'}} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={ttStyle} />
-            <Legend wrapperStyle={{fontSize:11}} />
-            <Bar dataKey="with_video" name="With Video Traffic" fill="#3A55FF" radius={[4,4,0,0]} />
-            <Bar dataKey="no_video" name="No Video Traffic" fill="#EBF0F5" radius={[4,4,0,0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Key insight */}
-      <div className="card" style={{background:'linear-gradient(135deg,#eef1ff,#e6f5ff)',border:'1px solid #b8c5ff'}}>
-        <div style={{fontWeight:700,fontSize:14,marginBottom:8,color:'var(--blue)'}}>💡 Key Insight: Short Video Bridge Asymmetry</div>
-        <div style={{fontSize:13,lineHeight:1.8,color:'var(--dark)'}}>
-          <strong>Thorne self-operated accounts</strong> publish ~18 videos per session and generate 34.3% of their live viewers from short video redirects — the highest of any segment. However, <strong>all partner (合作) KOLs across both brands</strong> generate zero video bridge traffic. This represents a major untapped lever: if partner KOLs were coached to publish bridge videos before sessions, the bridge funnel effect observed in self-operated accounts could potentially be replicated.
-        </div>
-        <div style={{marginTop:10,fontSize:12,color:'var(--blue)',fontWeight:600}}>
-          Optimization action → Mandate 3–5 bridge videos per partner KOL session · Estimated impact: +15–30% viewer count
-        </div>
-      </div>
-    </div>
-  );
+const BridgeTab = ({
+  brand
+}) => {
+  const brands = brand === 'All' ? ['Thorne', 'KC'] : [brand];
+  const brandKey = brand === 'All' ? null : brand;
+  const chartData = [{
+    name: 'KC Self-Op\n(n=46)',
+    with_video: 46,
+    no_video: 17,
+    share: 13.7,
+    uv: 169
+  }, {
+    name: 'KC Partner\n(n=87)',
+    with_video: 0,
+    no_video: 87,
+    share: 0,
+    uv: 0
+  }, {
+    name: 'Thorne Self-Op\n(n=15)',
+    with_video: 15,
+    no_video: 2,
+    share: 34.3,
+    uv: 256
+  }, {
+    name: 'Thorne Partner\n(n=80)',
+    with_video: 0,
+    no_video: 80,
+    share: 0,
+    uv: 0
+  }].filter(d => brand === 'All' || d.name.startsWith(brand === 'Thorne' ? 'Thorne' : 'KC'));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pg-hdr"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pg-title"
+  }, "Short Video \u2192 Live Bridge (\u77ED\u76F4\u8054\u52A8)"), /*#__PURE__*/React.createElement("div", {
+    className: "pg-sub"
+  }, "Video-to-live redirect traffic analysis \u2014 self-operated vs partner accounts")), /*#__PURE__*/React.createElement("span", {
+    className: "src-badge"
+  }, "thorne_kc_shortvideo_* + livestream")), /*#__PURE__*/React.createElement("div", {
+    className: "g4"
+  }, [{
+    brand: 'Thorne',
+    type: 'Self-Op',
+    with: 15,
+    total: 17,
+    uv: 3838,
+    share: '34.3%',
+    videos: 18.1,
+    color: '#3A55FF',
+    insight: 'High short video activity driving ~30% of viewers'
+  }, {
+    brand: 'Thorne',
+    type: 'Partner',
+    with: 0,
+    total: 80,
+    uv: 0,
+    share: '0%',
+    videos: 0,
+    color: '#C4D3E3',
+    insight: 'Partner KOLs create zero video traffic to live'
+  }, {
+    brand: 'KC',
+    type: 'Self-Op',
+    with: 46,
+    total: 63,
+    uv: 7762,
+    share: '13.7%',
+    videos: 3.5,
+    color: '#009BFF',
+    insight: 'Self-op generates consistent video bridge traffic'
+  }, {
+    brand: 'KC',
+    type: 'Partner',
+    with: 0,
+    total: 87,
+    uv: 0,
+    share: '0%',
+    videos: 0,
+    color: '#C4D3E3',
+    insight: 'Partner KOLs create zero video traffic to live'
+  }].filter(d => brand === 'All' || d.brand === brand).map(d => /*#__PURE__*/React.createElement("div", {
+    key: `${d.brand}${d.type}`,
+    className: "card",
+    style: {
+      borderTop: `3px solid ${d.color}`
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: 'var(--sub)',
+      marginBottom: 8
+    }
+  }, d.brand, " \xB7 ", d.type), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 700,
+      letterSpacing: -1,
+      color: d.uv > 0 ? 'var(--blue)' : 'var(--muted)'
+    }
+  }, d.uv > 0 ? `+${d.uv.toLocaleString()}` : '-'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mid)',
+      marginTop: 2
+    }
+  }, "Total video \u2192 live UV"), /*#__PURE__*/React.createElement("div", {
+    className: "bridge-bar",
+    style: {
+      margin: '10px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bridge-fill",
+    style: {
+      width: d.share,
+      background: d.color
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: 11
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Avg traffic share: ", /*#__PURE__*/React.createElement("strong", null, d.share)), /*#__PURE__*/React.createElement("span", null, "Avg ", d.videos, " videos/session")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--sub)',
+      marginTop: 8,
+      lineHeight: 1.5
+    }
+  }, d.insight)))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gbar"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Sessions with Video Bridge Traffic"), /*#__PURE__*/React.createElement("div", {
+    className: "sec-sub"
+  }, "Number of sessions that received short video redirect traffic")), /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 200
+  }, /*#__PURE__*/React.createElement(BarChart, {
+    data: chartData,
+    margin: {
+      top: 4,
+      right: 12,
+      left: 0,
+      bottom: 0
+    }
+  }, /*#__PURE__*/React.createElement(CartesianGrid, {
+    strokeDasharray: "3 3",
+    stroke: "#EBF0F5"
+  }), /*#__PURE__*/React.createElement(XAxis, {
+    dataKey: "name",
+    tick: {
+      fontSize: 10,
+      fill: '#9badc4'
+    },
+    axisLine: false,
+    tickLine: false
+  }), /*#__PURE__*/React.createElement(YAxis, {
+    tick: {
+      fontSize: 10,
+      fill: '#9badc4'
+    },
+    axisLine: false,
+    tickLine: false
+  }), /*#__PURE__*/React.createElement(Tooltip, {
+    contentStyle: ttStyle
+  }), /*#__PURE__*/React.createElement(Legend, {
+    wrapperStyle: {
+      fontSize: 11
+    }
+  }), /*#__PURE__*/React.createElement(Bar, {
+    dataKey: "with_video",
+    name: "With Video Traffic",
+    fill: "#3A55FF",
+    radius: [4, 4, 0, 0]
+  }), /*#__PURE__*/React.createElement(Bar, {
+    dataKey: "no_video",
+    name: "No Video Traffic",
+    fill: "#EBF0F5",
+    radius: [4, 4, 0, 0]
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      background: 'linear-gradient(135deg,#eef1ff,#e6f5ff)',
+      border: '1px solid #b8c5ff'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      marginBottom: 8,
+      color: 'var(--blue)'
+    }
+  }, "\uD83D\uDCA1 Key Insight: Short Video Bridge Asymmetry"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      lineHeight: 1.8,
+      color: 'var(--dark)'
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "Thorne self-operated accounts"), " publish ~18 videos per session and generate 34.3% of their live viewers from short video redirects \u2014 the highest of any segment. However, ", /*#__PURE__*/React.createElement("strong", null, "all partner (\u5408\u4F5C) KOLs across both brands"), " generate zero video bridge traffic. This represents a major untapped lever: if partner KOLs were coached to publish bridge videos before sessions, the bridge funnel effect observed in self-operated accounts could potentially be replicated."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 12,
+      color: 'var(--blue)',
+      fontWeight: 600
+    }
+  }, "Optimization action \u2192 Mandate 3\u20135 bridge videos per partner KOL session \xB7 Estimated impact: +15\u201330% viewer count")));
 };
 
 /* ══════════════════════════════════════════════════
    KOL TAB
 ═══════════════════════════════════════════════════ */
-const KOLTab = ({ brand }) => {
-  const sessions = SESSIONS.filter(s=>brand==='All'||s.brand===brand);
+const KOLTab = ({
+  brand
+}) => {
+  const sessions = SESSIONS.filter(s => brand === 'All' || s.brand === brand);
   const byKOL = {};
   sessions.forEach(s => {
     const k = s.kol;
-    if (!byKOL[k]) byKOL[k] = { kol:k, brand:s.brand, type:s.type, sessions:[], totalGMV:0, totalOrders:0 };
+    if (!byKOL[k]) byKOL[k] = {
+      kol: k,
+      brand: s.brand,
+      type: s.type,
+      sessions: [],
+      totalGMV: 0,
+      totalOrders: 0
+    };
     byKOL[k].sessions.push(s);
     byKOL[k].totalGMV += s.gmv;
     byKOL[k].totalOrders += s.paid;
   });
-  const kols = Object.values(byKOL).sort((a,b)=>b.totalGMV-a.totalGMV);
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-      <div className="pg-hdr">
-        <div>
-          <div className="pg-title">KOL / Creator Analysis</div>
-          <div className="pg-sub">Performance by creator account across {sessions.length} sessions</div>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="sec-row"><div className="sec-title">KOL Session Leaderboard</div></div>
-        <div className="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th><th>Creator</th><th>Brand</th><th>Type</th>
-                <th>Sessions</th><th>Total GMV</th><th>Total Orders</th>
-                <th>Best Session GMV</th><th>Avg CVR</th><th>Avg Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-              {kols.map((k,i)=>{
-                const avgCVR = k.sessions.reduce((a,s)=>a+s.cvr,0)/k.sessions.length;
-                const best = [...k.sessions].sort((a,b)=>b.gmv-a.gmv)[0];
-                const tiers = k.sessions.map(s=>sessionRating(s));
-                const starCount = tiers.filter(t=>t.includes('STAR')).length;
-                return (
-                  <tr key={k.kol}>
-                    <td style={{fontWeight:700,color:'var(--mid)'}}>{i+1}</td>
-                    <td>
-                      <div style={{fontWeight:600}}>{k.kol.split('(')[0].trim()}</div>
-                      <div style={{fontSize:10,color:'var(--mid)'}}>{k.kol.match(/\(.*\)/)?.[0]||''}</div>
-                    </td>
-                    <td><span style={{color:brandColor(k.brand),fontWeight:600,fontSize:11}}>{k.brand==='Thorne'?'Thorne':'KC'}</span></td>
-                    <td><span style={{fontSize:11,color:'var(--sub)'}}>{k.type==='Self-Op'?'自营':'合作'}</span></td>
-                    <td style={{textAlign:'center'}}>{k.sessions.length}</td>
-                    <td className="mono" style={{fontWeight:700}}>{money(k.totalGMV)}</td>
-                    <td className="mono">{k.totalOrders}</td>
-                    <td className="mono">{money(best.gmv)}</td>
-                    <td style={{color:avgCVR>=.02?'var(--success)':'var(--mid)',fontWeight:600}}>{pct1(avgCVR)}</td>
-                    <td style={{fontSize:12}}>{starCount>0?`⭐×${starCount}`:'🔶'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Interesting finding callout */}
-      <div className="g2">
-        <div className="card" style={{borderLeft:'3px solid var(--blue)'}}>
-          <div style={{fontWeight:700,fontSize:13,marginBottom:8}}>🔷 STAR Pattern: Thorne Self-Operated</div>
-          <div style={{fontSize:12,lineHeight:1.7,color:'var(--sub)'}}>
-            Thorne's self-operated accounts (自营) consistently achieve <strong>Step 2 CVR ≥ 95%</strong> (Product Exposure) because they maintain permanent product shelves. However, their Step 1 Entry CTR is weak (~7–11%), meaning the room attracts fewer external visitors. They compensate via high video bridge traffic (34% share).
-          </div>
-          <div style={{marginTop:8,fontSize:11,color:'var(--blue)',fontWeight:600}}>
-            Strategy: Invest in Qianchuan ads to improve entry CTR for self-operated sessions
-          </div>
-        </div>
-        <div className="card" style={{borderLeft:'3px solid var(--warning)'}}>
-          <div style={{fontWeight:700,fontSize:13,marginBottom:8}}>🔶 MID Pattern: Partner KOLs (合作)</div>
-          <div style={{fontSize:12,lineHeight:1.7,color:'var(--sub)'}}>
-            Most partner KOLs achieve good Step 1 entry CTR (15–32%) but struggle with <strong>Step 2 Product Exposure</strong> (8–30%) because they don't maintain permanent product shelves. The exception is LisaWang, who consistently drives 22–43% product exposure.
-          </div>
-          <div style={{marginTop:8,fontSize:11,color:'var(--warning)',fontWeight:600}}>
-            Action: Brief all partner KOLs to pin hero product within first 5 minutes
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const kols = Object.values(byKOL).sort((a, b) => b.totalGMV - a.totalGMV);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pg-hdr"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pg-title"
+  }, "KOL / Creator Analysis"), /*#__PURE__*/React.createElement("div", {
+    className: "pg-sub"
+  }, "Performance by creator account across ", sessions.length, " sessions"))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "KOL Session Leaderboard")), /*#__PURE__*/React.createElement("div", {
+    className: "tbl-wrap"
+  }, /*#__PURE__*/React.createElement("table", null, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", null, "#"), /*#__PURE__*/React.createElement("th", null, "Creator"), /*#__PURE__*/React.createElement("th", null, "Brand"), /*#__PURE__*/React.createElement("th", null, "Type"), /*#__PURE__*/React.createElement("th", null, "Sessions"), /*#__PURE__*/React.createElement("th", null, "Total GMV"), /*#__PURE__*/React.createElement("th", null, "Total Orders"), /*#__PURE__*/React.createElement("th", null, "Best Session GMV"), /*#__PURE__*/React.createElement("th", null, "Avg CVR"), /*#__PURE__*/React.createElement("th", null, "Avg Rating"))), /*#__PURE__*/React.createElement("tbody", null, kols.map((k, i) => {
+    const avgCVR = k.sessions.reduce((a, s) => a + s.cvr, 0) / k.sessions.length;
+    const best = [...k.sessions].sort((a, b) => b.gmv - a.gmv)[0];
+    const tiers = k.sessions.map(s => sessionRating(s));
+    const starCount = tiers.filter(t => t.includes('STAR')).length;
+    return /*#__PURE__*/React.createElement("tr", {
+      key: k.kol
+    }, /*#__PURE__*/React.createElement("td", {
+      style: {
+        fontWeight: 700,
+        color: 'var(--mid)'
+      }
+    }, i + 1), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 600
+      }
+    }, k.kol.split('(')[0].trim()), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: 'var(--mid)'
+      }
+    }, k.kol.match(/\(.*\)/)?.[0] || '')), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: brandColor(k.brand),
+        fontWeight: 600,
+        fontSize: 11
+      }
+    }, k.brand === 'Thorne' ? 'Thorne' : 'KC')), /*#__PURE__*/React.createElement("td", null, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--sub)'
+      }
+    }, k.type === 'Self-Op' ? '自营' : '合作')), /*#__PURE__*/React.createElement("td", {
+      style: {
+        textAlign: 'center'
+      }
+    }, k.sessions.length), /*#__PURE__*/React.createElement("td", {
+      className: "mono",
+      style: {
+        fontWeight: 700
+      }
+    }, money(k.totalGMV)), /*#__PURE__*/React.createElement("td", {
+      className: "mono"
+    }, k.totalOrders), /*#__PURE__*/React.createElement("td", {
+      className: "mono"
+    }, money(best.gmv)), /*#__PURE__*/React.createElement("td", {
+      style: {
+        color: avgCVR >= .02 ? 'var(--success)' : 'var(--mid)',
+        fontWeight: 600
+      }
+    }, pct1(avgCVR)), /*#__PURE__*/React.createElement("td", {
+      style: {
+        fontSize: 12
+      }
+    }, starCount > 0 ? `⭐×${starCount}` : '🔶'));
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "g2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      borderLeft: '3px solid var(--blue)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13,
+      marginBottom: 8
+    }
+  }, "\uD83D\uDD37 STAR Pattern: Thorne Self-Operated"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      lineHeight: 1.7,
+      color: 'var(--sub)'
+    }
+  }, "Thorne's self-operated accounts (\u81EA\u8425) consistently achieve ", /*#__PURE__*/React.createElement("strong", null, "Step 2 CVR \u2265 95%"), " (Product Exposure) because they maintain permanent product shelves. However, their Step 1 Entry CTR is weak (~7\u201311%), meaning the room attracts fewer external visitors. They compensate via high video bridge traffic (34% share)."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      fontSize: 11,
+      color: 'var(--blue)',
+      fontWeight: 600
+    }
+  }, "Strategy: Invest in Qianchuan ads to improve entry CTR for self-operated sessions")), /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      borderLeft: '3px solid var(--warning)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13,
+      marginBottom: 8
+    }
+  }, "\uD83D\uDD36 MID Pattern: Partner KOLs (\u5408\u4F5C)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      lineHeight: 1.7,
+      color: 'var(--sub)'
+    }
+  }, "Most partner KOLs achieve good Step 1 entry CTR (15\u201332%) but struggle with ", /*#__PURE__*/React.createElement("strong", null, "Step 2 Product Exposure"), " (8\u201330%) because they don't maintain permanent product shelves. The exception is LisaWang, who consistently drives 22\u201343% product exposure."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      fontSize: 11,
+      color: 'var(--warning)',
+      fontWeight: 600
+    }
+  }, "Action: Brief all partner KOLs to pin hero product within first 5 minutes"))));
 };
 
 /* ══════════════════════════════════════════════════
@@ -893,313 +1874,733 @@ const RiskTab = () => {
   const [subTab, setSubTab] = useState('overview');
   const [script, setScript] = useState('');
   const [checked, setChecked] = useState(false);
-
-  const BLACKLIST = ['治愈','根治','神药','第一','绝对','纯天然无副作用','专治','治疗','消除','彻底','神奇','永久','保证治好'];
+  const BLACKLIST = ['治愈', '根治', '神药', '第一', '绝对', '纯天然无副作用', '专治', '治疗', '消除', '彻底', '神奇', '永久', '保证治好'];
   const found = BLACKLIST.filter(w => script.includes(w));
-
   const highlighted = script ? found.reduce((text, word) => {
     return text.replace(new RegExp(word, 'g'), `<mark class="risk-word">${word}</mark>`);
-  }, script.replace(/</g,'&lt;').replace(/>/g,'&gt;')) : '';
-
-  const cats = [
-    { name:'Content Moderation', score:85, risk:'low',    issues:2 },
-    { name:'FTC / 广告法 Disclosures', score:91, risk:'low',    issues:1 },
-    { name:'Platform Guidelines', score:72, risk:'medium', issues:8 },
-    { name:'Data Privacy',       score:58, risk:'high',   issues:14 },
-    { name:'IP Protection',      score:81, risk:'low',    issues:3 },
-    { name:'Pricing Accuracy',   score:75, risk:'medium', issues:5 }
-  ];
-  const riskCol = r => r==='high'?'#ef4444':r==='medium'?'#f59e0b':'#10b981';
-  const riskBg  = r => r==='high'?'#fef2f2':r==='medium'?'#fffbeb':'#ecfdf5';
-
-  const flags = [
-    { sev:'high',   title:'Missing data consent notice',    platform:'TikTok Shop',     time:'2h ago',  status:'open' },
-    { sev:'medium', title:'Unclear affiliate disclosure',   platform:'Instagram Shop',  time:'1d ago',  status:'open' },
-    { sev:'medium', title:'Outdated terms version',         platform:'YouTube Shopping',time:'2d ago',  status:'in_review' },
-    { sev:'low',    title:'Product claim needs citation',   platform:'Douyin',          time:'3d ago',  status:'resolved' }
-  ];
-
-  const radarData = cats.map(c=>({ subject:c.name.split('/')[0].trim().split(' ').slice(-1)[0], score:c.score }));
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-      <div className="pg-hdr">
-        <div>
-          <div className="pg-title">Risk Radar (风险雷达)</div>
-          <div className="pg-sub">Pre-event vetting · Post-event audit · Compliance monitoring</div>
-        </div>
-        <button className="btn-primary">Generate Report</button>
-      </div>
-
-      <div className="stabs">
-        {[['overview','Overview'],['green-pass','Green Pass Tool'],['audit','Audit Log']].map(([id,lbl])=>(
-          <button key={id} className={`stab ${subTab===id?'active':''}`} onClick={()=>setSubTab(id)}>{lbl}</button>
-        ))}
-      </div>
-
-      {subTab==='overview' && (
-        <>
-          <div className="g2">
-            <div className="card">
-              <div className="sec-row"><div className="sec-title">Compliance Categories</div></div>
-              <div className="g3">
-                {cats.map(c=>(
-                  <div key={c.name} style={{padding:'12px',background:riskBg(c.risk),borderRadius:8}}>
-                    <div style={{fontSize:11,fontWeight:600,marginBottom:6}}>{c.name}</div>
-                    <div className="rbar-wrap"><div className="rbar" style={{width:`${c.score}%`,background:riskCol(c.risk)}} /></div>
-                    <div style={{display:'flex',justifyContent:'space-between',fontSize:11,marginTop:4}}>
-                      <strong style={{color:riskCol(c.risk)}}>{c.score}</strong>
-                      <span style={{color:'var(--mid)'}}>{c.issues} issues</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="card">
-              <div style={{fontWeight:700,fontSize:13,marginBottom:4}}>Overall Risk Score</div>
-              <div style={{fontSize:48,fontWeight:700,color:'#f59e0b',letterSpacing:-2,lineHeight:1,marginBottom:4}}>78</div>
-              <div style={{fontSize:11,color:'var(--mid)',marginBottom:16}}>Medium Risk · 33 total issues across all categories</div>
-              <ResponsiveContainer width="100%" height={180}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="#EBF0F5" />
-                  <PolarAngleAxis dataKey="subject" tick={{fontSize:10,fill:'var(--sub)'}} />
-                  <PolarRadiusAxis angle={30} domain={[0,100]} tick={{fontSize:9,fill:'var(--muted)'}} />
-                  <Radar name="Score" dataKey="score" stroke="#3A55FF" fill="#3A55FF" fillOpacity={.12} strokeWidth={2} />
-                  <Tooltip contentStyle={ttStyle} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="sec-row"><div className="sec-title">Recent Compliance Flags</div></div>
-            {flags.map((f,i)=>(
-              <div key={i} className="risk-row">
-                <div className="risk-dot" style={{background:riskCol(f.sev),marginTop:4}} />
-                <div style={{flex:1}}>
-                  <div style={{fontWeight:600,fontSize:12}}>{f.title}</div>
-                  <div style={{fontSize:11,color:'var(--mid)',marginTop:2}}>{f.platform} · {f.time}</div>
-                </div>
-                <span style={{fontSize:11,fontWeight:600,padding:'3px 10px',borderRadius:20,background:riskBg(f.sev),color:riskCol(f.sev)}}>
-                  {f.status.replace('_',' ')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {subTab==='green-pass' && (
-        <div style={{display:'flex',flexDirection:'column',gap:14}}>
-          <div className="card" style={{borderTop:'3px solid var(--success)'}}>
-            <div style={{fontWeight:700,fontSize:14,marginBottom:4}}>🟢 Script Compliance Simulator</div>
-            <div style={{fontSize:12,color:'var(--sub)',marginBottom:14}}>Paste your live script or short video copy below. The engine will scan for blacklisted terms from 广告法 and your brand rule base.</div>
-            <textarea
-              className="gp-textarea"
-              placeholder="粘贴直播逐字稿或短视频文案 / Paste your live script or video copy here..."
-              value={script}
-              onChange={e=>{setScript(e.target.value);setChecked(false)}}
-            />
-            <div style={{display:'flex',gap:10,marginTop:10}}>
-              <button className="btn-primary" onClick={()=>setChecked(true)}>Scan for Violations</button>
-              <button className="btn" onClick={()=>{setScript('');setChecked(false)}}>Clear</button>
-            </div>
-          </div>
-
-          {checked && script && (
-            <div className="card">
-              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
-                <div style={{width:10,height:10,borderRadius:'50%',background:found.length>0?'var(--error)':'var(--success)'}} />
-                <div style={{fontWeight:700,fontSize:14,color:found.length>0?'var(--error)':'var(--success)'}}>
-                  {found.length>0?`${found.length} violation${found.length>1?'s':''} detected`:'Script looks clean ✓'}
-                </div>
-              </div>
-
-              {found.length>0 && (
-                <>
-                  <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:14}}>
-                    {found.map(w=><span key={w} className="risk-word" style={{fontSize:12,padding:'3px 8px',borderRadius:6}}>{w}</span>)}
-                  </div>
-                  <div style={{padding:'12px',background:'#fffbeb',borderRadius:8,marginBottom:14}}>
-                    <div style={{fontWeight:600,fontSize:12,marginBottom:8,color:'#78350f'}}>Suggested Compliant Replacements:</div>
-                    {found.map(w => {
-                      const subs = {'治愈':'改善/缓解','根治':'长期改善','神药':'本品','第一':'领先的','绝对':'显著','纯天然无副作用':'天然成分配方','专治':'适合','治疗':'调理','消除':'减少','彻底':'有效','神奇':'显著效果','永久':'持续','保证治好':'可有效改善'};
-                      return <div key={w} style={{fontSize:12,marginBottom:4}}>❌ <strong>"{w}"</strong> → ✅ "{subs[w]||'[需人工替换]'}"</div>;
-                    })}
-                  </div>
-                </>
-              )}
-              <div style={{fontSize:12,color:'var(--sub)',fontStyle:'italic'}}>Scanned against: 广告法禁词库 + Brand Rule Base v2.1 · Last updated 2026-06-01</div>
-            </div>
-          )}
-
-          <div className="card" style={{background:'var(--gray)',border:'1px dashed var(--muted)'}}>
-            <div style={{fontWeight:600,fontSize:13,marginBottom:8}}>KOL Green Pass — External Link Generator</div>
-            <div style={{fontSize:12,color:'var(--sub)',lineHeight:1.7,marginBottom:12}}>
-              Generate a temporary H5 link for partner KOLs to self-check their scripts before going live — no login required. Brand in post that KOL has completed compliance check (for audit trail).
-            </div>
-            <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-              <input style={{fontFamily:'var(--font)',fontSize:12,border:'1px solid var(--muted)',borderRadius:7,padding:'6px 10px',flex:1,minWidth:200}} placeholder="KOL name or Douyin handle..." />
-              <select style={{fontFamily:'var(--font)',fontSize:12,border:'1px solid var(--muted)',borderRadius:7,padding:'6px 10px',background:'#fff'}}>
-                <option>Thorne 悦恩</option><option>KELO-COTE 芭克</option>
-              </select>
-              <button className="btn-primary">Generate Link (7 days)</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {subTab==='audit' && (
-        <div className="card">
-          <div style={{fontWeight:700,fontSize:14,marginBottom:4}}>AI Violation Audit Log</div>
-          <div style={{fontSize:12,color:'var(--sub)',marginBottom:16}}>T+1 automated audit of top GMV sessions via ASR + NLP + CV pipeline</div>
-          <div style={{padding:'24px',background:'var(--gray)',borderRadius:8,textAlign:'center',color:'var(--mid)'}}>
-            <div style={{fontSize:32,marginBottom:8}}>🔍</div>
-            <div style={{fontWeight:600,fontSize:13}}>Audit pipeline running...</div>
-            <div style={{fontSize:12,marginTop:4}}>Next scan scheduled: 2026-06-03 06:00 UTC+8</div>
-            <div style={{fontSize:11,marginTop:2}}>Scanning top 20% GMV sessions from 2026-06-02</div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  }, script.replace(/</g, '&lt;').replace(/>/g, '&gt;')) : '';
+  const cats = [{
+    name: 'Content Moderation',
+    score: 85,
+    risk: 'low',
+    issues: 2
+  }, {
+    name: 'FTC / 广告法 Disclosures',
+    score: 91,
+    risk: 'low',
+    issues: 1
+  }, {
+    name: 'Platform Guidelines',
+    score: 72,
+    risk: 'medium',
+    issues: 8
+  }, {
+    name: 'Data Privacy',
+    score: 58,
+    risk: 'high',
+    issues: 14
+  }, {
+    name: 'IP Protection',
+    score: 81,
+    risk: 'low',
+    issues: 3
+  }, {
+    name: 'Pricing Accuracy',
+    score: 75,
+    risk: 'medium',
+    issues: 5
+  }];
+  const riskCol = r => r === 'high' ? '#ef4444' : r === 'medium' ? '#f59e0b' : '#10b981';
+  const riskBg = r => r === 'high' ? '#fef2f2' : r === 'medium' ? '#fffbeb' : '#ecfdf5';
+  const flags = [{
+    sev: 'high',
+    title: 'Missing data consent notice',
+    platform: 'TikTok Shop',
+    time: '2h ago',
+    status: 'open'
+  }, {
+    sev: 'medium',
+    title: 'Unclear affiliate disclosure',
+    platform: 'Instagram Shop',
+    time: '1d ago',
+    status: 'open'
+  }, {
+    sev: 'medium',
+    title: 'Outdated terms version',
+    platform: 'YouTube Shopping',
+    time: '2d ago',
+    status: 'in_review'
+  }, {
+    sev: 'low',
+    title: 'Product claim needs citation',
+    platform: 'Douyin',
+    time: '3d ago',
+    status: 'resolved'
+  }];
+  const radarData = cats.map(c => ({
+    subject: c.name.split('/')[0].trim().split(' ').slice(-1)[0],
+    score: c.score
+  }));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pg-hdr"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pg-title"
+  }, "Risk Radar (\u98CE\u9669\u96F7\u8FBE)"), /*#__PURE__*/React.createElement("div", {
+    className: "pg-sub"
+  }, "Pre-event vetting \xB7 Post-event audit \xB7 Compliance monitoring")), /*#__PURE__*/React.createElement("button", {
+    className: "btn-primary"
+  }, "Generate Report")), /*#__PURE__*/React.createElement("div", {
+    className: "stabs"
+  }, [['overview', 'Overview'], ['green-pass', 'Green Pass Tool'], ['audit', 'Audit Log']].map(([id, lbl]) => /*#__PURE__*/React.createElement("button", {
+    key: id,
+    className: `stab ${subTab === id ? 'active' : ''}`,
+    onClick: () => setSubTab(id)
+  }, lbl))), subTab === 'overview' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "g2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Compliance Categories")), /*#__PURE__*/React.createElement("div", {
+    className: "g3"
+  }, cats.map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.name,
+    style: {
+      padding: '12px',
+      background: riskBg(c.risk),
+      borderRadius: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      marginBottom: 6
+    }
+  }, c.name), /*#__PURE__*/React.createElement("div", {
+    className: "rbar-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rbar",
+    style: {
+      width: `${c.score}%`,
+      background: riskCol(c.risk)
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: 11,
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: riskCol(c.risk)
+    }
+  }, c.score), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--mid)'
+    }
+  }, c.issues, " issues")))))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13,
+      marginBottom: 4
+    }
+  }, "Overall Risk Score"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 48,
+      fontWeight: 700,
+      color: '#f59e0b',
+      letterSpacing: -2,
+      lineHeight: 1,
+      marginBottom: 4
+    }
+  }, "78"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mid)',
+      marginBottom: 16
+    }
+  }, "Medium Risk \xB7 33 total issues across all categories"), /*#__PURE__*/React.createElement(ResponsiveContainer, {
+    width: "100%",
+    height: 180
+  }, /*#__PURE__*/React.createElement(RadarChart, {
+    data: radarData
+  }, /*#__PURE__*/React.createElement(PolarGrid, {
+    stroke: "#EBF0F5"
+  }), /*#__PURE__*/React.createElement(PolarAngleAxis, {
+    dataKey: "subject",
+    tick: {
+      fontSize: 10,
+      fill: 'var(--sub)'
+    }
+  }), /*#__PURE__*/React.createElement(PolarRadiusAxis, {
+    angle: 30,
+    domain: [0, 100],
+    tick: {
+      fontSize: 9,
+      fill: 'var(--muted)'
+    }
+  }), /*#__PURE__*/React.createElement(Radar, {
+    name: "Score",
+    dataKey: "score",
+    stroke: "#3A55FF",
+    fill: "#3A55FF",
+    fillOpacity: .12,
+    strokeWidth: 2
+  }), /*#__PURE__*/React.createElement(Tooltip, {
+    contentStyle: ttStyle
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sec-title"
+  }, "Recent Compliance Flags")), flags.map((f, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "risk-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "risk-dot",
+    style: {
+      background: riskCol(f.sev),
+      marginTop: 4
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 12
+    }
+  }, f.title), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--mid)',
+      marginTop: 2
+    }
+  }, f.platform, " \xB7 ", f.time)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      padding: '3px 10px',
+      borderRadius: 20,
+      background: riskBg(f.sev),
+      color: riskCol(f.sev)
+    }
+  }, f.status.replace('_', ' ')))))), subTab === 'green-pass' && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      borderTop: '3px solid var(--success)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      marginBottom: 4
+    }
+  }, "\uD83D\uDFE2 Script Compliance Simulator"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--sub)',
+      marginBottom: 14
+    }
+  }, "Paste your live script or short video copy below. The engine will scan for blacklisted terms from \u5E7F\u544A\u6CD5 and your brand rule base."), /*#__PURE__*/React.createElement("textarea", {
+    className: "gp-textarea",
+    placeholder: "\u7C98\u8D34\u76F4\u64AD\u9010\u5B57\u7A3F\u6216\u77ED\u89C6\u9891\u6587\u6848 / Paste your live script or video copy here...",
+    value: script,
+    onChange: e => {
+      setScript(e.target.value);
+      setChecked(false);
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn-primary",
+    onClick: () => setChecked(true)
+  }, "Scan for Violations"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      setScript('');
+      setChecked(false);
+    }
+  }, "Clear"))), checked && script && /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 10,
+      height: 10,
+      borderRadius: '50%',
+      background: found.length > 0 ? 'var(--error)' : 'var(--success)'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      color: found.length > 0 ? 'var(--error)' : 'var(--success)'
+    }
+  }, found.length > 0 ? `${found.length} violation${found.length > 1 ? 's' : ''} detected` : 'Script looks clean ✓')), found.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      flexWrap: 'wrap',
+      marginBottom: 14
+    }
+  }, found.map(w => /*#__PURE__*/React.createElement("span", {
+    key: w,
+    className: "risk-word",
+    style: {
+      fontSize: 12,
+      padding: '3px 8px',
+      borderRadius: 6
+    }
+  }, w))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '12px',
+      background: '#fffbeb',
+      borderRadius: 8,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 12,
+      marginBottom: 8,
+      color: '#78350f'
+    }
+  }, "Suggested Compliant Replacements:"), found.map(w => {
+    const subs = {
+      '治愈': '改善/缓解',
+      '根治': '长期改善',
+      '神药': '本品',
+      '第一': '领先的',
+      '绝对': '显著',
+      '纯天然无副作用': '天然成分配方',
+      '专治': '适合',
+      '治疗': '调理',
+      '消除': '减少',
+      '彻底': '有效',
+      '神奇': '显著效果',
+      '永久': '持续',
+      '保证治好': '可有效改善'
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      key: w,
+      style: {
+        fontSize: 12,
+        marginBottom: 4
+      }
+    }, "\u274C ", /*#__PURE__*/React.createElement("strong", null, "\"", w, "\""), " \u2192 \u2705 \"", subs[w] || '[需人工替换]', "\"");
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--sub)',
+      fontStyle: 'italic'
+    }
+  }, "Scanned against: \u5E7F\u544A\u6CD5\u7981\u8BCD\u5E93 + Brand Rule Base v2.1 \xB7 Last updated 2026-06-01")), /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      background: 'var(--gray)',
+      border: '1px dashed var(--muted)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 13,
+      marginBottom: 8
+    }
+  }, "KOL Green Pass \u2014 External Link Generator"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--sub)',
+      lineHeight: 1.7,
+      marginBottom: 12
+    }
+  }, "Generate a temporary H5 link for partner KOLs to self-check their scripts before going live \u2014 no login required. Brand in post that KOL has completed compliance check (for audit trail)."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    style: {
+      fontFamily: 'var(--font)',
+      fontSize: 12,
+      border: '1px solid var(--muted)',
+      borderRadius: 7,
+      padding: '6px 10px',
+      flex: 1,
+      minWidth: 200
+    },
+    placeholder: "KOL name or Douyin handle..."
+  }), /*#__PURE__*/React.createElement("select", {
+    style: {
+      fontFamily: 'var(--font)',
+      fontSize: 12,
+      border: '1px solid var(--muted)',
+      borderRadius: 7,
+      padding: '6px 10px',
+      background: '#fff'
+    }
+  }, /*#__PURE__*/React.createElement("option", null, "Thorne \u60A6\u6069"), /*#__PURE__*/React.createElement("option", null, "KELO-COTE \u82AD\u514B")), /*#__PURE__*/React.createElement("button", {
+    className: "btn-primary"
+  }, "Generate Link (7 days)")))), subTab === 'audit' && /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      marginBottom: 4
+    }
+  }, "AI Violation Audit Log"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--sub)',
+      marginBottom: 16
+    }
+  }, "T+1 automated audit of top GMV sessions via ASR + NLP + CV pipeline"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '24px',
+      background: 'var(--gray)',
+      borderRadius: 8,
+      textAlign: 'center',
+      color: 'var(--mid)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 32,
+      marginBottom: 8
+    }
+  }, "\uD83D\uDD0D"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      fontSize: 13
+    }
+  }, "Audit pipeline running..."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      marginTop: 4
+    }
+  }, "Next scan scheduled: 2026-06-03 06:00 UTC+8"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      marginTop: 2
+    }
+  }, "Scanning top 20% GMV sessions from 2026-06-02"))));
 };
 
 /* ══════════════════════════════════════════════════
    OPTIMIZATION TAB
 ═══════════════════════════════════════════════════ */
-const OptTab = ({ brand }) => {
-  const sessions = SESSIONS.filter(s=>brand==='All'||s.brand===brand);
-  const bBrand = brand==='All'?'All':brand;
-
-  const opts = [
-    { priority:'high',   type:'Funnel Leak',   title:'Partner KOLs: Product exposure < P25',
-      desc:'80+ partner KOL sessions across Thorne and KC show Step 2 (Product Exposure) below P25 (<16%). The root cause is that partner accounts don\'t maintain a permanent product shelf. Briefing KOLs to pin the hero product within 5 minutes of going live could lift this to P50.', impact:'+32% order uplift', effort:'Low' },
-    { priority:'high',   type:'Bridge Traffic', title:'Launch bridge video program for all partner KOLs',
-      desc:'Only self-operated accounts generate short video → live redirect traffic. Thorne self-op achieves 34.3% viewer share from bridge videos (18 videos/session). Requiring partner KOLs to post 3–5 bridge videos before each session could replicate this effect.', impact:'+15–30% live UV', effort:'Medium' },
-    { priority:'high',   type:'Refund Risk',    title:'Thorne LisaWang sessions: 20–61% refund rate anomaly',
-      desc:'LisaWang sessions show refund rates of 21–61%, significantly above benchmarks. Step 5 (Ordered→Paid) in the Apr 11 session was only 63.5% — the lowest observed. This may indicate expectation mismatch between ad creatives and actual live room content, or overselling claims.', impact:'¥40K+ at-risk GMV', effort:'Medium' },
-    { priority:'medium', type:'CVR Optimization','title':'KC partner KOL Step 3 (Product CTR) below P25',
-      desc:'Partner sessions like 西福芦 (4.0%), 孙火火甲友 (6.0%), and 万子疤痕管理 (12.9%) all show product card CTR below P25 benchmark (7.34%). Thumbnail quality, pricing visibility, and verbal CTAs need improvement.', impact:'+18% click uplift', effort:'Low' },
-    { priority:'low',    type:'Content Quality', title:'Increase Thorne watch time in self-op sessions',
-      desc:'Thorne self-operated sessions show very low avg watch time (81–111s) compared to partner sessions (130–350s). Low watch time signals low content engagement, which limits algorithm amplification and viewer retention.', impact:'+10% organic reach', effort:'High' }
-  ];
-
-  return (
-    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-      <div className="pg-hdr">
-        <div>
-          <div className="pg-title">Optimization Signals</div>
-          <div className="pg-sub">AI-surfaced actions ranked by GMV impact · Based on real funnel diagnostic data</div>
-        </div>
-      </div>
-      {opts.map((o,i) => {
-        const pCol = {high:'var(--error)',medium:'var(--warning)',low:'var(--success)'}[o.priority];
-        return (
-          <div key={i} className="card" style={{borderLeft:`3px solid ${pCol}`}}>
-            <div style={{display:'flex',alignItems:'flex-start',gap:14}}>
-              <div style={{flexShrink:0,marginTop:2}}>
-                <span style={{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:12,background:o.priority==='high'?'#fef2f2':o.priority==='medium'?'#fffbeb':'#ecfdf5',color:pCol,textTransform:'uppercase',letterSpacing:.8}}>
-                  {o.priority}
-                </span>
-              </div>
-              <div style={{flex:1}}>
-                <div style={{fontWeight:700,fontSize:13,marginBottom:4}}>{o.title}</div>
-                <div style={{fontSize:12,color:'var(--sub)',lineHeight:1.7,marginBottom:8}}>{o.desc}</div>
-                <div style={{display:'flex',gap:16,fontSize:12}}>
-                  <span style={{fontWeight:700,color:'var(--blue)'}}>{o.impact}</span>
-                  <span style={{color:'var(--mid)'}}>Effort: <strong>{o.effort}</strong></span>
-                </div>
-              </div>
-              <div style={{fontSize:10,color:'var(--mid)',flexShrink:0,textAlign:'right',marginTop:2}}>{o.type}</div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
+const OptTab = ({
+  brand
+}) => {
+  const sessions = SESSIONS.filter(s => brand === 'All' || s.brand === brand);
+  const bBrand = brand === 'All' ? 'All' : brand;
+  const opts = [{
+    priority: 'high',
+    type: 'Funnel Leak',
+    title: 'Partner KOLs: Product exposure < P25',
+    desc: '80+ partner KOL sessions across Thorne and KC show Step 2 (Product Exposure) below P25 (<16%). The root cause is that partner accounts don\'t maintain a permanent product shelf. Briefing KOLs to pin the hero product within 5 minutes of going live could lift this to P50.',
+    impact: '+32% order uplift',
+    effort: 'Low'
+  }, {
+    priority: 'high',
+    type: 'Bridge Traffic',
+    title: 'Launch bridge video program for all partner KOLs',
+    desc: 'Only self-operated accounts generate short video → live redirect traffic. Thorne self-op achieves 34.3% viewer share from bridge videos (18 videos/session). Requiring partner KOLs to post 3–5 bridge videos before each session could replicate this effect.',
+    impact: '+15–30% live UV',
+    effort: 'Medium'
+  }, {
+    priority: 'high',
+    type: 'Refund Risk',
+    title: 'Thorne LisaWang sessions: 20–61% refund rate anomaly',
+    desc: 'LisaWang sessions show refund rates of 21–61%, significantly above benchmarks. Step 5 (Ordered→Paid) in the Apr 11 session was only 63.5% — the lowest observed. This may indicate expectation mismatch between ad creatives and actual live room content, or overselling claims.',
+    impact: '¥40K+ at-risk GMV',
+    effort: 'Medium'
+  }, {
+    priority: 'medium',
+    type: 'CVR Optimization',
+    'title': 'KC partner KOL Step 3 (Product CTR) below P25',
+    desc: 'Partner sessions like 西福芦 (4.0%), 孙火火甲友 (6.0%), and 万子疤痕管理 (12.9%) all show product card CTR below P25 benchmark (7.34%). Thumbnail quality, pricing visibility, and verbal CTAs need improvement.',
+    impact: '+18% click uplift',
+    effort: 'Low'
+  }, {
+    priority: 'low',
+    type: 'Content Quality',
+    title: 'Increase Thorne watch time in self-op sessions',
+    desc: 'Thorne self-operated sessions show very low avg watch time (81–111s) compared to partner sessions (130–350s). Low watch time signals low content engagement, which limits algorithm amplification and viewer retention.',
+    impact: '+10% organic reach',
+    effort: 'High'
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pg-hdr"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pg-title"
+  }, "Optimization Signals"), /*#__PURE__*/React.createElement("div", {
+    className: "pg-sub"
+  }, "AI-surfaced actions ranked by GMV impact \xB7 Based on real funnel diagnostic data"))), opts.map((o, i) => {
+    const pCol = {
+      high: 'var(--error)',
+      medium: 'var(--warning)',
+      low: 'var(--success)'
+    }[o.priority];
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      className: "card",
+      style: {
+        borderLeft: `3px solid ${pCol}`
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 14
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        flexShrink: 0,
+        marginTop: 2
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        fontWeight: 700,
+        padding: '2px 8px',
+        borderRadius: 12,
+        background: o.priority === 'high' ? '#fef2f2' : o.priority === 'medium' ? '#fffbeb' : '#ecfdf5',
+        color: pCol,
+        textTransform: 'uppercase',
+        letterSpacing: .8
+      }
+    }, o.priority)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 700,
+        fontSize: 13,
+        marginBottom: 4
+      }
+    }, o.title), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: 'var(--sub)',
+        lineHeight: 1.7,
+        marginBottom: 8
+      }
+    }, o.desc), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 16,
+        fontSize: 12
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 700,
+        color: 'var(--blue)'
+      }
+    }, o.impact), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: 'var(--mid)'
+      }
+    }, "Effort: ", /*#__PURE__*/React.createElement("strong", null, o.effort)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: 'var(--mid)',
+        flexShrink: 0,
+        textAlign: 'right',
+        marginTop: 2
+      }
+    }, o.type)));
+  }));
 };
 
 /* ══════════════════════════════════════════════════
    HEADER + SIDEBAR + APP ROOT
 ═══════════════════════════════════════════════════ */
-const NAV = [
-  { id:'overview',  icon:'◈',  label:'Overview',      sub:'Results Layer' },
-  { id:'funnel',    icon:'⬓',  label:'Live Funnel',   sub:'Diagnostic' },
-  { id:'bridge',    icon:'⟷',  label:'Bridge 短直',   sub:'Video→Live' },
-  { id:'kol',       icon:'◎',  label:'KOL Analysis',  sub:'Creator Data' },
-  { id:'optimize',  icon:'▤',  label:'Optimization',  sub:'Actions' },
-  { id:'risk',      icon:'⊕',  label:'Risk Radar',    sub:'Compliance', badge:7 }
-];
-
-const Header = ({ brand, setBrand, dateRange, setDateRange }) => {
-  const brands = ['All','Thorne','KC'];
-  const dates = ['Last 30 Days','Last 60 Days','Last 90 Days','This Year'];
-  const colors = { All:'#3A55FF', Thorne:'#3A55FF', KC:'#009BFF' };
-  return (
-    <header className="header">
-      <div className="logo">
-        <div className="logo-mark">A</div>
-        <div><div className="logo-name">Attentiv</div><div className="logo-by">by Pattern</div></div>
-      </div>
-      <div className="hdiv" />
-      {brands.map(b=>(
-        <button key={b} className={`hchip ${brand===b?'active':''}`} onClick={()=>setBrand(b)}>
-          <div className="dot" style={{background:colors[b]||'var(--muted)'}} />
-          {b==='All'?'All Brands':b==='Thorne'?'Thorne 悦恩':'KELO-COTE 芭克'}
-        </button>
-      ))}
-      <div className="hdiv" />
-      <span className="hchip" style={{opacity:.7}}>
-        <div className="dot" style={{background:'#fe2c55'}} />
-        Douyin 抖音
-      </span>
-      <div className="hmid">
-        <select className="hselect" value={dateRange} onChange={e=>setDateRange(e.target.value)}>
-          {dates.map(d=><option key={d}>{d}</option>)}
-        </select>
-        <div className="avatar">JL</div>
-      </div>
-    </header>
-  );
+const NAV = [{
+  id: 'overview',
+  icon: '◈',
+  label: 'Overview',
+  sub: 'Results Layer'
+}, {
+  id: 'funnel',
+  icon: '⬓',
+  label: 'Live Funnel',
+  sub: 'Diagnostic'
+}, {
+  id: 'bridge',
+  icon: '⟷',
+  label: 'Bridge 短直',
+  sub: 'Video→Live'
+}, {
+  id: 'kol',
+  icon: '◎',
+  label: 'KOL Analysis',
+  sub: 'Creator Data'
+}, {
+  id: 'optimize',
+  icon: '▤',
+  label: 'Optimization',
+  sub: 'Actions'
+}, {
+  id: 'risk',
+  icon: '⊕',
+  label: 'Risk Radar',
+  sub: 'Compliance',
+  badge: 7
+}];
+const Header = ({
+  brand,
+  setBrand,
+  dateRange,
+  setDateRange
+}) => {
+  const brands = ['All', 'Thorne', 'KC'];
+  const dates = ['Last 30 Days', 'Last 60 Days', 'Last 90 Days', 'This Year'];
+  const colors = {
+    All: '#3A55FF',
+    Thorne: '#3A55FF',
+    KC: '#009BFF'
+  };
+  return /*#__PURE__*/React.createElement("header", {
+    className: "header"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "logo"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "logo-mark"
+  }, "A"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "logo-name"
+  }, "Attentiv"), /*#__PURE__*/React.createElement("div", {
+    className: "logo-by"
+  }, "by Pattern"))), /*#__PURE__*/React.createElement("div", {
+    className: "hdiv"
+  }), brands.map(b => /*#__PURE__*/React.createElement("button", {
+    key: b,
+    className: `hchip ${brand === b ? 'active' : ''}`,
+    onClick: () => setBrand(b)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dot",
+    style: {
+      background: colors[b] || 'var(--muted)'
+    }
+  }), b === 'All' ? 'All Brands' : b === 'Thorne' ? 'Thorne 悦恩' : 'KELO-COTE 芭克')), /*#__PURE__*/React.createElement("div", {
+    className: "hdiv"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "hchip",
+    style: {
+      opacity: .7
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "dot",
+    style: {
+      background: '#fe2c55'
+    }
+  }), "Douyin \u6296\u97F3"), /*#__PURE__*/React.createElement("div", {
+    className: "hmid"
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "hselect",
+    value: dateRange,
+    onChange: e => setDateRange(e.target.value)
+  }, dates.map(d => /*#__PURE__*/React.createElement("option", {
+    key: d
+  }, d))), /*#__PURE__*/React.createElement("div", {
+    className: "avatar"
+  }, "JL")));
 };
-
 const App = () => {
   const [tab, setTab] = useState('overview');
   const [brand, setBrand] = useState('All');
   const [dateRange, setDateRange] = useState('Last 60 Days');
   const content = {
-    overview: <OverviewTab brand={brand} />,
-    funnel:   <FunnelTab brand={brand} />,
-    bridge:   <BridgeTab brand={brand} />,
-    kol:      <KOLTab brand={brand} />,
-    optimize: <OptTab brand={brand} />,
-    risk:     <RiskTab />
+    overview: /*#__PURE__*/React.createElement(OverviewTab, {
+      brand: brand
+    }),
+    funnel: /*#__PURE__*/React.createElement(FunnelTab, {
+      brand: brand
+    }),
+    bridge: /*#__PURE__*/React.createElement(BridgeTab, {
+      brand: brand
+    }),
+    kol: /*#__PURE__*/React.createElement(KOLTab, {
+      brand: brand
+    }),
+    optimize: /*#__PURE__*/React.createElement(OptTab, {
+      brand: brand
+    }),
+    risk: /*#__PURE__*/React.createElement(RiskTab, null)
   };
-  return (
-    <div className="app">
-      <Header brand={brand} setBrand={setBrand} dateRange={dateRange} setDateRange={setDateRange} />
-      <div className="body">
-        <nav className="sidebar">
-          <div className="slabel">Analytics</div>
-          {NAV.map(n=>(
-            <button key={n.id} className={`sitem ${tab===n.id?'active':''}`} onClick={()=>setTab(n.id)}>
-              <span className="si">{n.icon}</span>
-              <div style={{lineHeight:1.3}}>
-                <div>{n.label}</div>
-                <div style={{fontSize:9.5,color:'var(--muted)',fontWeight:400}}>{n.sub}</div>
-              </div>
-              {n.badge && <span className="sbadge">{n.badge}</span>}
-            </button>
-          ))}
-        </nav>
-        <main className="main">{content[tab]}</main>
-      </div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "app"
+  }, /*#__PURE__*/React.createElement(Header, {
+    brand: brand,
+    setBrand: setBrand,
+    dateRange: dateRange,
+    setDateRange: setDateRange
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "body"
+  }, /*#__PURE__*/React.createElement("nav", {
+    className: "sidebar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "slabel"
+  }, "Analytics"), NAV.map(n => /*#__PURE__*/React.createElement("button", {
+    key: n.id,
+    className: `sitem ${tab === n.id ? 'active' : ''}`,
+    onClick: () => setTab(n.id)
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "si"
+  }, n.icon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      lineHeight: 1.3
+    }
+  }, /*#__PURE__*/React.createElement("div", null, n.label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9.5,
+      color: 'var(--muted)',
+      fontWeight: 400
+    }
+  }, n.sub)), n.badge && /*#__PURE__*/React.createElement("span", {
+    className: "sbadge"
+  }, n.badge)))), /*#__PURE__*/React.createElement("main", {
+    className: "main"
+  }, content[tab])));
 };
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
 </script>
 </body>
 </html>
