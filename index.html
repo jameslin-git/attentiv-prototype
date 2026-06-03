@@ -1463,15 +1463,12 @@ function renderFunnel(){
     return `<div style="display:grid;grid-template-columns:160px 72px 1fr 64px 80px 90px;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--gray);background:${t==='WEAK'?'#fff8f8':t==='STAR'?'#f8fffe':'var(--white)'}">
       <div style="font-size:11.5px;font-weight:600;color:var(--dark)">${lbls[i]}</div>
       <div style="font-size:14px;font-weight:800;color:${tc[t]};letter-spacing:-.5px;font-family:var(--mono)">${p2(v)}</div>
-      <div style="position:relative;height:28px">
-        <div style="position:absolute;top:8px;left:0;right:0;height:8px;background:#eef1f8;border-radius:4px"></div>
-        <div style="position:absolute;left:${p25x}%;top:4px;bottom:0;width:1.5px;background:#c4d3e3"></div>
-        <div style="position:absolute;left:${p50x}%;top:4px;bottom:0;width:2px;background:#9badc4"></div>
-        <div style="position:absolute;left:${p75x}%;top:4px;bottom:0;width:1.5px;background:#3A55FF"></div>
-        <div style="position:absolute;left:${vx}%;top:6px;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:${tc[t]};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>
-        <div style="position:absolute;left:${p25x}%;top:18px;transform:translateX(-50%);font-size:8.5px;color:var(--muted);white-space:nowrap">${p2(b.p25)}</div>
-        <div style="position:absolute;left:${p50x}%;top:18px;transform:translateX(-50%);font-size:8.5px;color:var(--mid);white-space:nowrap">${p2(b.p50)}</div>
-        <div style="position:absolute;left:${p75x}%;top:18px;transform:translateX(-50%);font-size:8.5px;color:#3A55FF;white-space:nowrap">${p2(b.p75)}</div>
+      <div style="position:relative;height:18px;margin:4px 0">
+        <div style="position:absolute;top:5px;left:0;right:0;height:8px;background:#eef1f8;border-radius:4px"></div>
+        <div style="position:absolute;left:${p25x}%;top:0;height:18px;width:2px;background:#c4d3e3;border-radius:1px"></div>
+        <div style="position:absolute;left:${p50x}%;top:0;height:18px;width:2px;background:#9badc4;border-radius:1px"></div>
+        <div style="position:absolute;left:${p75x}%;top:0;height:18px;width:2px;background:#3A55FF;border-radius:1px"></div>
+        <div style="position:absolute;left:${vx}%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:${tc[t]};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>
       </div>
       <span class="tier ${t}" style="justify-self:center">${t}</span>
       <div style="font-size:11px;font-weight:600;color:${gapCol};text-align:right;font-family:var(--mono)">${gapToP50}</div>
@@ -1483,7 +1480,13 @@ function renderFunnel(){
     <div style="display:grid;grid-template-columns:160px 72px 1fr 64px 80px 90px;gap:10px;padding:8px 12px;background:var(--dark);border-radius:8px 8px 0 0">
       <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px">Stage</div>
       <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px">CVR</div>
-      <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px">P25 │ P50 │ P75 benchmark scale</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px">Benchmark</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.65)"><span style="display:inline-block;width:2px;height:12px;background:#c4d3e3;border-radius:1px;vertical-align:middle"></span>P25</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.75)"><span style="display:inline-block;width:2px;height:12px;background:#9badc4;border-radius:1px;vertical-align:middle"></span>P50</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#84C9F7"><span style="display:inline-block;width:2px;height:12px;background:#84C9F7;border-radius:1px;vertical-align:middle"></span>P75</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.65)"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.4);vertical-align:middle"></span>Your session</span>
+      </div>
       <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;text-align:center">Tier</div>
       <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;text-align:right">vs P50</div>
       <div style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;text-align:right">UV Lost</div>
