@@ -283,20 +283,23 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
       <div class="gbar"></div>
       <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">POC Validation — 247 Sessions Analyzed</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
-        <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#fff;line-height:1">247</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Sessions Analyzed</div></div>
-        <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#ef4444;line-height:1">583K</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Aggregate Drop-offs</div></div>
-        <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#f59e0b;line-height:1">52.6%</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Sessions WEAK (130)</div></div>
+        <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#fff;line-height:1" id="poc-n">247</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Sessions Analyzed</div></div>
+        <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#ef4444;line-height:1">583K</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Aggregate Drop-offs (full dataset)</div></div>
+        <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#f59e0b;line-height:1" id="poc-weak-pct">—</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Sessions WEAK (<span id="poc-weak-n">—</span>)</div></div>
         <div><div style="font-size:36px;font-weight:800;letter-spacing:-2px;color:#10b981;line-height:1">71.3%</div><div style="font-size:10px;color:var(--muted);margin-top:3px">Leakage at Enter→Expose</div></div>
       </div>
-      <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Session Tier Distribution</div>
-      <div class="tier-dist">
-        <div class="tier-seg" style="width:52.6%;background:#ef4444">WEAK 52.6%</div>
-        <div class="tier-seg" style="width:15%;background:#f59e0b;font-size:9px">MID 15%</div>
-        <div class="tier-seg" style="width:8.9%;background:#1d4ed8;font-size:8px">GOOD</div>
-        <div class="tier-seg" style="width:23.5%;background:#10b981">STAR 23.5%</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Session Tier Distribution (S1–S4 composite · S5 excluded)</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.3)">Updates with brand filter</div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:4px;margin-bottom:16px">
-        <span>⬛ WEAK: 130</span><span>🔶 MID: 37</span><span>🔷 GOOD: 22</span><span>⭐ STAR: 58</span>
+      <div class="tier-dist" id="poc-tier-bar">
+        <div class="tier-seg" style="width:0.4%;background:#ef4444" id="poc-seg-weak"></div>
+        <div class="tier-seg" style="width:40.5%;background:#f59e0b" id="poc-seg-mid"></div>
+        <div class="tier-seg" style="width:55.9%;background:#1d4ed8" id="poc-seg-good"></div>
+        <div class="tier-seg" style="width:3.2%;background:#10b981" id="poc-seg-star"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);margin-top:4px;margin-bottom:16px" id="poc-tier-legend">
+        <span id="poc-t-weak">⬛ WEAK: —</span><span id="poc-t-mid">🔶 MID: —</span><span id="poc-t-good">🔷 GOOD: —</span><span id="poc-t-star">⭐ STAR: —</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
         <div style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);border-radius:7px;padding:10px">
@@ -944,9 +947,11 @@ const rb=r=>r==='high'?'#fef2f2':r==='medium'?'#fffbeb':'#ecfdf5';
 function tier(v,bm){return v>=bm.p75?'STAR':v>=bm.p50?'GOOD':v>=bm.p25?'MID':'WEAK';}
 function tierScore(t){return{STAR:4,GOOD:3,MID:2,WEAK:1}[t]||0;}
 function rating(s){
+  // S5 (Ordered→Paid) excluded from composite — it is a platform lever, not an operator lever.
+  // Near-perfect across 247 sessions (median 100%), zero diagnostic value for operator coaching.
   const b=BM[s.brand];
-  const ts=['s1','s2','s3','s4','s5'].map(k=>tier(s[k],b[k]));
-  const avg=ts.reduce((a,t)=>a+tierScore(t),0)/5;
+  const ts=['s1','s2','s3','s4'].map(k=>tier(s[k],b[k]));
+  const avg=ts.reduce((a,t)=>a+tierScore(t),0)/4;
   return avg>=3.5?'⭐ STAR':avg>=2.5?'🔷 GOOD':avg>=1.5?'🔶 MID':'⬛ WEAK';
 }
 // Benchmark follows the brand filter: All Brands → combined 247, specific brand → brand-specific
