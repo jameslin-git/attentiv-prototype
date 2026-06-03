@@ -364,7 +364,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
       </div>
     </div>
     <div class="card">
-      <div class="row"><div class="rtitle">Session Leaderboard</div><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--sub);text-transform:uppercase;letter-spacing:.5px">thorne_kc_livestream</span></div>
+      <div class="row"><div><div class="rtitle">Session Performance</div><div class="rsub">Business results per session — GMV, orders, AOV, CVR, compliance</div></div><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--sub);text-transform:uppercase;letter-spacing:.5px">thorne_kc_livestream</span></div>
       <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th class='sortable' onclick="sortTable('date')">Date<span id='sov-date'></span></th><th class='sortable' onclick="sortTable('gmv')">GMV<span id='sov-gmv'></span></th><th class='sortable' onclick="sortTable('paid')">Orders<span id='sov-paid'></span></th><th class='sortable' onclick="sortTable('aov')">AOV<span id='sov-aov'></span></th><th class='sortable' onclick="sortTable('cvr')">CVR<span id='sov-cvr'></span></th><th>Rating</th><th>Compliance</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
       <div class="pgbar" id="ov-pgbar"></div>
     </div>
@@ -389,7 +389,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
     </div>
     <div id="f-diag"></div>
     <div class="card">
-      <div class="row"><div class="rtitle">All Sessions — Tier Comparison</div></div>
+      <div class="row"><div><div class="rtitle">Funnel Stage Breakdown</div><div class="rsub">Step-by-step tier per session — which stage failed, across all sessions for this brand</div></div></div>
       <div class="tbl-wrap"><table><thead><tr><th>KOL</th><th>Br</th><th class='sortable' onclick="sortTable('date')">Date</th><th class='sortable' onclick="sortTable('s1')">① Entry</th><th class='sortable' onclick="sortTable('s2')">② ProdExp</th><th class='sortable' onclick="sortTable('s3')">③ CTR</th><th class='sortable' onclick="sortTable('s4')">④ Order</th><th class='sortable' onclick="sortTable('s5')">⑤ Pay</th><th class='sortable' onclick="sortTable('cvr')">CVR</th><th class='sortable' onclick="sortTable('aov')">AOV</th><th>Rating</th></tr></thead><tbody id="f-batch"></tbody></table></div>
       <div class="pgbar" id="f-pgbar"></div>
     </div>
@@ -1055,10 +1055,13 @@ function populateGroupDropdown(){
   if([...sel.options].some(o=>o.value===cur)) sel.value = cur;
 }
 
-// Check if current group selection is a multi-session group (aggregate mode)
+// Aggregate mode ONLY for type groups (Self-Op, Partner). Specific KOL → filtered session list.
 function isGroupMode(){
   const g = SF.group;
-  return g && g!=='all' && g.endsWith('::Self-Op') || (g && g!=='all' && g.endsWith('::Partner'));
+  if(!g || g==='all') return false;
+  const parts = g.split('::');
+  const t = parts[parts.length-1];
+  return t==='Self-Op' || t==='Partner';
 }
 
 function getGroupLabel(){
@@ -1208,8 +1211,10 @@ function initFunnel(){
   if(aggRow) aggRow.style.display = isGroup ? 'flex' : 'none';
   
   if(!isGroup){
+    // Use getFilteredSS() so specific KOL selections filter the session list
+    const filteredSS = getFilteredSS();
     const sel=document.getElementById('f-sel');
-    sel.innerHTML=ss.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
+    sel.innerHTML=filteredSS.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
     if(!sel.innerHTML)sel.innerHTML='<option>No sessions in range</option>';
   } else {
     // Aggregated mode
