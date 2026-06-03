@@ -179,7 +179,7 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
   <span class="fbar-lbl" style="font-size:10px">Platform</span>
   <div class="fchips" id="plat-chips">
     <button class="fchip active" onclick="setPlatform('Douyin',this)">Douyin 抖音</button>
-    <button class="fchip" onclick="setPlatform('RED',this)" style="opacity:.5" title="Coming Q3">RED 小红书</button>
+    <span class="fchip" style="opacity:.4;cursor:not-allowed;user-select:none" title="Coming Q3 — no data ingested yet">RED 小红书 · Q3</span>
   </div>
   <div class="fdiv"></div>
   <span class="fbar-lbl" style="font-size:10px">Time</span>
@@ -334,8 +334,15 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
 
   <!-- ── ACTION CARDS LAYER ── -->
   <div class="layer" id="layer-actions">
-    <div style="padding:10px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff;font-size:11.5px;color:var(--blue)">
-      <strong>Diagnostic Engine:</strong> Statistical layer detects leaks &amp; quantifies severity. LLM explains root causes and prescribes operator actions. No analyst required.
+    <div style="padding:10px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff;font-size:11.5px;color:var(--blue);margin-bottom:4px">
+      <strong>Session Diagnostic Engine:</strong> Select a past session to see exactly what leaked and what to fix before the next session with that KOL. Statistical layer detects leaks · LLM prescribes actions. No analyst required.
+    </div>
+    <div class="card" style="padding:12px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap">Diagnose session:</span>
+        <select class="ssel" id="ac-sel" onchange="renderActions()" style="flex:1;min-width:220px"></select>
+        <div id="ac-meta" style="font-size:11px;color:var(--mid)"></div>
+      </div>
     </div>
     <div id="action-cards"></div>
   </div><!-- /actions layer -->
@@ -570,7 +577,7 @@ function showLayer(id,btn){
   document.getElementById('layer-'+id).classList.add('active');
   btn.classList.add('active');
   if(id==='funnel')initFunnel();
-  if(id==='actions')renderActions();
+  if(id==='actions')initActions();
 }
 function setBrand(b,btn){
   curBrand=b;
@@ -592,7 +599,7 @@ function refresh(){
   document.getElementById('data-count').textContent=ss.length+' sessions';
   renderOverview();
   if(document.getElementById('layer-funnel').classList.contains('active'))initFunnel();
-  if(document.getElementById('layer-actions').classList.contains('active'))renderActions();
+  if(document.getElementById('layer-actions').classList.contains('active'))initActions();
   if(document.getElementById('screen-kol').classList.contains('active'))renderKOL();
 }
 
@@ -696,8 +703,9 @@ function renderFunnel(){
     }).join('')
   }</div>`;
 
-  // Batch table
-  document.getElementById('f-batch').innerHTML=ss.map(sx=>{
+  // Batch table — always shows all sessions for brand (not time-filtered), used as reference
+  const allForBrand=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  document.getElementById('f-batch').innerHTML=allForBrand.map(sx=>{
     const bx=getActiveBM(sx.brand);
     const ts=keys.map(k=>tier(sx[k],bx[k]));
     const tc={STAR:'#047857',GOOD:'#1d4ed8',MID:'#b45309',WEAK:'#b91c1c'};
@@ -810,53 +818,101 @@ function renderComparison(){
 }
 
 // ═══════════════════════════════════════════════════
-// ACTION CARDS
+// ACTION CARDS — session-specific
 // ═══════════════════════════════════════════════════
+const AC_DIAG = {
+  s1:{
+    WEAK:{root:'Cover image and title are not pulling in feed traffic. Most impressions are not converting to live room entry — paid traffic (Qianchuan) is being wasted.',rec:'Before next session: refresh thumbnail with a product-forward visual and clear price anchor. Align ad creatives to live room content. Test 2–3 cover variants.',impact:'Entry CTR is the multiplier on all downstream metrics. Lifting from WEAK to P50 can double the effective audience entering the funnel.'},
+    MID:{root:'Entry CTR is below median — cover image or title has room to improve.',rec:'Before next session: A/B test a new cover thumbnail with product name or a concrete benefit hook in the title.',impact:'Closing the gap to P50 adds incremental viewers at the top of the funnel, compounding through all downstream stages.'},
+    GOOD:{root:'Entry CTR is above median. Cover image and title are reasonably optimized.',rec:'Maintain current creative. Minor seasonal refresh may yield small gains.',impact:'Focus optimization energy on weaker downstream stages for higher marginal GMV return.'},
+    STAR:{root:'Top-quartile entry CTR. Cover and title are strong traffic drivers.',rec:'Use this session\'s creative as a reference template for future sessions with this KOL.',impact:'Entry is not the bottleneck — optimize downstream stages to fully convert incoming traffic.'}
+  },
+  s2:{
+    WEAK:{root:'Product card exposure is critically low. Most entering viewers leave before seeing any product — the session is failing before selling even begins. This is the #1 revenue leak across 247 sessions.',rec:'Before next session: brief the host to pin the hero product within the first 5 minutes. Remove extended warm-up segments. Consider a cold-open format that leads directly with the product card.',impact:'Recovering exposure to P50 is the single largest GMV lever available. Even a 10pp improvement unlocks hundreds of potential buyers currently lost in the intro.'},
+    MID:{root:'Product card exposure is below median. Some traffic exits before seeing a product card.',rec:'Before next session: review product shelf order — top 3 products should be visible without scrolling. Tighten intro pacing and reduce dead-air time.',impact:'Closing the gap to P50 directly increases the pool of buyers who see and can click on the product.'},
+    GOOD:{root:'Product exposure is solid — above median.',rec:'Minor improvement possible via card sequencing and shelf order. No major changes needed.',impact:'Good foundation — focus on improving click rate on the products already being shown.'},
+    STAR:{root:'Excellent product exposure. Products are surfacing to nearly all room entrants.',rec:'Maintain current shelf and script structure. Document the host\'s timing approach as a playbook.',impact:'Exposure is not the bottleneck. Optimize product CTR and closing language for maximum return.'}
+  },
+  s3:{
+    WEAK:{root:'Product CTR is critically low. Products are being shown but users are not clicking. Card design, pricing, or host persuasion is failing at the moment of display.',rec:'Before next session: audit thumbnail quality, price visibility, and label clarity. Add urgency triggers — limited stock badge, time-limited discount overlay. Script an explicit verbal CTA at the moment each product card appears.',impact:'Closing the CTR gap to P50 converts a large share of currently-lost exposure into actual clicks, feeding the order pipeline.'},
+    MID:{root:'Product CTR is below median — the most common bottleneck across sessions.',rec:'Before next session: A/B test product card images. Add a clear "swipe up" callout to verbal script. Confirm displayed price matches host\'s spoken price.',impact:'Even small CTR gains compound significantly given the volume of exposed users.'},
+    GOOD:{root:'Product CTR is above median.',rec:'Incremental gains possible via better thumbnails or flash-sale mechanics.',impact:'Continue current approach. Optimize other stages for bigger GMV gains.'},
+    STAR:{root:'Top-quartile product CTR. Host CTAs and card design are well-aligned.',rec:'Capture and document this host\'s CTA script and card timing as a template.',impact:'CTR is not the bottleneck. Focus on order conversion to close the remaining gap.'}
+  },
+  s4:{
+    WEAK:{root:'Click-to-order conversion is low. Users are engaged enough to click but not committing to purchase — signals price sensitivity, checkout hesitation, or insufficient closing language.',rec:'Before next session: add a live-only coupon code. Strengthen host closing language at product moments. Check price competitiveness against search results for the same product.',impact:'Users who click are high-intent. Recovering even half the lost conversion at this stage directly adds orders at full AOV.'},
+    MID:{root:'Click-to-order slightly below median.',rec:'Before next session: tighten PDP copy and ensure fulfilment promise is prominent — delivery date and return policy.',impact:'Incremental improvement here converts already-engaged users into completed orders.'},
+    GOOD:{root:'Healthy conversion from click to order.',rec:'Maintain current pricing and closing approach.',impact:'Good execution — fine-tune with urgency mechanics for marginal improvement.'},
+    STAR:{root:'Excellent purchase intent from clickers. Product-market fit and host closing are strong.',rec:'Document closing language and incentive structure as a script template.',impact:'Order conversion is not the bottleneck.'}
+  },
+  s5:{
+    WEAK:{root:'Payment completion is low. Orders are placed but not paid — often indicates price shock at checkout, payment method friction, or buyer remorse from impulse ordering.',rec:'Before next session: verify checkout flow on mobile. Confirm coupon/promotion codes apply correctly at payment. Investigate refund patterns for clues.',impact:'Every unpaid order represents lost GMV at full AOV. Fixing checkout friction has direct, immediate revenue impact.'},
+    MID:{root:'Payment rate slightly below median.',rec:'Review checkout UX for friction points.',impact:'Minor improvement directly recovers GMV from near-converted buyers.'},
+    GOOD:{root:'Payment completion is above median.',rec:'No significant action needed.',impact:'Checkout is not the bottleneck.'},
+    STAR:{root:'Near-perfect payment completion.',rec:'No action needed. Payment friction is negligible.',impact:'All optimization energy should go to upstream stages.'}
+  }
+};
+
+function initActions(){
+  const ss=getSS();
+  const sel=document.getElementById('ac-sel');
+  sel.innerHTML=ss.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
+  renderActions();
+}
+
 function renderActions(){
-  const acts=[
-    {p:'CRITICAL',pc:'#ef4444',pb:'#fef2f2',
-     leak:'Enter → Product Exposed',lval:'Median 24.1% vs P75 86.9%',
-     drop:'415,821 users lost · 71.3% of all leakage across 247 sessions',
-     root:'Product visibility issue. Host is not displaying product cards frequently enough. Entering viewers exit before ever seeing the product — the session fails before selling begins.',
-     rec:'Pin top products within first 5 minutes. Increase card display frequency. Remove extended warm-up segments. Consider cold-open format leading with hero product.',
-     impact:'The single largest GMV lever. Even closing half the gap to P75 recovers 190K+ exposure events per session base.',rank:'#1'},
-    {p:'HIGH',pc:'#f59e0b',pb:'#fffbeb',
-     leak:'Product Exposed → Clicked (CTR)',lval:'Median 11.9% vs P75 30.9%',
-     drop:'133,546 users lost · 22.9% of leakage · 19-point CTR gap to P75',
-     root:'Product presentation issue. Card design, positioning, or host persuasion insufficient to drive clicks. Users see product but choose not to engage.',
-     rec:'Improve card thumbnail quality. Lead with social proof. Reposition top-sellers at front of rotation. Add time-limited offer mechanics. Strengthen verbal CTA at card display moment.',
-     impact:'19-point gap to P75 = 133K recoverable click-intent users per session base.',rank:'#2'},
-    {p:'MEDIUM',pc:'#3A55FF',pb:'#eef1ff',
-     leak:'Clicked → Ordered',lval:'Median 9.9% vs P75 14.1%',
-     drop:'33,417 users lost · 5.7% of leakage · narrower variance, higher-intent users',
-     root:'Pricing or trust gap. Users clicked through but did not convert — price sensitivity, checkout hesitation, or competing alternatives at point of decision.',
-     rec:'Test limited-time offer mechanics. Add social proof at decision point. Review pricing vs search results. Improve fulfilment promise visibility.',
-     impact:'Smaller drop-off but highest-intent users. Closing the 4.2-point gap converts users already in consideration.',rank:'#3'},
-    {p:'NOTE',pc:'#10b981',pb:'#ecfdf5',
-     leak:'Ordered → Paid (Payment Completion)',lval:'Median ~100% · negligible drop-off',
-     drop:'Payment friction is not a meaningful revenue problem. Near-perfect across 247 sessions.',
-     root:'Checkout is functioning correctly. This stage is not where optimization energy should be directed.',
-     rec:'No action required. Direct all optimization resources upstream to Enter→Expose and Expose→Click stages.',
-     impact:'Confirmed: payment friction < 1% of leakage. Focus 99% of optimization effort on upstream stages.',rank:'✓'}
-  ];
-  document.getElementById('action-cards').innerHTML=acts.map((a,i)=>`
-    <div class="acard">
-      <div class="acard-hdr" style="border-left-color:${a.pc};background:${a.pb}08">
-        <div style="flex-shrink:0"><span style="font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:10px;background:${a.pb};color:${a.pc};text-transform:uppercase">${a.p}</span></div>
+  const ss=getSS();
+  const sel=document.getElementById('ac-sel');
+  if(!sel)return;
+  const s=ss.find(x=>x.id===sel.value)||ss[0];
+  if(!s){document.getElementById('action-cards').innerHTML='<div style="padding:20px;color:var(--mid);font-size:12px">No sessions in selected range.</div>';return;}
+
+  const bm=getActiveBM(s.brand);
+  const keys=['s1','s2','s3','s4','s5'];
+  const lbls=['① Exposed → Entered','② Entered → Prod Exposed','③ Prod Exposed → Clicked','④ Clicked → Ordered','⑤ Ordered → Paid'];
+  const tiers=keys.map(k=>tier(s[k],bm[k]));
+  const overallRating=rating(s);
+  const drops=[s.exposed-s.entered,s.entered-s.prod_exp,s.prod_exp-s.clicked,s.clicked-s.orders,s.orders-s.paid];
+  const tc={STAR:'#10b981',GOOD:'#1d4ed8',MID:'#f59e0b',WEAK:'#ef4444'};
+  const pb={STAR:'#ecfdf5',GOOD:'#eff6ff',MID:'#fffbeb',WEAK:'#fef2f2'};
+  const pri={WEAK:'CRITICAL',MID:'ACTION NEEDED',GOOD:'WATCH',STAR:'STRONG'};
+
+  document.getElementById('ac-meta').innerHTML=`${overallRating} &nbsp;·&nbsp; AOV: <strong>¥${Math.round(s.aov)}</strong> &nbsp;·&nbsp; GMV: <strong>${mon(s.gmv)}</strong>`;
+
+  // Sort: WEAK first, then MID, GOOD, STAR
+  const sorted=keys.map((k,i)=>({k,i,t:tiers[i],val:s[k],bm:bm[k],drop:drops[i]}))
+    .sort((a,b)=>({WEAK:0,MID:1,GOOD:2,STAR:3}[a.t]-({WEAK:0,MID:1,GOOD:2,STAR:3}[b.t])));
+
+  document.getElementById('action-cards').innerHTML=`
+    <div style="padding:10px 14px;background:var(--gray);border-radius:8px;font-size:11px;color:var(--sub);margin-bottom:4px">
+      Session: <strong style="color:var(--dark)">${s.kol}</strong> · ${s.date} · ${s.type==='Self-Op'?'自营 Self-Op':'合作 Partner'} · Benchmark: ${curBrand==='All'?'Combined 247 sessions':s.brand+' (n='+bm.n+')'}
+    </div>`+
+  sorted.map(({k,i,t,val,bm:b,drop})=>{
+    const d=AC_DIAG[k][t];
+    const gapToP50=val<b.p50?b.p50-val:null;
+    const gapToP75=val<b.p75?b.p75-val:null;
+    return `<div class="acard">
+      <div class="acard-hdr" style="border-left-color:${tc[t]};background:${pb[t]}18">
+        <div style="flex-shrink:0"><span style="font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:10px;background:${pb[t]};color:${tc[t]};text-transform:uppercase">${pri[t]}</span></div>
         <div style="flex:1">
-          <div style="font-weight:700;font-size:13px;margin-bottom:3px">${['①','②','③','④'][i]} Leak: <span style="color:${a.pc}">${a.leak}</span></div>
-          <div style="font-size:11px;color:var(--sub)">${a.lval}</div>
-          <div style="font-size:10.5px;margin-top:3px;color:${a.pc};font-weight:600">${a.drop}</div>
+          <div style="font-weight:700;font-size:13px;margin-bottom:3px">${lbls[i]} — <span class="tier ${t}">${t}</span></div>
+          <div style="display:flex;gap:16px;font-size:11px;flex-wrap:wrap;margin-top:4px">
+            <span>Actual: <strong style="color:${tc[t]}">${p2(val)}</strong></span>
+            <span>P50: <strong>${p2(b.p50)}</strong></span>
+            <span>P75: <strong>${p2(b.p75)}</strong></span>
+            ${gapToP50?`<span style="color:${tc[t]}">Gap to P50: <strong>−${p2(gapToP50)}</strong></span>`:''}
+            ${drop!=null&&!isNaN(drop)&&drop>0?`<span style="color:var(--err)">Users lost: <strong>${drop.toLocaleString()}</strong></span>`:''}
+          </div>
         </div>
-        <div style="font-size:28px;font-weight:800;color:${a.pc};letter-spacing:-2px;flex-shrink:0">${a.rank}</div>
       </div>
       <div class="acard-chain">
-        <div class="acc"><div class="acl">● Root Cause</div><div style="color:var(--dark);line-height:1.6">${a.root}</div></div>
-        <div class="acc"><div class="acl">→ AI Recommendation</div><div style="color:var(--dark);line-height:1.6">${a.rec}</div></div>
-        <div class="acc" style="background:#f8fafd"><div class="acl">↑ Expected Impact</div><div style="color:var(--dark);line-height:1.6;font-weight:500">${a.impact}</div></div>
-        <div class="acc" style="background:#f0f4ff"><div class="acl" style="color:var(--blue)">Priority</div><div style="font-size:26px;font-weight:800;color:${a.pc};letter-spacing:-1px;margin-top:4px">${a.rank}</div><div style="font-size:10px;color:var(--mid);margin-top:3px">${['Fix first','Fix second','Fix third','No action'][i]}</div></div>
+        <div class="acc"><div class="acl">● What happened</div><div style="color:var(--dark);line-height:1.6">${d.root}</div></div>
+        <div class="acc"><div class="acl">→ Before next session</div><div style="color:var(--dark);line-height:1.6;font-weight:500">${d.rec}</div></div>
+        <div class="acc" style="background:#f8fafd"><div class="acl">↑ Expected recovery</div><div style="color:var(--dark);line-height:1.6">${d.impact}</div></div>
+        <div class="acc" style="background:${pb[t]}18"><div class="acl" style="color:${tc[t]}">Stage</div><div style="font-size:22px;font-weight:800;color:${tc[t]};letter-spacing:-1px;margin-top:4px">${t}</div><div style="font-size:10px;color:var(--mid);margin-top:3px">${gapToP75?'Gap to P75: '+p2(gapToP75):'Above P75'}</div></div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════
@@ -908,7 +964,7 @@ function scanScript(){
 // ═══════════════════════════════════════════════════
 renderOverview();
 initFunnel();
-renderActions();
+initActions();
 </script>
 </body>
 </html>
