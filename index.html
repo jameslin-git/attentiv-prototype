@@ -150,6 +150,15 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
 .pg-t{font-size:19px;font-weight:700;letter-spacing:-.5px}
 .pg-s{font-size:11.5px;color:var(--mid);margin-top:3px}
 .ssel{font-family:var(--font);font-size:12px;border:1px solid var(--muted);border-radius:7px;padding:5px 9px;width:100%;cursor:pointer;background:var(--white)}
+/* Pagination */
+.pgbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0 2px;flex-wrap:wrap;gap:8px}
+.pginfo{font-size:11px;color:var(--mid)}
+.pgbtns{display:flex;align-items:center;gap:4px}
+.pgbtn{font-family:var(--font);font-size:11px;font-weight:500;padding:3px 10px;border-radius:6px;border:1px solid var(--muted);background:var(--white);color:var(--sub);cursor:pointer;transition:all .12s}
+.pgbtn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+.pgbtn:disabled{opacity:.35;cursor:not-allowed}
+.pgbtn.active{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.pgsize{font-family:var(--font);font-size:11px;border:1px solid var(--muted);border-radius:6px;padding:3px 7px;background:var(--white);color:var(--sub);cursor:pointer}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:10px}
 .mono{font-family:var(--mono)}
 </style>
@@ -304,7 +313,8 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
     </div>
     <div class="card">
       <div class="row"><div class="rtitle">Session Leaderboard</div><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--sub);text-transform:uppercase;letter-spacing:.5px">thorne_kc_livestream</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>KOL / Account</th><th>Brand</th><th>Type</th><th>Date</th><th>GMV</th><th>Orders</th><th>AOV</th><th>CVR</th><th>Rating</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th>Date</th><th>GMV</th><th>Orders</th><th>AOV</th><th>CVR</th><th>Rating</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
+      <div class="pgbar" id="ov-pgbar"></div>
     </div>
   </div><!-- /overview layer -->
 
@@ -329,6 +339,7 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
     <div class="card">
       <div class="row"><div class="rtitle">All Sessions — Tier Comparison</div></div>
       <div class="tbl-wrap"><table><thead><tr><th>KOL</th><th>Br</th><th>Date</th><th>① Entry</th><th>② ProdExp</th><th>③ CTR</th><th>④ Order</th><th>⑤ Pay</th><th>CVR</th><th>AOV</th><th>Rating</th></tr></thead><tbody id="f-batch"></tbody></table></div>
+      <div class="pgbar" id="f-pgbar"></div>
     </div>
   </div><!-- /funnel layer -->
 
@@ -352,7 +363,7 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
 <!-- ═══════════════ KOL SCREEN ═══════════════ -->
 <div class="screen" id="screen-kol">
   <div><div class="pg-t">KOL / Creator Analysis</div><div class="pg-s" id="kol-sub">Performance by creator</div></div>
-  <div class="card"><div class="row"><div class="rtitle">KOL Leaderboard</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Creator</th><th>Brand</th><th>Type</th><th>Sessions</th><th>Total GMV</th><th>Avg AOV</th><th>Avg CVR</th><th>Best GMV</th></tr></thead><tbody id="kol-tbody"></tbody></table></div></div>
+  <div class="card"><div class="row"><div class="rtitle">KOL Leaderboard</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Creator</th><th>Brand</th><th>Type</th><th>Sessions</th><th>Total GMV</th><th>Avg AOV</th><th>Avg CVR</th><th>Best GMV</th></tr></thead><tbody id="kol-tbody"></tbody></table></div><div class="pgbar" id="kol-pgbar"></div></div>
   <div class="g2">
     <div class="card" style="border-left:3px solid var(--blue)">
       <div style="font-weight:700;font-size:13px;margin-bottom:7px">🔷 STAR: Self-Operated Accounts</div>
@@ -831,6 +842,65 @@ function refresh(){
 }
 
 // ═══════════════════════════════════════════════════
+// PAGINATION ENGINE
+// ═══════════════════════════════════════════════════
+const PG = {}; // { tableId: { page, size, rows, renderFn } }
+
+function pgInit(id, rows, renderFn, size=25){
+  PG[id] = { page:0, size, rows, renderFn };
+  pgRender(id);
+}
+
+function pgRender(id){
+  const s = PG[id];
+  const {page, size, rows, renderFn} = s;
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total/size));
+  const start = page * size;
+  const end = Math.min(start + size, total);
+  const pageRows = rows.slice(start, end);
+
+  renderFn(pageRows, start);
+
+  // Build pagination bar
+  const bar = document.getElementById(id+'-pgbar');
+  if(!bar) return;
+  if(total <= size){ bar.innerHTML=''; return; }
+
+  // Page number buttons — show up to 7
+  const maxBtns = 7;
+  let btnStart = Math.max(0, page - Math.floor(maxBtns/2));
+  let btnEnd = Math.min(totalPages, btnStart + maxBtns);
+  if(btnEnd - btnStart < maxBtns) btnStart = Math.max(0, btnEnd - maxBtns);
+
+  const pageNums = Array.from({length: btnEnd - btnStart}, (_,i) => btnStart + i);
+
+  bar.innerHTML = `
+    <div class="pginfo">Showing <strong>${start+1}–${end}</strong> of <strong>${total}</strong></div>
+    <div class="pgbtns">
+      <button class="pgbtn" onclick="pgGo('${id}',0)" ${page===0?'disabled':''}>«</button>
+      <button class="pgbtn" onclick="pgGo('${id}',${page-1})" ${page===0?'disabled':''}>‹</button>
+      ${pageNums.map(p=>`<button class="pgbtn ${p===page?'active':''}" onclick="pgGo('${id}',${p})">${p+1}</button>`).join('')}
+      <button class="pgbtn" onclick="pgGo('${id}',${page+1})" ${page>=totalPages-1?'disabled':''}>›</button>
+      <button class="pgbtn" onclick="pgGo('${id}',${totalPages-1})" ${page>=totalPages-1?'disabled':''}>»</button>
+      <select class="pgsize" onchange="pgSize('${id}',this.value)">
+        ${[25,50,100].map(n=>`<option value="${n}" ${n===size?'selected':''}>${n}/page</option>`).join('')}
+      </select>
+    </div>`;
+}
+
+function pgGo(id, page){
+  PG[id].page = Math.max(0, Math.min(page, Math.ceil(PG[id].rows.length/PG[id].size)-1));
+  pgRender(id);
+}
+
+function pgSize(id, size){
+  PG[id].size = parseInt(size);
+  PG[id].page = 0;
+  pgRender(id);
+}
+
+// ═══════════════════════════════════════════════════
 // OVERVIEW
 // ═══════════════════════════════════════════════════
 function renderOverview(){
@@ -846,18 +916,22 @@ function renderOverview(){
       <div class="bfill" style="height:${Math.max(4,s.gmv/mx*105)}px;background:${bc(s.brand)}"></div>
       <div class="blbl">${s.kol.split('(')[0].trim().split(' ').slice(0,2).join(' ')}</div>
     </div>`).join('');
-  document.getElementById('ov-tbody').innerHTML=[...ss].sort((a,b)=>b.gmv-a.gmv).map(s=>`
-    <tr>
-      <td style="font-weight:600">${s.kol}</td>
-      <td><span class="bchip" style="background:${s.brand==='Thorne'?'#eef1ff':'#e6f5ff'};color:${bc(s.brand)}">${s.brand==='Thorne'?'Thorne':'KC'}</span></td>
-      <td style="color:var(--sub);font-size:10.5px">${s.type==='Self-Op'?'自营':'合作'}</td>
-      <td style="color:var(--mid)">${s.date.slice(5)}</td>
-      <td class="mono" style="font-weight:700">${mon(s.gmv)}</td>
-      <td class="mono">${s.paid}</td>
-      <td class="mono">¥${Math.round(s.aov)}</td>
-      <td style="font-weight:600;color:${s.cvr>=.02?'var(--ok)':'var(--mid)'}">${p1(s.cvr)}</td>
-      <td style="font-size:12px">${rating(s)}</td>
-    </tr>`).join('');
+  const ovRows = [...ss].sort((a,b)=>b.gmv-a.gmv);
+  pgInit('ov', ovRows, (rows, offset) => {
+    document.getElementById('ov-tbody').innerHTML = rows.map((s,i)=>`
+      <tr>
+        <td style="font-weight:700;color:var(--mid);width:32px">${offset+i+1}</td>
+        <td style="font-weight:600">${s.kol}</td>
+        <td><span class="bchip" style="background:${s.brand==='Thorne'?'#eef1ff':'#e6f5ff'};color:${bc(s.brand)}">${s.brand==='Thorne'?'Thorne':'KC'}</span></td>
+        <td style="color:var(--sub);font-size:10.5px">${s.type==='Self-Op'?'自营':'合作'}</td>
+        <td style="color:var(--mid)">${s.date.slice(5)}</td>
+        <td class="mono" style="font-weight:700">${mon(s.gmv)}</td>
+        <td class="mono">${s.paid}</td>
+        <td class="mono">¥${Math.round(s.aov)}</td>
+        <td style="font-weight:600;color:${s.cvr>=.02?'var(--ok)':'var(--mid)'}">${p1(s.cvr)}</td>
+        <td style="font-size:12px">${rating(s)}</td>
+      </tr>`).join('');
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -930,22 +1004,24 @@ function renderFunnel(){
     }).join('')
   }</div>`;
 
-  // Batch table — always shows all sessions for brand (not time-filtered), used as reference
-  const allForBrand=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
-  document.getElementById('f-batch').innerHTML=allForBrand.map(sx=>{
-    const bx=getActiveBM(sx.brand);
-    const ts=keys.map(k=>tier(sx[k],bx[k]));
+  // Batch table — all sessions for brand, not time-filtered, used as reference
+  const allForBrand=curBrand==='All'?ALL_SS:ALL_SS.filter(sx=>sx.brand===curBrand);
+  pgInit('f', allForBrand, (rows) => {
     const tc={STAR:'#047857',GOOD:'#1d4ed8',MID:'#b45309',WEAK:'#b91c1c'};
-    return`<tr style="${sx.id===s.id?'background:#f0f4ff':''}">
-      <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis">${sx.kol.split('(')[0].trim()}</td>
-      <td><span style="color:${bc(sx.brand)};font-weight:600;font-size:10.5px">${sx.brand==='Thorne'?'TH':'KC'}</span></td>
-      <td style="color:var(--mid)">${sx.date.slice(5)}</td>
-      ${keys.map((k,i)=>`<td><span class="tier ${ts[i]}" style="font-size:9px">${p1(sx[k])}</span></td>`).join('')}
-      <td class="mono" style="color:${sx.cvr>=.02?'var(--ok)':'var(--dark)'}">${p1(sx.cvr)}</td>
-      <td class="mono">¥${Math.round(sx.aov)}</td>
-      <td style="font-size:11px">${rating(sx)}</td>
-    </tr>`;
-  }).join('');
+    document.getElementById('f-batch').innerHTML=rows.map(sx=>{
+      const bx=getActiveBM(sx.brand);
+      const ts=keys.map(k=>tier(sx[k],bx[k]));
+      return`<tr style="${sx.id===s.id?'background:#f0f4ff':''}">
+        <td style="font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis">${sx.kol.split('(')[0].trim()}</td>
+        <td><span style="color:${bc(sx.brand)};font-weight:600;font-size:10.5px">${sx.brand==='Thorne'?'TH':'KC'}</span></td>
+        <td style="color:var(--mid)">${sx.date.slice(5)}</td>
+        ${keys.map((k,i)=>`<td><span class="tier ${ts[i]}" style="font-size:9px">${p1(sx[k])}</span></td>`).join('')}
+        <td class="mono" style="color:${sx.cvr>=.02?'var(--ok)':'var(--dark)'}">${p1(sx.cvr)}</td>
+        <td class="mono">¥${Math.round(sx.aov)}</td>
+        <td style="font-size:11px">${rating(sx)}</td>
+      </tr>`;
+    }).join('');
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -957,22 +1033,25 @@ function renderKOL(){
   renderComparison();
   const m={};
   ss.forEach(s=>{if(!m[s.kol])m[s.kol]={kol:s.kol,brand:s.brand,type:s.type,ss:[],gmv:0,orders:0};m[s.kol].ss.push(s);m[s.kol].gmv+=s.gmv;m[s.kol].orders+=s.paid;});
-  document.getElementById('kol-tbody').innerHTML=Object.values(m).sort((a,b)=>b.gmv-a.gmv).map((k,i)=>{
-    const ac=k.ss.reduce((a,s)=>a+s.cvr,0)/k.ss.length;
-    const aa=k.ss.reduce((a,s)=>a+s.aov,0)/k.ss.length;
-    const best=[...k.ss].sort((a,b)=>b.gmv-a.gmv)[0];
-    return`<tr>
-      <td style="font-weight:700;color:var(--mid)">${i+1}</td>
-      <td style="font-weight:600">${k.kol}</td>
-      <td><span style="color:${bc(k.brand)};font-weight:600;font-size:10.5px">${k.brand}</span></td>
-      <td style="font-size:10.5px;color:var(--sub)">${k.type==='Self-Op'?'自营':'合作'}</td>
-      <td style="text-align:center">${k.ss.length}</td>
-      <td class="mono" style="font-weight:700">${mon(k.gmv)}</td>
-      <td class="mono">¥${Math.round(aa)}</td>
-      <td style="font-weight:600;color:${ac>=.02?'var(--ok)':'var(--mid)'}">${p1(ac)}</td>
-      <td class="mono">${mon(best.gmv)}</td>
-    </tr>`;
-  }).join('');
+  const kolRows = Object.values(m).sort((a,b)=>b.gmv-a.gmv);
+  pgInit('kol', kolRows, (rows, offset) => {
+    document.getElementById('kol-tbody').innerHTML=rows.map((k,i)=>{
+      const ac=k.ss.reduce((a,s)=>a+s.cvr,0)/k.ss.length;
+      const aa=k.ss.reduce((a,s)=>a+s.aov,0)/k.ss.length;
+      const best=[...k.ss].sort((a,b)=>b.gmv-a.gmv)[0];
+      return`<tr>
+        <td style="font-weight:700;color:var(--mid)">${offset+i+1}</td>
+        <td style="font-weight:600">${k.kol}</td>
+        <td><span style="color:${bc(k.brand)};font-weight:600;font-size:10.5px">${k.brand}</span></td>
+        <td style="font-size:10.5px;color:var(--sub)">${k.type==='Self-Op'?'自营':'合作'}</td>
+        <td style="text-align:center">${k.ss.length}</td>
+        <td class="mono" style="font-weight:700">${mon(k.gmv)}</td>
+        <td class="mono">¥${Math.round(aa)}</td>
+        <td style="font-weight:600;color:${ac>=.02?'var(--ok)':'var(--mid)'}">${p1(ac)}</td>
+        <td class="mono">${mon(best.gmv)}</td>
+      </tr>`;
+    }).join('');
+  });
 }
 
 // ═══════════════════════════════════════════════════
