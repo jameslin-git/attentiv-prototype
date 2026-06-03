@@ -498,17 +498,19 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
 <!-- ═══════════════ KOL SCREEN ═══════════════ -->
 <div class="screen" id="screen-kol">
   <div><div class="pg-t">KOL / Creator Analysis</div><div class="pg-s" id="kol-sub">Performance by creator</div></div>
-  <!-- KOL sub-filter bar -->
+  <!-- KOL sub-filter bar — same pattern as Analytics sfbar -->
   <div class="sfbar">
-    <span class="fbar-lbl" style="font-size:10px">Account Type</span>
-    <div class="fchips" id="kol-type-chips">
-      <button class="fchip active" onclick="setKOLType('All',this)">All</button>
-      <button class="fchip" onclick="setKOLType('Self-Op',this)">Self-Op</button>
-      <button class="fchip" onclick="setKOLType('Partner',this)">Partner KOL</button>
-    </div>
+    <span class="fbar-lbl" style="font-size:10px">Account / KOL</span>
+    <select class="fsel" id="kol-group" onchange="renderKOL()" style="min-width:180px"></select>
     <div class="fdiv"></div>
-    <span class="fbar-lbl" style="font-size:10px">Search</span>
-    <input class="sfinput" type="text" id="kol-search" placeholder="Search KOL name..." oninput="renderKOL()" style="flex:1;min-width:160px;max-width:240px">
+    <span class="fbar-lbl" style="font-size:10px">Rating</span>
+    <div class="fchips" id="kol-rating-chips">
+      <button class="fchip active" onclick="setKOLRating('All',this)">All</button>
+      <button class="fchip" onclick="setKOLRating('STAR',this)">⭐ STAR</button>
+      <button class="fchip" onclick="setKOLRating('GOOD',this)">🔷 GOOD</button>
+      <button class="fchip" onclick="setKOLRating('MID',this)">🔶 MID</button>
+      <button class="fchip" onclick="setKOLRating('WEAK',this)">⬛ WEAK</button>
+    </div>
     <button class="sfclear" onclick="clearKOLFilter()">✕ Clear</button>
   </div>
   <div class="card"><div class="row"><div class="rtitle">KOL Leaderboard</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Creator</th><th>Brand</th><th>Type</th><th class='sortable' data-sort='sessions' onclick="sortTable('sessions')">Sessions</th><th class='sortable' data-sort='gmv' onclick="sortTable('gmv')">Total GMV</th><th class='sortable' data-sort='aov' onclick="sortTable('aov')">Avg AOV</th><th class='sortable' data-sort='cvr' onclick="sortTable('cvr')">Avg CVR</th><th class='sortable' data-sort='bestgmv' onclick="sortTable('bestgmv')">Best GMV</th></tr></thead><tbody id="kol-tbody"></tbody></table></div><div class="pgbar" id="kol-pgbar"></div></div>
@@ -1568,29 +1570,57 @@ function renderFunnel(){
 // ═══════════════════════════════════════════════════
 // KOL
 // ═══════════════════════════════════════════════════
-let KOL_TYPE = 'All';
-function setKOLType(t, btn){
-  KOL_TYPE = t;
-  document.querySelectorAll('#kol-type-chips .fchip').forEach(c=>c.classList.remove('active'));
+let KOL_RATING = 'All';
+function setKOLRating(r, btn){
+  KOL_RATING=r;
+  document.querySelectorAll('#kol-rating-chips .fchip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   renderKOL();
 }
 function clearKOLFilter(){
-  KOL_TYPE='All';
-  document.getElementById('kol-search').value='';
-  document.querySelectorAll('#kol-type-chips .fchip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  KOL_RATING='All';
+  const sg=document.getElementById('kol-group'); if(sg) sg.value='all';
+  document.querySelectorAll('#kol-rating-chips .fchip').forEach((c,i)=>c.classList.toggle('active',i===0));
   renderKOL();
+}
+function populateKOLGroupDropdown(){
+  const sel=document.getElementById('kol-group');
+  if(!sel) return;
+  const base=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  const brands=curBrand==='All'?['Thorne','KC']:[curBrand];
+  let opts='<option value="all">All Accounts</option>';
+  brands.forEach(b=>{
+    const bSess=base.filter(s=>s.brand===b);
+    if(!bSess.length) return;
+    opts+=`<optgroup label="── ${b} ──">`;
+    const selfOp=bSess.filter(s=>s.type==='Self-Op');
+    if(selfOp.length) opts+=`<option value="${b}::Self-Op">${b} · Self-Op (${selfOp.length} sessions)</option>`;
+    const kols={};
+    bSess.filter(s=>s.type==='Partner').forEach(s=>{kols[s.kol]=(kols[s.kol]||0)+1;});
+    Object.entries(kols).sort((a,b2)=>b2[1]-a[1]).forEach(([kol,cnt])=>{
+      opts+=`<option value="${b}::${kol}">${kol.length>35?kol.slice(0,33)+'…':kol} (${cnt})</option>`;
+    });
+    opts+='</optgroup>';
+  });
+  const cur=sel.value;
+  sel.innerHTML=opts;
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
 }
 
 function renderKOL(){
+  populateKOLGroupDropdown();
   // Use ALL_SS filtered by brand only — KOL analysis needs full historical picture
-  let ss = curBrand==='All' ? ALL_SS : ALL_SS.filter(s=>s.brand===curBrand);
-  // Apply KOL type filter
-  if(KOL_TYPE!=='All') ss=ss.filter(s=>s.type===KOL_TYPE);
-  // Apply name search
-  const q=(document.getElementById('kol-search')?.value||'').trim().toLowerCase();
-  if(q) ss=ss.filter(s=>s.kol.toLowerCase().includes(q));
-  document.getElementById('kol-sub').textContent=`${ss.length} sessions · Full dataset · ${curBrand==='All'?'All brands':curBrand}${KOL_TYPE!=='All'?' · '+KOL_TYPE:''}`;
+  let ss=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  // Apply group dropdown filter (same logic as analytics sf-group)
+  const grp=document.getElementById('kol-group')?.value||'all';
+  if(grp!=='all'){
+    const [gb,gt]=grp.split('::');
+    if(gt==='Self-Op') ss=ss.filter(s=>s.brand===gb&&s.type==='Self-Op');
+    else ss=ss.filter(s=>s.brand===gb&&s.kol===gt);
+  }
+  // Apply rating filter — based on each session's rating
+  if(KOL_RATING!=='All') ss=ss.filter(s=>rating(s).includes(KOL_RATING));
+  document.getElementById('kol-sub').textContent=`${ss.length} sessions · Full dataset · ${curBrand==='All'?'All brands':curBrand}`;
   renderComparison();
   const m={};
   ss.forEach(s=>{if(!m[s.kol])m[s.kol]={kol:s.kol,brand:s.brand,type:s.type,ss:[],gmv:0,orders:0};m[s.kol].ss.push(s);m[s.kol].gmv+=s.gmv;m[s.kol].orders+=s.paid;});
