@@ -1238,7 +1238,35 @@ function pgSize(id, size){
 // ═══════════════════════════════════════════════════
 // OVERVIEW
 // ═══════════════════════════════════════════════════
+function renderPOCHero(){
+  const base=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  const n=base.length;
+  if(!n) return;
+  const counts={STAR:0,GOOD:0,MID:0,WEAK:0};
+  base.forEach(s=>{
+    const r=rating(s);
+    if(r.includes('STAR')) counts.STAR++;
+    else if(r.includes('GOOD')) counts.GOOD++;
+    else if(r.includes('MID')) counts.MID++;
+    else counts.WEAK++;
+  });
+  const pct=v=>+(v/n*100).toFixed(1);
+  const el=id=>document.getElementById(id);
+  if(el('poc-n')) el('poc-n').textContent=n;
+  if(el('poc-weak-pct')) el('poc-weak-pct').textContent=pct(counts.WEAK)+'%';
+  if(el('poc-weak-n'))   el('poc-weak-n').textContent=counts.WEAK;
+  [{t:'WEAK',col:'#ef4444'},{t:'MID',col:'#f59e0b'},{t:'GOOD',col:'#1d4ed8'},{t:'STAR',col:'#10b981'}].forEach(({t})=>{
+    const seg=el('poc-seg-'+t.toLowerCase());
+    if(seg) seg.style.width=pct(counts[t])+'%';
+  });
+  if(el('poc-t-weak')) el('poc-t-weak').textContent='⬛ WEAK: '+counts.WEAK;
+  if(el('poc-t-mid'))  el('poc-t-mid').textContent='🔶 MID: '+counts.MID;
+  if(el('poc-t-good')) el('poc-t-good').textContent='🔷 GOOD: '+counts.GOOD;
+  if(el('poc-t-star')) el('poc-t-star').textContent='⭐ STAR: '+counts.STAR;
+}
+
 function renderOverview(){
+  renderPOCHero();
   const ss=getFilteredSS();
   const rawCount=getSS().length;
   const label=`${curBrand==='All'?'All brands':curBrand} · Last ${curDays} days · ${ss.length}${ss.length!==rawCount?' of '+rawCount:''} sessions`;
