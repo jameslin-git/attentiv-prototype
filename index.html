@@ -358,6 +358,31 @@ td{padding:9px 11px;font-size:12px;white-space:nowrap}
       <div style="margin-top:7px;font-size:10.5px;color:var(--warn);font-weight:600">→ Brief all partner KOLs to pin hero product within 5 min</div>
     </div>
   </div>
+
+  <!-- Self-Op vs Partner Comparison -->
+  <div class="card">
+    <div class="gbar"></div>
+    <div class="row">
+      <div><div class="rtitle">Self-Operated vs Partner KOL — Side by Side</div><div class="rsub">Avg metrics across sessions in current filter · real spikeattentiv data</div></div>
+    </div>
+    <!-- Funnel comparison bars -->
+    <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:0;margin-bottom:16px">
+      <div></div>
+      <div style="text-align:center;padding:8px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:8px 0 0 0;border:1px solid #b8c5ff;border-right:none">
+        <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px">Self-Operated (自营)</div>
+        <div style="font-size:10px;color:var(--mid);margin-top:2px" id="so-count"></div>
+      </div>
+      <div style="text-align:center;padding:8px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:0 8px 0 0;border:1px solid #fcd34d;border-left:none">
+        <div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:1px">Partner KOL (合作)</div>
+        <div style="font-size:10px;color:var(--mid);margin-top:2px" id="partner-count"></div>
+      </div>
+    </div>
+    <div id="compare-funnel"></div>
+    <!-- Key metrics grid -->
+    <div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:2px;margin-top:4px" id="compare-metrics"></div>
+    <!-- Insight callout -->
+    <div style="margin-top:14px;padding:12px 14px;background:var(--gray);border-radius:8px;font-size:11.5px;line-height:1.7;color:var(--sub)" id="compare-insight"></div>
+  </div>
 </div>
 
 <!-- ═══════════════ BRIDGE SCREEN ═══════════════ -->
@@ -690,6 +715,7 @@ function renderFunnel(){
 function renderKOL(){
   const ss=getSS();
   document.getElementById('kol-sub').textContent=`Performance by creator · Last ${curDays} days · ${ss.length} sessions`;
+  renderComparison();
   const m={};
   ss.forEach(s=>{if(!m[s.kol])m[s.kol]={kol:s.kol,brand:s.brand,type:s.type,ss:[],gmv:0,orders:0};m[s.kol].ss.push(s);m[s.kol].gmv+=s.gmv;m[s.kol].orders+=s.paid;});
   document.getElementById('kol-tbody').innerHTML=Object.values(m).sort((a,b)=>b.gmv-a.gmv).map((k,i)=>{
@@ -708,6 +734,75 @@ function renderKOL(){
       <td class="mono">${mon(best.gmv)}</td>
     </tr>`;
   }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// SELF-OP vs PARTNER COMPARISON
+// ═══════════════════════════════════════════════════
+function renderComparison(){
+  const ss=getSS();
+  const so=ss.filter(s=>s.type==='Self-Op');
+  const pa=ss.filter(s=>s.type==='Partner');
+  if(!so.length&&!pa.length)return;
+
+  document.getElementById('so-count').textContent=`${so.length} session${so.length!==1?'s':''}`;
+  document.getElementById('partner-count').textContent=`${pa.length} session${pa.length!==1?'s':''}`;
+
+  const avg=(arr,key)=>arr.length?arr.reduce((a,s)=>a+(s[key]||0),0)/arr.length:0;
+  const keys=['s1','s2','s3','s4','s5'];
+  const lbls=['① Exposed → Entered','② Entered → Prod Exposed','③ Prod Exposed → Clicked','④ Clicked → Ordered','⑤ Ordered → Paid'];
+
+  // Funnel rows
+  const soAvgs=keys.map(k=>avg(so,k));
+  const paAvgs=keys.map(k=>avg(pa,k));
+
+  const barRow=(val,col,maxVal)=>{
+    const pct=Math.min(val/Math.max(maxVal,.01)*100,100);
+    const t=val>=.75?'STAR':val>=.3?'GOOD':val>=.1?'MID':'WEAK';
+    const tc={STAR:'#10b981',GOOD:'#1d4ed8',MID:'#f59e0b',WEAK:'#ef4444'};
+    return `<div style="display:flex;align-items:center;gap:7px;padding:6px 10px">
+      <div style="flex:1;height:22px;background:var(--gray);border-radius:5px;overflow:hidden;position:relative">
+        <div style="height:100%;width:${pct}%;background:${tc[t]};border-radius:5px;transition:width .4s"></div>
+        <span style="position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:10.5px;font-weight:600;color:#fff;z-index:1">${p2(val)}</span>
+      </div>
+      <span class="tier ${t}" style="flex-shrink:0;font-size:9px">${t}</span>
+    </div>`;
+  };
+
+  document.getElementById('compare-funnel').innerHTML=keys.map((k,i)=>{
+    const mx=Math.max(soAvgs[i],paAvgs[i],.01);
+    return `<div style="display:grid;grid-template-columns:120px 1fr 1fr;gap:0;border-bottom:1px solid var(--gray)">
+      <div style="display:flex;align-items:center;padding:6px 10px;font-size:11px;font-weight:500;color:var(--sub)">${lbls[i]}</div>
+      <div style="border-left:2px solid #b8c5ff">${barRow(soAvgs[i],'#3A55FF',mx)}</div>
+      <div style="border-left:2px solid #fcd34d">${barRow(paAvgs[i],'#f59e0b',mx)}</div>
+    </div>`;
+  }).join('');
+
+  // Key metrics
+  const mets=[
+    {l:'Sessions',so:so.length,pa:pa.length,fmt:v=>v},
+    {l:'Avg GMV/session',so:avg(so,'gmv'),pa:avg(pa,'gmv'),fmt:mon,highlight:true},
+    {l:'Avg AOV',so:avg(so,'aov'),pa:avg(pa,'aov'),fmt:v=>'¥'+Math.round(v),highlight:true},
+    {l:'Avg Overall CVR',so:avg(so,'cvr'),pa:avg(pa,'cvr'),fmt:v=>p1(v),highlight:true},
+    {l:'Avg Refund Rate',so:avg(so,'refund'),pa:avg(pa,'refund'),fmt:v=>p1(v)},
+    {l:'Avg Watch Time',so:avg(so,'watch'),pa:avg(pa,'watch'),fmt:v=>Math.round(v)+'s'}
+  ];
+
+  document.getElementById('compare-metrics').innerHTML=`
+    <div style="padding:8px 10px;background:var(--dark);border-radius:7px 0 0 0"><span style="font-size:9.5px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px">Metric</span></div>
+    <div style="padding:8px 10px;background:var(--dark);border-radius:0;text-align:center"><span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.8px">Self-Op 自营</span></div>
+    <div style="padding:8px 10px;background:var(--dark);border-radius:0 7px 0 0;text-align:center"><span style="font-size:9.5px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.8px">Partner KOL 合作</span></div>
+    ${mets.map(m=>{
+      const soBetter=m.highlight&&m.so>m.pa;
+      const paBetter=m.highlight&&m.pa>m.so;
+      return `<div style="padding:8px 10px;font-size:11.5px;font-weight:500;color:var(--sub);border-bottom:1px solid var(--gray)">${m.l}</div>
+        <div style="padding:8px 10px;text-align:center;border-bottom:1px solid var(--gray);border-left:2px solid #b8c5ff;background:${soBetter?'#f0fdf4':'var(--white)'}"><span style="font-size:13px;font-weight:700;color:${soBetter?'var(--ok)':'var(--dark)'}">${m.fmt(m.so)}</span>${soBetter?'<span style="font-size:10px;margin-left:4px">▲</span>':''}</div>
+        <div style="padding:8px 10px;text-align:center;border-bottom:1px solid var(--gray);border-left:2px solid #fcd34d;background:${paBetter?'#f0fdf4':'var(--white)'}"><span style="font-size:13px;font-weight:700;color:${paBetter?'var(--ok)':'var(--dark)'}">${m.fmt(m.pa)}</span>${paBetter?'<span style="font-size:10px;margin-left:4px">▲</span>':''}</div>`;
+    }).join('')}`;
+
+  // Insight
+  const soS2=soAvgs[1],paS2=paAvgs[1],soS1=soAvgs[0],paS1=paAvgs[0];
+  document.getElementById('compare-insight').innerHTML=`<strong>Key takeaway:</strong> Self-op accounts achieve <strong style="color:var(--ok)">${p1(soS2)}</strong> product exposure (Step 2) vs <strong style="color:var(--err)">${p1(paS2)}</strong> for partner KOLs — a <strong>${p1(soS2-paS2)}</strong> gap driven entirely by permanent product shelves. Partner KOLs compensate with <strong>${p1(paS1)}</strong> entry CTR vs self-op's <strong>${p1(soS1)}</strong>. The optimal strategy combines both strengths: self-op shelf discipline for product exposure + partner KOL audience reach for traffic entry.`;
 }
 
 // ═══════════════════════════════════════════════════
