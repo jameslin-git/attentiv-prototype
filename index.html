@@ -527,13 +527,8 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
   <!-- Brand × KOL selector -->
   <div class="card" style="padding:14px">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <span style="font-size:11px;font-weight:600;color:var(--sub)">Brand:</span>
-      <select class="fsel" id="pb-brand" onchange="updateKOLList()" style="min-width:100px">
-        <option value="Thorne">Thorne</option>
-        <option value="KC">KELO-COTE</option>
-      </select>
       <span style="font-size:11px;font-weight:600;color:var(--sub)">Account / KOL:</span>
-      <select class="fsel" id="pb-kol" onchange="renderPlaybook()" style="min-width:200px"></select>
+      <select class="fsel" id="pb-kol" onchange="renderPlaybook()" style="min-width:220px"></select>
       <div id="pb-session-meta" style="font-size:11px;color:var(--mid)"></div>
     </div>
   </div>
@@ -1785,17 +1780,21 @@ const PB_SECTIONS = [
 const PB_STATE = {}; // { key: { text:{}, scanClean:null, overridden:false, overrideLog:'' } }
 
 function getPBKey(){
-  const brand = document.getElementById('pb-brand')?.value;
   const kol = document.getElementById('pb-kol')?.value;
-  return brand && kol ? `${brand}::${kol}` : null;
+  if(!kol) return null;
+  // Derive brand from session data
+  const s = ALL_SS.find(x=>x.kol===kol);
+  const brand = s?.brand || (curBrand!=='All'?curBrand:'Thorne');
+  return `${brand}::${kol}`;
 }
 
 function updateKOLList(){
-  const brand = document.getElementById('pb-brand').value;
-  const kols = [...new Set(ALL_SS.filter(s=>s.brand===brand).map(s=>s.kol))];
+  const brand = curBrand==='All' ? null : curBrand; // null = show all brands
+  const base = brand ? ALL_SS.filter(s=>s.brand===brand) : ALL_SS;
+  const kols = [...new Set(base.map(s=>s.kol))];
   // Sort by session count desc
   const kolCounts = {};
-  ALL_SS.filter(s=>s.brand===brand).forEach(s=>{kolCounts[s.kol]=(kolCounts[s.kol]||0)+1;});
+  base.forEach(s=>{kolCounts[s.kol]=(kolCounts[s.kol]||0)+1;});
   kols.sort((a,b)=>(kolCounts[b]||0)-(kolCounts[a]||0));
   document.getElementById('pb-kol').innerHTML = kols.map(k=>`<option value="${k}">${k} (${kolCounts[k]} sessions)</option>`).join('');
   renderPlaybook();
