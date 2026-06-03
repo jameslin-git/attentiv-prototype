@@ -1335,52 +1335,76 @@ function renderPyramid(s){
   if(!el) return;
   const sub = document.getElementById('f-vol-sub');
 
-  const stages = [
-    {label:'Exposed',     val:s.exposed,   color:'#3A55FF'},
-    {label:'Enter Room',  val:s.entered,   color:'#009BFF'},
-    {label:'Prod. Exposed',val:s.prod_exp, color:'#0096FA', warn:true},
-    {label:'Prod. Click', val:s.clicked,   color:'#84C9F7'},
-    {label:'Orders',      val:s.orders,    color:'#10b981'},
-    {label:'Paid',        val:s.paid,      color:'#047857'},
+  const STAGES = [
+    {label:'Exposed',       val:s.exposed,  color:'#3A55FF'},
+    {label:'Enter Room',    val:s.entered,  color:'#009BFF'},
+    {label:'Prod. Exposed', val:s.prod_exp, color:'#0096FA', bigLeak:true},
+    {label:'Prod. Click',   val:s.clicked,  color:'#84C9F7'},
+    {label:'Orders',        val:s.orders,   color:'#10b981'},
+    {label:'Paid',          val:s.paid,     color:'#047857'},
   ];
 
-  const isGroup = s.n > 1;
-  if(sub) sub.textContent = isGroup
-    ? `Aggregate across ${s.n} sessions · total user counts`
-    : `${s.kol} · ${s.date} · absolute user counts`;
+  if(sub) sub.textContent = (s.n>1)
+    ? `Aggregate · ${s.n} sessions · total user counts`
+    : `${s.kol} · ${s.date} · absolute UV counts`;
 
   if(!s.exposed){
-    el.innerHTML='<div style="padding:16px;color:var(--mid);font-size:12px;text-align:center">UV data not available for this session</div>';
+    el.innerHTML='<div style="padding:20px;color:var(--mid);font-size:12px;text-align:center">UV data not available for this session</div>';
     return;
   }
 
-  const top = s.exposed;
-  let html = '<div style="padding:8px 0">';
-  stages.forEach((st,i)=>{
-    const pct = Math.max(st.val/top*100, 3); // min 3% for visibility
-    const lpad = (100-pct)/2;
-    html += `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
-        <div style="width:130px;text-align:right;font-size:11px;font-weight:600;color:var(--sub);flex-shrink:0">${st.label}</div>
-        <div style="flex:1;position:relative;height:38px">
-          <div style="margin:0 ${lpad}%;height:100%;background:${st.color};border-radius:6px;display:flex;align-items:center;justify-content:center;min-width:80px">
-            <span style="font-size:11px;font-weight:700;color:${pct<20?'var(--dark)':'#fff'}">${(st.val||0).toLocaleString()}</span>
-          </div>
-        </div>
-        <div style="width:56px;font-size:10.5px;color:var(--mid);flex-shrink:0;text-align:right">${(st.val/top*100).toFixed(1)}%</div>
-      </div>`;
-    if(i < stages.length-1){
-      const next = stages[i+1].val||0;
-      const cvr = st.val ? (next/st.val*100).toFixed(1) : '—';
-      const lost = (st.val||0)-(next||0);
-      const isLargest = i===1; // Enter→Expose is the biggest leak
-      html += `<div style="padding:1px 0 1px 140px;font-size:10px;color:${isLargest?'#ef4444':'var(--mid)'};font-weight:${isLargest?700:400}">
-        ▼ ${cvr}% converted &nbsp;·&nbsp; <span style="color:#ef4444">−${lost.toLocaleString()} users</span>${isLargest?' ← largest leak':''}
-      </div>`;
+  const W = 520;      // SVG drawing width for trapezoids
+  const SH = 48;      // stage height
+  const GAP = 22;     // gap between stages for drop label
+  const MINW = 40;    // minimum bar width so tiny stages are still visible
+  const top = STAGES[0].val;
+  const totalH = STAGES.length * SH + (STAGES.length - 1) * GAP;
+
+  // Compute widths — use sqrt scale so small stages remain visible
+  const widths = STAGES.map(st => {
+    const ratio = st.val / top;
+    const scaled = Math.sqrt(ratio); // sqrt scale for visual clarity
+    return Math.max(scaled * W, MINW);
+  });
+
+  let svg = `<svg viewBox="0 0 ${W+240} ${totalH+10}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;overflow:visible">`;
+
+  STAGES.forEach((st, i) => {
+    const y = i * (SH + GAP);
+    const w = widths[i];
+    const x = (W - w) / 2;
+
+    // Trapezoid: top edge = this width, bottom edge = next width (or taper to 70%)
+    const wNext = i < STAGES.length-1 ? widths[i+1] : w * 0.7;
+    const xNext = (W - wNext) / 2;
+
+    const pts = `${x},${y} ${x+w},${y} ${xNext+wNext},${y+SH} ${xNext},${y+SH}`;
+    svg += `<polygon points="${pts}" fill="${st.color}" opacity="0.92" rx="4"/>`;
+
+    // Stage label left
+    svg += `<text x="${x-10}" y="${y+SH/2+4}" text-anchor="end" font-size="11" font-weight="600" fill="#535660" font-family="Wix Madefor Display,sans-serif">${st.label}</text>`;
+
+    // UV count + pct inside trapezoid
+    const cx = W/2;
+    const cy = y + SH/2 + 4;
+    const pctOfTop = (st.val/top*100).toFixed(1);
+    svg += `<text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="12" font-weight="700" fill="white" font-family="Wix Madefor Display,sans-serif">${(st.val||0).toLocaleString()}</text>`;
+    svg += `<text x="${cx}" y="${cy+9}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.8)" font-family="Wix Madefor Display,sans-serif">${pctOfTop}% of exposed</text>`;
+
+    // Drop-off label between stages
+    if(i < STAGES.length-1){
+      const nextVal = STAGES[i+1].val||0;
+      const cvr = st.val ? (nextVal/st.val*100).toFixed(1) : '—';
+      const lost = (st.val||0)-nextVal;
+      const gy = y + SH + GAP/2;
+      const isLeak = st.bigLeak || i===1;
+      const labelColor = isLeak ? '#ef4444' : '#9badc4';
+      svg += `<text x="${cx}" y="${gy+4}" text-anchor="middle" font-size="10" fill="${labelColor}" font-weight="${isLeak?700:400}" font-family="Wix Madefor Display,sans-serif">▼ ${cvr}% continued · −${lost.toLocaleString()} lost${isLeak?' ← largest leak':''}</text>`;
     }
   });
-  html += '</div>';
-  el.innerHTML = html;
+
+  svg += '</svg>';
+  el.innerHTML = svg;
 }
 
 function initFunnel(){
