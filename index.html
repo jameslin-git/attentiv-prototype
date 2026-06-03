@@ -1756,7 +1756,196 @@ const PB_TEXT = {
   }
 };
 
-// Default template for KOLs without a specific playbook
+
+  // ── Thorne × Steven 营养师 (n=28, avg ¥542/sess)
+  // S1:9.8% S2:24.3%±31.8pp S3:6.6%WEAK S4:4.8%WEAK S5:96.4%±50pp
+  'Thorne::说真话的营养师Steven': {
+    opening: `Welcome. 说真话的营养师Steven here. I talk about nutrition without commercial spin — so when I feature a product, it means I've reviewed the formulation myself. Today I want to show you what's on the shelf, then I'll explain exactly why I chose these specific Thorne products. Let me pin the first one now.`,
+    products: `Product sequence — CRITICAL RULE: Pin product in first 60 seconds before any explanation.
+• Lead with: the product most directly tied to today's health topic
+• Use scientific context to justify each product AFTER pinning, not before
+• Example: "I've just pinned the Fish Oil — now let me tell you why I chose this specific formulation over others in the market"
+
+⚠️ PERSISTENT ISSUE: S3 avg 6.6% (WEAK, 28 sessions). Viewers watch the education but don't click the product.
+→ ROOT CAUSE: Science content creates engagement, not buying intent. Fix: bridge from "I explain the category" to "this specific product solves your specific problem."
+⚠️ PERSISTENT ISSUE: S4 avg 4.8% (WEAK). When viewers do click, almost none order.
+→ Investigate: Is price point the barrier? Add: "This is the exact product I take — not a sponsored choice."`,
+    cta: `CTA approach for nutritionist persona:
+• "I've just pinned the product — it's the one I recommend based on the formulation standards I just explained"
+• "If you're managing [specific condition], this is what I'd point you to first. Swipe up."
+• "Thorne uses this specific form of [ingredient] because bioavailability research shows..." — then CTA
+
+✅ USE: "supports", "the research on this form shows", "formulated to", "I personally use"
+⚠️ AVOID: Treating claims as medical advice, dosage prescriptions, outcome guarantees
+⚠️ S5 variance ±50pp: Extreme variance in payment completion. Check: are some sessions driving cart abandonment due to price? Consider installment payment mention.`,
+    engagement: `Engagement beats (science Q&A format works well for this audience):
+• "Drop your health goal in comments — I'll tell you which product on the shelf today is most relevant"
+• "Has anyone here tried [ingredient]? What was your experience?"
+• Take 2–3 supplement science questions per session — creates credibility and keeps audience watching
+• "For everyone asking about dosage — read the product card, I've noted the research basis there"`,
+    closing: `Closing:
+• "I only feature what I've reviewed — Thorne meets my formulation criteria. That's not a sponsored statement."
+• Recap: which product, why this formulation, who it's for
+• "Follow me — I do this kind of review monthly, not sponsored drops"
+
+⚠️ S5 note: Payment completion wildly variable (±50pp). For sessions with low payment, investigate: was audience expecting free consultation not a purchase? Recalibrate session intent framing.`
+  },
+
+  // ── Thorne × 小小欢叔_Zmyyhs (n=9, avg ¥347/sess)
+  // S1:11.9% S2:24.3%±27.6pp S3:8.5% S4:25.2%(GOOD) S5:92.6%±33pp
+  'Thorne::小小欢叔_Zmyyhs': {
+    opening: `Hey everyone! 欢叔 here — family wellness session today. I've got some Thorne supplements on the shelf that I genuinely use at home. Let me show you what we have right now.`,
+    products: `Product sequence:
+• Pin hero product in first 60–90 seconds (S2 avg 24.3% — improve this)
+• Lead with family-friendly entry: Thorne Basic Nutrients or Vitamin D
+• S2 variance ±27.6pp shows inconsistency — some sessions pin early, some don't
+
+✅ STRENGTH: S4 avg 25.2% — when viewers see and click the product, 1 in 4 orders. This is well above average. Protect this by ensuring product quality and price are clearly visible.
+⚠️ FOCUS: Increase top-of-funnel visibility. S3 avg 8.5% — product card CTR is moderate. Improve thumbnail and verbal CTA.
+⚠️ S5 variance ±33pp: Occasional payment drop. Confirm checkout flow before each session.`,
+    cta: `Family/lifestyle CTA approach:
+• "I've been using this for the whole family — swipe up to see what we have today"
+• "Great value for a family pack — check the product card"
+• "For the parents in the room — this is what I recommend for [use case]"
+
+✅ USE: "our family uses", "supports daily wellness", "easy to incorporate"
+⚠️ AVOID: Medical claims, specific health outcomes for children without certification`,
+    engagement: `Engagement beats:
+• "Drop a 👨‍👩‍👧 in comments if you manage family health supplements"
+• "What's the hardest part about getting your family to take vitamins? Let me know"
+• Product polls: "Fish Oil or Vitamin D — which would you try first?"`,
+    closing: `Closing:
+• Recap products + keep pinned
+• "Follow for our next session — I do family wellness content regularly"
+• Clear session close with product lineup visible`
+  },
+
+  // ── Thorne × 李娜老师讲修行(臻健来) (n=5, avg ¥385/sess)
+  // S1:33.0%(STAR) S2:18.0%WEAK S3:5.6%WEAK S4:11.0% S5:100%
+  'Thorne::李娜老师讲修行(臻健来)': {
+    opening: `Welcome, everyone — 李娜老师 here. Today I want to talk about something that sits at the intersection of traditional wellness practice and modern nutritional science. I've selected a few Thorne products that I think align with what we discuss in our practice. Let me show you what's on the shelf first.`,
+    products: `Product sequence:
+• S1 avg 33.0% — STAR tier entry. Your audience is highly engaged and actively chooses to enter the room. This is exceptional.
+• CRITICAL ISSUE: S2 avg 18.0% (WEAK, persistent). Viewers enter but rarely see the product.
+→ Rule: Pin the product immediately after greeting. Your audience trusts you — they will look at what you recommend. Don't make them wait.
+• S3 avg 5.6% (WEAK). Very few who see the product, click it.
+→ Bridge gap: frame the product as part of a wellness ritual ("I incorporate this into my morning practice"), not a commercial product.
+
+✅ S5 100% — zero payment drop. When someone commits to ordering, they complete. Perfect closing conversion.`,
+    cta: `Wellness/spiritual practice CTA approach:
+• "I've added this to my morning routine — you can see it pinned on screen now"
+• "For those of us who take our wellness practice seriously, the quality of the foundation supplements matters. This one meets that standard."
+• "It's not just a product — it's part of how I support my practice physically"
+
+✅ USE: "supports wellbeing", "part of a holistic approach", "formulated for those who take health seriously"
+⚠️ AVOID: Medical treatment claims, spiritual healing claims for supplements, "cure" language`,
+    engagement: `Engagement beats:
+• "What does your morning wellness routine look like? Share in comments"
+• "How many of you already take supplements as part of your practice?"
+• Keep Q&A gentle and unhurried — this audience values thoughtfulness over urgency`,
+    closing: `Closing:
+• Unhurried, reflective tone — matches the audience's mindset
+• "These products are available on screen — I've pinned them for those who are interested"
+• "Thank you for practicing together today. See you next time."
+
+✅ No payment drop issues. No changes needed to closing sequence.`
+  },
+
+  // ── KC × KELO-COTE芭克母婴海外直播间 (n=5, avg ¥3,023/sess)
+  // S1:7.8% S2:88.3%(STAR) S3:28.2% S4:8.9% S5:97.2%
+  'KC::KELO-COTE芭克母婴海外直播间': {
+    opening: `Welcome to KELO-COTE's official backup channel! Full scar and baby skincare lineup available. Same products, same quality, direct from the brand. Let me show you what's on the shelf today.`,
+    products: `Shelf management (follow main KC Official playbook discipline):
+• S2 avg 88.3% — STAR tier, same as main channel. Shelf discipline is working ✅
+• Maintain permanent product shelf: KC Scar Gel (hero) + KC Baby Balm + KC Advanced Formula
+• S1 avg 7.8% — slightly below main channel. Drive pre-session traffic via Qianchuan ads aligned to this channel.
+• S3 avg 28.2% — slightly below main channel (main avg 31.4%). Check: are product thumbnails and pricing updated for this channel?
+
+⚠️ FOCUS: This channel's job is consistent coverage when main channel is inactive. Maintain identical shelf discipline.
+⚠️ S4 avg 8.9% — slightly below main KC Official (10.1%). Review verbal CTA at product transition.`,
+    cta: `CTA for secondary KC channel:
+• "Same products, same official KELO-COTE quality — this is our second official channel"
+• "Swipe up — the scar gel is right there on screen"
+• Reinforce authenticity: "Directly from KELO-COTE brand — no distributors"
+
+⚠️ HIGH RISK: Baby product claims
+✅ USE: "formulated for sensitive skin", "gentle formula", "dermatologist-reviewed"
+⚠️ AVOID: "safe for newborns" as absolute claim, "clinically proven" without active certification`,
+    engagement: `Engagement approach:
+• Same as main KC Official channel — product-focused
+• "Drop a ❤️ if you've tried KELO-COTE before"
+• Respond to authenticity questions immediately: show QR verification`,
+    closing: `Closing:
+• Full shelf pin for final 5 minutes
+• "Follow both our official channels for maximum session availability"
+• After-sales: "Our customer team responds within 24 hours to all queries"`
+  },
+
+  // ── KC × 万子疤痕管理 (n=5, avg ¥362/sess)
+  // S1:9.7% S2:10.6%WEAK S3:13.2% S4:7.4% S5:100% Refund:40%!
+  'KC::万子疤痕管理': {
+    opening: `Hello everyone — 万子 here, scar management specialist. Today I'm featuring KELO-COTE products — I want to explain how topical scar treatment actually works before I show you what's available. Let me pin the product first so you can see it while I talk.`,
+    products: `Product sequence:
+• CRITICAL: S2 avg 10.6% (WEAK, persistent — all 5 sessions). Product is never getting pinned early enough.
+→ Rule: Pin hero product in first 60 seconds. Specialist education can follow, not precede.
+• S3 avg 13.2% — moderate. When the product is shown, some viewers click.
+
+⚠️ CRITICAL COMPLIANCE ISSUE: Avg refund rate 40% (extremely high). This is the highest refund rate in the dataset.
+→ Root cause: Very likely expectation mismatch. Scar management claims may be overpromising outcomes → customers buy expecting rapid visible change → disappointed → refund.
+→ Immediate action: Review every session script for outcome claims. Replace specific result promises with process descriptions.
+→ MUST FIX BEFORE NEXT SESSION: Ensure product description is accurate to label claims only.`,
+    cta: `Scar specialist CTA — conservative framing required:
+• "I've pinned the product — this is what I recommend as part of a scar management routine"
+• "Consistent application over 8–12 weeks is how topical scar treatment works. Swipe up if you want to start that journey."
+• "Results vary by scar type and age — but the formulation is specifically designed for this"
+
+🔴 HIGH COMPLIANCE RISK — given 40% refund rate, CTA language must be extremely conservative
+⚠️ AVOID: "works in X days/weeks", "removes scars", "guaranteed improvement"
+✅ USE: "helps improve the appearance of scars over time", "part of a consistent scar management routine", "visible improvement with regular use — individual results vary"`,
+    engagement: `Engagement approach:
+• "What type of scar are you managing? Drop it in comments"
+• Educational: "Let me explain why hydration matters for scar tissue"
+• Set realistic expectations in the Q&A — this reduces refund risk`,
+    closing: `Closing with expectation management:
+• "Scar management is a long-term commitment — this product supports that journey"
+• "Any questions about what to expect — DM me, I respond to scar management questions personally"
+• "Follow for my next session — I'll share application techniques"
+
+⚠️ HIGH PRIORITY: Refund rate reduction is the #1 goal for this account. Every session, reinforce realistic timeline expectations.`
+  },
+
+  // ── KC × 孙火火甲友(十年) (n=5, avg ¥308/sess)
+  // S1:17.8%(GOOD) S2:3.8%WEAK S3:6.8%WEAK Refund:0%
+  'KC::孙火火甲友(十年)': {
+    opening: `Hi everyone! 孙火火 here — 10-year nail art and beauty community. Today I'm sharing something a bit different from my usual nail content — KELO-COTE's scar and skin care range. Let me pin what we have so you can see it, then I'll explain why beauty enthusiasts should care about this.`,
+    products: `Product sequence — AUDIENCE MISMATCH MANAGEMENT:
+• S1 avg 17.8% (GOOD) — nail beauty audience actively enters. Good.
+• S2 avg 3.8% (WEAK — worst in dataset). Viewers come for nail content and completely ignore scar/baby products.
+→ ROOT CAUSE: Product-audience mismatch. KELO-COTE is not a natural nail beauty purchase.
+→ Strategy: Create a beauty-to-skin bridge. Scar gel for post-cuticle care or hand skin maintenance is relevant to nail enthusiasts.
+
+• Pin scar gel WITH a nail-beauty angle: "If you work with your hands, skin quality matters — this is what I use"
+• Lead with the most cosmetically relevant product, not the baby/maternal angle
+• S3 avg 6.8% (WEAK) — low CTR because beauty audience doesn't see product relevance. Fix the framing, not the product.`,
+    cta: `Beauty-focused CTA (bridge to skin care):
+• "For everyone obsessed with hand and nail care — healthy skin is the foundation. Swipe up."
+• "I use the scar gel on my hands after nail sessions — it really does improve skin texture"
+• "Not just for post-surgery scars — this works for any skin that needs intensive repair"
+
+✅ USE: "improves skin texture", "intensive skin repair", "visible skin improvement"
+⚠️ AVOID: Medical scar treatment claims, maternal/baby angle for this audience (wrong context)
+✅ Zero refund rate — trust is maintained. Protect this.`,
+    engagement: `Engagement beats for nail audience:
+• "Drop your nail shape in comments — 💅 if you're square, ❤️ if you're almond"
+• Bridge to skin: "How many of you deal with dry cuticles or hand skin from nail work?"
+• "If you've been following me for my nail content — today I want to share something that's become part of my hand care routine"`,
+    closing: `Closing:
+• Return to nail content territory: "Back to our regular nail content next session — follow so you don't miss it"
+• Soft product close: "The KELO-COTE products are pinned — for anyone who wants to level up their hand skin care"
+• Zero refund rate note: This audience trusts you. Maintain honesty about what the product is and isn't for.`
+  },
+
+  // Default template for KOLs without a specific playbook
 const PB_DEFAULT = {
   opening: `[Opening Hook — Introduce yourself and brand. Pin hero product within 60 seconds.]`,
   products: `[Product Sequence — List products in order. Define pin schedule. Note: Pin hero product first, switch every 15–20 minutes.]`,
