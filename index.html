@@ -162,6 +162,28 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
 .pg-t{font-size:19px;font-weight:700;letter-spacing:-.5px}
 .pg-s{font-size:11.5px;color:var(--mid);margin-top:3px}
 .ssel{font-family:var(--font);font-size:12px;border:1px solid var(--muted);border-radius:7px;padding:5px 9px;width:100%;cursor:pointer;background:var(--white)}
+
+/* Playbook */
+.pb-section{margin-bottom:16px;border:1px solid var(--gray);border-radius:9px;overflow:hidden}
+.pb-sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8fafd;border-bottom:1px solid var(--gray)}
+.pb-sec-title{font-size:12.5px;font-weight:600;color:var(--dark)}
+.pb-risk{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.7px}
+.pb-risk.low{background:#ecfdf5;color:#047857}
+.pb-risk.medium{background:#fffbeb;color:#b45309}
+.pb-risk.high{background:#fef2f2;color:#b91c1c}
+.pb-ta{width:100%;min-height:90px;font-family:var(--font);font-size:12px;border:none;padding:12px 14px;resize:vertical;outline:none;background:var(--white);color:var(--dark);line-height:1.7}
+.pb-warning{font-size:11px;padding:6px 14px;background:#fffbeb;border-bottom:1px solid #fef3c7;color:#78350f}
+.pb-scan-row{display:flex;align-items:center;gap:8px;padding:7px 14px;border-top:1px solid var(--gray);font-size:11px}
+.pb-rule{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;border-radius:7px;margin-bottom:6px;font-size:11.5px}
+.pb-rule.issue{background:#fff5f5;border-left:3px solid var(--err)}
+.pb-rule.warning{background:#fffbeb;border-left:3px solid var(--warn)}
+.pb-rule.ok{background:#f0fdf4;border-left:3px solid var(--ok)}
+/* Compliance badge */
+.cbadge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;white-space:nowrap}
+.cbadge.clean{background:#ecfdf5;color:#047857}
+.cbadge.flagged{background:#fffbeb;color:#b45309}
+.cbadge.violation{background:#fef2f2;color:#b91c1c}
+
 /* Pagination */
 .pgbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0 2px;flex-wrap:wrap;gap:8px}
 .pginfo{font-size:11px;color:var(--mid)}
@@ -223,7 +245,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
   <button class="sbitem" id="nav-bridge" onclick="showScreen('bridge',this)"><span class="si">⟷</span><div><div>Bridge</div><div style="font-size:9px;color:var(--muted);font-weight:400">Video→Live</div></div></button>
   <div class="sblbl">Compliance</div>
   <button class="sbitem" id="nav-risk" onclick="showScreen('risk',this)"><span class="si">⊕</span><div><div>Risk Radar</div><div style="font-size:9px;color:var(--muted);font-weight:400">Dashboard</div></div><span class="sbadge">7</span></button>
-  <button class="sbitem" id="nav-greenpass" onclick="showScreen('greenpass',this)"><span class="si">🛡</span><div><div>Green Pass</div><div style="font-size:9px;color:var(--muted);font-weight:400">Script Vetting</div></div></button>
+  <button class="sbitem" id="nav-playbook" onclick="showScreen('playbook',this)"><span class="si">📋</span><div><div>Playbook</div><div style="font-size:9px;color:var(--muted);font-weight:400">Builder + Green Pass</div></div></button>
 </nav>
 
 <main class="main">
@@ -344,7 +366,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
     </div>
     <div class="card">
       <div class="row"><div class="rtitle">Session Leaderboard</div><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--sub);text-transform:uppercase;letter-spacing:.5px">thorne_kc_livestream</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th>Date</th><th>GMV</th><th>Orders</th><th>AOV</th><th>CVR</th><th>Rating</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th>Date</th><th>GMV</th><th>Orders</th><th>AOV</th><th>CVR</th><th>Rating</th><th>Compliance</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
       <div class="pgbar" id="ov-pgbar"></div>
     </div>
   </div><!-- /overview layer -->
@@ -496,30 +518,74 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
   <div class="card"><div class="row"><div class="rtitle">Recent Compliance Flags</div></div><div id="r-flags"></div></div>
 </div>
 
-<!-- ═══════════════ GREEN PASS SCREEN ═══════════════ -->
-<div class="screen" id="screen-greenpass">
-  <div><div class="pg-t">Green Pass Tool</div><div class="pg-s">Pre-event script vetting · KOL compliance self-check</div></div>
-  <div class="card" style="border-top:3px solid var(--ok)">
-    <div style="font-weight:700;font-size:14px;margin-bottom:4px">🟢 Script Compliance Simulator</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:12px">Paste your live script below. The engine scans for 广告法 blacklisted terms and generates compliant replacement suggestions.</div>
-    <textarea class="sarea" id="s-input" placeholder="Paste your live script or video copy here (直播逐字稿 / 短视频文案)..."></textarea>
-    <div style="display:flex;gap:9px;margin-top:9px">
-      <button class="btn-p" onclick="scanScript()">Scan for Violations</button>
-      <button class="btn" onclick="document.getElementById('s-input').value='';document.getElementById('s-res').innerHTML=''">Clear</button>
+<!-- ═══════════════ PLAYBOOK SCREEN ═══════════════ -->
+<div class="screen" id="screen-playbook">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div><div class="pg-t">Playbook Builder</div><div class="pg-s">Account/KOL-level live room playbook · Performance-informed · Green Pass embedded</div></div>
+    <div id="pb-preclear-badge"></div>
+  </div>
+
+  <!-- Brand × KOL selector -->
+  <div class="card" style="padding:14px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:600;color:var(--sub)">Brand:</span>
+      <select class="fsel" id="pb-brand" onchange="updateKOLList()" style="min-width:100px">
+        <option value="Thorne">Thorne</option>
+        <option value="KC">KELO-COTE</option>
+      </select>
+      <span style="font-size:11px;font-weight:600;color:var(--sub)">Account / KOL:</span>
+      <select class="fsel" id="pb-kol" onchange="renderPlaybook()" style="min-width:200px"></select>
+      <div id="pb-session-meta" style="font-size:11px;color:var(--mid)"></div>
     </div>
   </div>
-  <div id="s-res"></div>
-  <div class="card" style="background:var(--gray);border:1px dashed var(--muted)">
-    <div style="font-weight:600;font-size:13px;margin-bottom:7px">KOL Green Pass — External Link Generator</div>
-    <div style="font-size:11.5px;color:var(--sub);line-height:1.7;margin-bottom:11px">Generate a temporary H5 link for partner KOLs to self-check scripts before going live — no login required. Compliance check is logged as audit evidence.</div>
-    <div style="display:flex;gap:9px;flex-wrap:wrap">
-      <input style="font-family:var(--font);font-size:12px;border:1px solid var(--muted);border-radius:7px;padding:5px 9px;flex:1;min-width:180px;background:#fff" placeholder="KOL name or Douyin handle...">
-      <select style="font-family:var(--font);font-size:12px;border:1px solid var(--muted);border-radius:7px;padding:5px 9px;background:#fff"><option>Thorne</option><option>KELO-COTE</option></select>
-      <button class="btn-p">Generate Link (7 days)</button>
+
+  <!-- Performance Context -->
+  <div class="card" id="pb-perf-card">
+    <div class="gbar"></div>
+    <div class="row"><div><div class="rtitle">Performance Context</div><div class="rsub">Collective trend across all sessions for this account · Basis for playbook rules</div></div></div>
+    <div id="pb-perf"></div>
+  </div>
+
+  <!-- Playbook sections -->
+  <div class="card">
+    <div class="gbar"></div>
+    <div class="row"><div class="rtitle">Live Room Playbook</div><div style="font-size:11px;color:var(--mid)">Editable · Version tracked · Green Pass scanned</div></div>
+    <div id="pb-sections"></div>
+
+    <!-- Green Pass inline scan -->
+    <div style="margin-top:16px;padding:14px;background:var(--gray);border-radius:9px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700">🛡 Green Pass Scan</span>
+        <button class="btn-p" onclick="scanPlaybook()" style="padding:5px 14px">Scan All Sections</button>
+        <div id="pb-scan-badge" style="font-size:12px;color:var(--mid)">Not yet scanned</div>
+      </div>
+      <div id="pb-scan-result"></div>
+      <!-- Override (shown when issues found) -->
+      <div id="pb-override" style="display:none;margin-top:12px;padding:12px;background:#fffbeb;border-radius:8px;border-left:3px solid var(--warn)">
+        <div style="font-size:12px;font-weight:600;color:#78350f;margin-bottom:8px">⚠️ Compliance issues detected. Override required to proceed.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <select class="fsel" id="pb-override-reason" style="flex:1;min-width:220px">
+            <option value="">Select override reason...</option>
+            <option>Reviewed and approved by compliance team</option>
+            <option>Platform-specific context — reviewed against current guidelines</option>
+            <option>Language will be revised before going live</option>
+            <option>Low-risk exception — flagged term used in compliant context</option>
+          </select>
+          <button class="btn" onclick="overrideAndLog()" style="border-color:var(--warn);color:#b45309">Log Override & Proceed</button>
+        </div>
+        <div id="pb-override-log" style="margin-top:8px;font-size:11px;color:var(--sub)"></div>
+      </div>
+    </div>
+
+    <!-- Action bar -->
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn-p" onclick="saveVersion()">Save Version</button>
+      <button class="btn" onclick="exportPlaybook()">Export</button>
+      <button class="btn" id="pb-preclear-btn" onclick="markPrecleared()" style="border-color:var(--ok);color:var(--ok)" disabled>Mark Pre-cleared</button>
+      <div id="pb-save-status" style="font-size:11px;color:var(--mid);align-self:center"></div>
     </div>
   </div>
 </div>
-
 </main>
 </div>
 </div>
@@ -839,6 +905,7 @@ function showScreen(id,btn){
   btn.classList.add('active');
   if(id==='kol')renderKOL();
   if(id==='risk')renderRisk();
+  if(id==='playbook'){updateKOLList();}
 }
 function showLayer(id,btn){
   document.querySelectorAll('.layer').forEach(l=>l.classList.remove('active'));
@@ -874,6 +941,7 @@ function refresh(){
   if(document.getElementById('layer-actions').classList.contains('active'))initActions();
   document.getElementById('data-count').textContent=getSS().length+' sessions';
   if(document.getElementById('screen-kol').classList.contains('active'))renderKOL();
+  if(document.getElementById('screen-playbook').classList.contains('active'))updateKOLList();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1039,6 +1107,7 @@ function renderOverview(){
         <td class="mono">¥${Math.round(s.aov)}</td>
         <td style="font-weight:600;color:${s.cvr>=.02?'var(--ok)':'var(--mid)'}">${p1(s.cvr)}</td>
         <td style="font-size:12px">${rating(s)}</td>
+        <td><span class="cbadge ${complianceBadge(s).cls}">${complianceBadge(s).label}</span></td>
       </tr>`).join('');
   });
 }
@@ -1379,12 +1448,468 @@ function scanScript(){
 }
 
 // ═══════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════
+// COMPLIANCE BADGE (mocked based on session signals)
+// ═══════════════════════════════════════════════════
+function complianceBadge(s){
+  // Heuristic: high refund = possible overselling; very low payment = checkout/compliance friction
+  if(s.refund>=0.40||s.s5<0.65) return {cls:'violation',label:'🔴 Flagged'};
+  if(s.refund>=0.25||s.s5<0.80) return {cls:'flagged',label:'⚠️ Review'};
+  return {cls:'clean',label:'🟢 Clean'};
+}
+
+// ═══════════════════════════════════════════════════
+// PLAYBOOK DATA
+// ═══════════════════════════════════════════════════
+const PB_TEXT = {
+  'Thorne::LisaWang（15号悦恩活动）': {
+    opening: `Welcome everyone! I'm so excited to share today's exclusive Thorne lineup. LisaWang here — for those joining for the first time, I've been using Thorne supplements for over 2 years. Today we have 3 core products I want to walk you through. Let me pin the first one right now so you can see it on your screen.`,
+    products: `Product sequence:
+• Min 0:00–0:05 → PIN HERO immediately: Thorne Fish Oil (¥279 single / ¥498 bundle)
+• Min 5–20 → Thorne Basic Nutrients IV
+• Min 20–30 → Thorne Magnesium Bisglycinate
+• Peak bundle reveal at ~Min 15
+
+⚠️ RULE (persistent issue): Do NOT run warm-up longer than 4 min — Step 2 avg 30.7%. Pin product in first 60 seconds.
+⚠️ RULE (variance flag): Step 5 ranges 63–100%. Before each session: confirm checkout flow and coupon codes work. Consider: "Add to cart now, payment locks the price."`,
+    cta: `Verbal CTA phrases:
+• "Swipe up to see the product card — it's right there on your screen"
+• "For everyone asking in comments — yes, that's the one, just swipe up"
+• "We have a limited quantity at this price today"
+
+✅ USE: "supports", "helps improve", "formulated to"
+⚠️ AVOID: "cures", "treats", "guarantees results", "100% effective"
+⚠️ AVOID: Specific health outcome claims without citation`,
+    engagement: `Engagement beats:
+• Min 2: "Drop a 💊 in comments if you take supplements"
+• Min 8: "Tell me — Team Fish Oil or Team Multivitamin?"
+• Min 20: "If you've been wanting to try Thorne, this is the best time — today's price is exclusive to this stream"`,
+    closing: `Closing sequence:
+• Final 5 min: recap products + pin all items
+• "Thank you for joining — these prices are exclusive to today's session"
+• "I'll be back next month — follow so you don't miss it"
+
+⚠️ Step 5 note (avg 83.3%): Remind viewers: "You can add to cart and complete payment when ready — the price is locked for 24 hours."`
+  },
+  'Thorne::弓老师': {
+    opening: `Welcome! 弓老师 here — 20+ years in nutritional medicine. Today I'm featuring Thorne — a brand I personally trust for purity and clinical formulation standards. Let me start by showing you what's on the shelf today.`,
+    products: `Product sequence:
+• Min 0:00–0:05 → PIN HERO immediately (CRITICAL: historical S2 avg 7.2% — WEAK)
+• Lead with: Thorne Basic Nutrients (broad appeal, entry price point)
+• Min 15: Transition to Fish Oil or Magnesium specialty product
+
+⚠️ RULE (persistent issue): Step 2 is WEAK in 85%+ of sessions. Host must pin product in the FIRST 60 SECONDS before any educational content. Audience exits before seeing products.
+⚠️ RULE: Intro/education segment must not exceed 3 minutes.`,
+    cta: `Educational CTA approach:
+• "If you want to see the formulation details, the product card is right there on your screen"
+• "The research on this is solid — but first, swipe up to see what we're talking about"
+• Pair every scientific point with a product card reference
+
+✅ USE: "formulated based on research showing...", "designed to support..."
+⚠️ AVOID: Unsubstantiated efficacy claims, clinical treatment language`,
+    engagement: `Engagement beats:
+• "What supplements are you currently taking? Drop it in comments"
+• Educational polls: "Do you know the difference between Fish Oil and Krill Oil?"
+• Q&A format: take 2–3 questions per product`,
+    closing: `Closing:
+• Summarise the "why" for each product
+• "If you have questions after watching, DM me — I respond to supplement questions personally"
+• Clear pin of all products in final 2 minutes`
+  },
+  'Thorne::Thorne悦恩运动极限海外店': {
+    opening: `Welcome to Thorne's official sports performance store! Today we have our core endurance and recovery lineup available. Everything you see on the shelf is in stock and ships same-day.`,
+    products: `Self-Op shelf management:
+• Maintain all products pinned at all times ✅ (S2 avg 96.4% — STAR)
+• Priority order: Recovery Formula → Electrolytes → Protein → Vitamins
+• Rotate featured product every 15 minutes
+
+✅ STRENGTH: Product exposure consistently STAR tier — maintain discipline
+⚠️ FOCUS: Entry CTR (S1 avg 8.3% — below P50). Drive pre-session traffic via Qianchuan ads.
+⚠️ CHECK before each session: Qianchuan creatives must match live room content and products.`,
+    cta: `CTA approach for sports/official account:
+• "All items in stock — ships same day from our official warehouse"
+• "This is Thorne's official store — every product is guaranteed authentic"
+• "Sports performance products — verified by athletes"
+
+✅ USE: "formulated for performance", "supports recovery", "third-party tested"
+⚠️ AVOID: "100% safe", "zero side effects", specific performance guarantees`,
+    engagement: `Self-Op engagement:
+• Product demo focus — show packaging, authenticity codes
+• "Drop a ⚡ in comments if you train regularly"
+• Respond to authentication questions immediately`,
+    closing: `Wrap with store follow CTA:
+• "Follow our official store for exclusive deals every week"
+• Highlight after-sales service: "Our team responds to all queries within 24 hours"`
+  },
+  'Thorne::Thorne悦恩自营直播间': {
+    opening: `Welcome to Thorne's official live room! Full supplement lineup available today — everything you see on the shelf is ready to ship.`,
+    products: `Self-Op shelf management:
+• Maintain all products pinned permanently ✅ (S2 avg 96.4% — STAR)
+• Hero: Thorne Fish Oil → Basic Nutrients → Magnesium → Specialty
+• Swap featured product every 20 minutes
+
+✅ STRENGTH: Product shelf consistently STAR — do not change what works
+⚠️ FOCUS: S1 avg 9.5%. Improve live room thumbnail and Qianchuan ad alignment.
+⚠️ S3 variance (±31pp): Ensure product card thumbnails are high quality and price is clearly visible.`,
+    cta: `Official account CTA:
+• "Official Thorne store — all authentic, direct from brand"
+• "Swipe up to see today's exclusive pricing"
+• "In-stock guarantee — ships same day"
+
+✅ USE: "supports", "helps with", "formulated to"
+⚠️ AVOID: Comparative claims vs competitors, unverified health outcomes`,
+    engagement: `Engagement:
+• Product FAQ format
+• Show certificate of analysis / third-party test results for key products
+• Respond to dosage questions with label information only`,
+    closing: `Closing:
+• Full shelf pin for final 5 minutes
+• "Follow for weekly drops — subscribers get early access to promotions"`
+  },
+  'KC::KELO-COTE芭克母婴海外': {
+    opening: `Welcome to KELO-COTE's official store! Our full scar management and baby skincare range is live. Direct from brand — no middlemen, every product guaranteed authentic. Let me show you what's on the shelf today.`,
+    products: `Shelf management (STAR tier — maintain discipline):
+• Always-on shelf: KC Scar Gel (hero) + KC Baby Balm + KC Advanced Formula
+• S2 avg 87.2% (STAR) — shelf discipline is the core strength ✅
+• Feature hero product in 20-minute blocks, rotate
+• S5 avg 95.2% — payment flow is solid ✅
+
+⚠️ FOCUS: S1 avg 8.5% (below P50). Key lever: improve live room cover and Qianchuan ad creative alignment.
+⚠️ S4 variance (±11.5pp): Click-to-order inconsistency — review product pricing vs search results before each session.`,
+    cta: `CTA for scar and baby category:
+• "The scar gel is right there on your screen — swipe up to see it"
+• "We ship with specialist packaging for the baby products"
+• "Many customers combine the scar gel with the calming balm for best results"
+
+⚠️ HIGH RISK CATEGORY: Baby and medical-adjacent products require extra care
+⚠️ AVOID: "clinically proven", "dermatologist recommended" without active certification
+⚠️ AVOID: "safe for newborns" as absolute claim
+✅ USE: "formulated for sensitive skin", "gentle enough for daily use", "dermatologist-reviewed formula"`,
+    engagement: `Engagement:
+• Before/after sharing — use carefully (visual claims risk)
+• "Drop a ❤️ if you're managing a scar"
+• Educational: "What causes scarring and how topical treatment works"
+• Customer story format: "Our users often share that..."`,
+    closing: `Closing:
+• Highlight store authenticity + after-sales service
+• "Any questions after purchase — our team responds within 24 hours"
+• "Follow our store for seasonal promotions and restocks"`
+  },
+  'KC::我是芒果【孕期知识分享】': {
+    opening: `Hi everyone! I'm 我是芒果 — here with something really special for the mamas today. KELO-COTE's baby and scar care range. As someone who's been through pregnancy and recovery, I know how important it is to find products you can actually trust. Let me show you what's on the shelf.`,
+    products: `Product sequence for maternal/baby audience:
+• Lead with: KC Baby Balm or gentle formula (relatable for new moms)
+• Pin product by minute 3 — S2 avg 34.7% but with high variance (±36pp)
+• Audience: new mothers, pregnant women — respond to personal stories
+
+⚠️ CRITICAL RULE: S4 avg only 4.5% (WEAK in 70%+ of sessions). Click-to-order is the primary leak.
+→ Investigate: Is the price competitive vs alternatives? Add: social proof, certifications at product reveal.
+→ Try: "I've been using this for X weeks and here's what I noticed..." before pinning.`,
+    cta: `Maternal audience CTA approach:
+• Story-led: "When I was dealing with stretch marks post-delivery, this is what I turned to"
+• Safety-first: "I only share products I've personally researched for my family"
+• "The product card is right there — take your time, it's a considered purchase"
+
+⚠️ CRITICAL: Baby product claims require highest scrutiny
+⚠️ AVOID: "safe for newborns", "no chemicals", "100% natural" as absolutes
+✅ USE: "formulated for sensitive skin", "free from [specific listed ingredients]", "dermatologist-reviewed"`,
+    engagement: `Engagement:
+• Mom community Q&A: "Who here has dealt with stretch marks or baby eczema?"
+• Real product experience sharing
+• "What's your biggest skincare concern for your little one?"`,
+    closing: `Closing:
+• Reassure on authenticity: "This is direct from KELO-COTE — you can verify the QR code on the packaging"
+• Soft close: "No pressure — but today's price is the best I've seen for this range"
+• "Follow me for my next session — testing the advanced formula next week"`
+  },
+  'KC::西福芦（想当辣妈版）': {
+    opening: `Welcome! 西福芦 here — today I'm sharing some effective scar care products from KELO-COTE. Let me pin what we're looking at first.`,
+    products: `Product notes (both S2 and S3 persistently WEAK):
+• S2 avg 9.1% (WEAK in 80%+ of sessions) — pin product in FIRST 90 SECONDS
+• S3 avg 6.8% (WEAK) — very low card CTR. Review thumbnail quality before session.
+• RULE: Do not start with personal story. Open with product pin, then narrate.
+• RULE: Make swipe-up explicit: "I'm pinning the product now — you should see it at the bottom of your screen"
+
+⚠️ S4 variance (±26.7pp): High variance. Inconsistent pricing or trust signals. Add authenticity proof.`,
+    cta: `CTA improvement needed (both click rate and close rate are weak):
+• "I'm pinning it right now — watch for the card at the bottom"
+• "Tap the product — it takes you straight to the product details"
+• Price anchor: "This is the direct-from-brand price — cheaper than you'll find elsewhere"
+
+⚠️ AVOID: Overpromising scar removal ("removes scars completely", "guaranteed results")
+✅ USE: "helps improve appearance of scars", "visible improvement over consistent use", "visible difference with regular use"`,
+    engagement: `Engagement approach:
+• Scar awareness — educational rather than testimonial
+• "Drop a ❤️ if you'd like to know more about how this works"
+• Keep interactive to retain viewers (S1 avg 20.9% is actually above P50 ✅)`,
+    closing: `Standard close:
+• Product recap + pin all items
+• "Thank you for watching — looking forward to sharing results next time"`
+  }
+};
+
+// Default template for KOLs without a specific playbook
+const PB_DEFAULT = {
+  opening: `[Opening Hook — Introduce yourself and brand. Pin hero product within 60 seconds.]`,
+  products: `[Product Sequence — List products in order. Define pin schedule. Note: Pin hero product first, switch every 15–20 minutes.]`,
+  cta: `[CTA Moments — Define verbal CTA phrases for each product transition.
+
+✅ USE: "supports", "helps improve", "formulated to"
+⚠️ AVOID: Absolute claims, clinical treatment language, guaranteed outcomes]`,
+  engagement: `[Engagement Beats — Define 2–3 audience interaction moments per session.]`,
+  closing: `[Closing Sequence — Recap products, pin all items, follow CTA.]`
+};
+
+const PB_SECTIONS = [
+  {id:'opening',   label:'Opening Hook',              risk:'low',    warn:null},
+  {id:'products',  label:'Product Sequence & Pin Schedule', risk:'low', warn:null},
+  {id:'cta',       label:'CTA Moments',               risk:'high',   warn:'Urgency and scarcity language frequently triggers 广告法 violations. Review every claim carefully before going live.'},
+  {id:'engagement',label:'Audience Engagement',       risk:'low',    warn:null},
+  {id:'closing',   label:'Closing',                   risk:'medium', warn:'Closing statements sometimes include performance promises. Ensure any outcome claims use compliant language.'}
+];
+
+// State per playbook
+const PB_STATE = {}; // { key: { text:{}, scanClean:null, overridden:false, overrideLog:'' } }
+
+function getPBKey(){
+  const brand = document.getElementById('pb-brand')?.value;
+  const kol = document.getElementById('pb-kol')?.value;
+  return brand && kol ? `${brand}::${kol}` : null;
+}
+
+function updateKOLList(){
+  const brand = document.getElementById('pb-brand').value;
+  const kols = [...new Set(ALL_SS.filter(s=>s.brand===brand).map(s=>s.kol))];
+  // Sort by session count desc
+  const kolCounts = {};
+  ALL_SS.filter(s=>s.brand===brand).forEach(s=>{kolCounts[s.kol]=(kolCounts[s.kol]||0)+1;});
+  kols.sort((a,b)=>(kolCounts[b]||0)-(kolCounts[a]||0));
+  document.getElementById('pb-kol').innerHTML = kols.map(k=>`<option value="${k}">${k} (${kolCounts[k]} sessions)</option>`).join('');
+  renderPlaybook();
+}
+
+function getKOLStats(kol, brand){
+  const sess = ALL_SS.filter(s=>s.brand===brand && s.kol===kol);
+  const keys = ['s1','s2','s3','s4','s5'];
+  const stats = {};
+  keys.forEach(k=>{
+    const vals = sess.map(s=>s[k]||0).filter(v=>v>0);
+    if(!vals.length){stats[k]={avg:0,min:0,max:0,range:0,weakPct:0,n:0};return;}
+    const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+    const bm = BM[brand];
+    const weakCount = vals.filter(v=>tier(v,bm[k])==='WEAK').length;
+    stats[k] = {
+      avg, min:Math.min(...vals), max:Math.max(...vals),
+      range:Math.max(...vals)-Math.min(...vals),
+      weakPct: weakCount/vals.length,
+      tierAvg: tier(avg, bm[k]), n: vals.length
+    };
+  });
+  const gmvs = sess.map(s=>s.gmv);
+  stats.avgGMV = gmvs.reduce((a,b)=>a+b,0)/gmvs.length;
+  stats.n = sess.length;
+  stats.type = sess[0]?.type || '';
+  return stats;
+}
+
+function renderPlaybook(){
+  const key = getPBKey();
+  if(!key) return;
+  const [brand, kol] = key.split('::');
+  const stats = getKOLStats(kol, brand);
+  const bm = BM[brand];
+
+  // Session meta
+  document.getElementById('pb-session-meta').textContent = `${stats.n} sessions · Avg GMV ${mon(stats.avgGMV)}/session · ${stats.type==='Self-Op'?'Self-Operated':'Partner KOL'}`;
+
+  // Performance context
+  const steps = ['s1','s2','s3','s4','s5'];
+  const stepLabels = ['① Exposed→Entered','② Entered→ProdExp','③ ProdExp→Clicked','④ Clicked→Ordered','⑤ Ordered→Paid'];
+  const tColors = {STAR:'#10b981',GOOD:'#1d4ed8',MID:'#f59e0b',WEAK:'#ef4444'};
+
+  // Derive rules
+  const rules = [];
+  const varFlags = [];
+  steps.forEach((k,i)=>{
+    const s = stats[k];
+    if(!s||!s.n) return;
+    if(s.weakPct>=0.5) rules.push({step:stepLabels[i], avg:s.avg, tier:s.tierAvg, bm:bm[k]});
+    if(s.range>=0.15) varFlags.push({step:stepLabels[i], range:s.range, avg:s.avg});
+  });
+
+  let perfHTML = `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px">`;
+  steps.forEach((k,i)=>{
+    const s = stats[k];
+    const t = s?.tierAvg||'MID';
+    const c = tColors[t];
+    perfHTML += `<div style="text-align:center;padding:9px 6px;background:${t==='WEAK'?'#fff5f5':t==='STAR'?'#f0fdf4':'#f8fafd'};border-radius:8px;border:1px solid ${t==='WEAK'?'#fecaca':t==='STAR'?'#bbf7d0':'var(--gray)'}">
+      <div style="font-size:9.5px;color:var(--mid);margin-bottom:4px">${stepLabels[i]}</div>
+      <div style="font-size:16px;font-weight:700;color:${c};letter-spacing:-.5px">${p1(s?.avg||0)}</div>
+      <span class="tier ${t}" style="font-size:9px">${t}</span>
+      <div style="font-size:9.5px;color:var(--mid);margin-top:3px">±${p1(s?.range||0)} range</div>
+    </div>`;
+  });
+  perfHTML += `</div>`;
+
+  if(rules.length){
+    perfHTML += `<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--err);margin-bottom:6px">📌 Persistent Issues → Playbook Rules (appearing in >50% of sessions)</div>`;
+    rules.forEach(r=>{
+      perfHTML += `<div class="pb-rule issue"><span style="font-size:14px">⚠️</span><div><strong>${r.step}</strong> avg <strong style="color:var(--err)">${p1(r.avg)}</strong> — below P50 (${p1(r.bm.p50)}) · <span class="tier WEAK">WEAK</span> in ${Math.round(stats[steps.find((_,i)=>stepLabels[i]===r.step)]?.weakPct*100||0)}% of sessions → <strong>Add as standing rule in playbook</strong></div></div>`;
+    });
+    perfHTML += `</div>`;
+  }
+  if(varFlags.length){
+    perfHTML += `<div><div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:6px">🔍 High Variance Flags → Investigation Items</div>`;
+    varFlags.forEach(v=>{
+      perfHTML += `<div class="pb-rule warning"><span style="font-size:14px">📊</span><div><strong>${v.step}</strong> avg ${p1(v.avg)} but range <strong style="color:var(--warn)">±${p1(v.range)}</strong> — inconsistent session-to-session → <strong>Investigate root cause before each session</strong></div></div>`;
+    });
+    perfHTML += `</div>`;
+  }
+  if(!rules.length && !varFlags.length){
+    perfHTML += `<div class="pb-rule ok"><span style="font-size:14px">✅</span><div>All funnel steps are consistent and at or above benchmark. Playbook is working — maintain current structure.</div></div>`;
+  }
+
+  document.getElementById('pb-perf').innerHTML = perfHTML;
+
+  // Load text sections
+  if(!PB_STATE[key]){
+    const tmpl = PB_TEXT[key] || PB_DEFAULT;
+    PB_STATE[key] = { text:{...tmpl}, scanClean:null, overridden:false, overrideLog:'' };
+  }
+  const state = PB_STATE[key];
+
+  let sectHTML = '';
+  PB_SECTIONS.forEach(sec=>{
+    const riskMap = {low:'🟢 Low Risk',medium:'⚠️ Medium Risk',high:'🔴 High Compliance Risk'};
+    sectHTML += `<div class="pb-section">
+      <div class="pb-sec-hdr">
+        <span class="pb-sec-title">${sec.label}</span>
+        <span class="pb-risk ${sec.risk}">${riskMap[sec.risk]}</span>
+      </div>
+      ${sec.warn?`<div class="pb-warning">⚠️ ${sec.warn}</div>`:''}
+      <textarea class="pb-ta" id="pbt-${sec.id}" onchange="pbTextChange('${key}','${sec.id}')">${state.text[sec.id]||''}</textarea>
+      <div class="pb-scan-row" id="pbsr-${sec.id}"><span style="color:var(--mid)">Not scanned</span></div>
+    </div>`;
+  });
+  document.getElementById('pb-sections').innerHTML = sectHTML;
+
+  // Reset scan state
+  document.getElementById('pb-scan-badge').textContent = 'Not yet scanned';
+  document.getElementById('pb-scan-badge').style.color = 'var(--mid)';
+  document.getElementById('pb-scan-result').innerHTML = '';
+  document.getElementById('pb-override').style.display = 'none';
+  document.getElementById('pb-override-log').textContent = state.overrideLog || '';
+
+  // Update pre-clear badge
+  updatePreClearBadge();
+}
+
+function pbTextChange(key, sectionId){
+  if(!PB_STATE[key]) return;
+  PB_STATE[key].text[sectionId] = document.getElementById('pbt-'+sectionId).value;
+  PB_STATE[key].scanClean = null; // reset scan
+  document.getElementById('pb-preclear-btn').disabled = true;
+}
+
+function scanPlaybook(){
+  const key = getPBKey();
+  if(!key) return;
+  const state = PB_STATE[key];
+  let totalIssues = 0;
+  let resultHTML = '';
+
+  PB_SECTIONS.forEach(sec=>{
+    const text = document.getElementById('pbt-'+sec.id)?.value || '';
+    const found = BL.filter(w=>text.includes(w));
+    const row = document.getElementById('pbsr-'+sec.id);
+    if(!row) return;
+    if(!found.length){
+      row.innerHTML = `<span style="color:var(--ok);font-weight:600">🟢 Clean</span>`;
+    } else {
+      totalIssues += found.length;
+      row.innerHTML = `<span style="color:var(--err);font-weight:600">🔴 ${found.length} issue${found.length>1?'s':''} found</span> &nbsp; ${found.map(w=>`<span class="rword">${w}</span>`).join(' ')} → ${found.map(w=>`<span style="color:var(--ok);font-size:11px">✅ ${SUBS[w]||'[replace]'}</span>`).join(' ')}`;
+    }
+  });
+
+  state.scanClean = totalIssues === 0;
+
+  if(totalIssues === 0){
+    document.getElementById('pb-scan-badge').innerHTML = '<span style="color:var(--ok);font-weight:700">🟢 All sections clean</span>';
+    document.getElementById('pb-scan-result').innerHTML = '';
+    document.getElementById('pb-override').style.display = 'none';
+    document.getElementById('pb-preclear-btn').disabled = false;
+  } else {
+    document.getElementById('pb-scan-badge').innerHTML = `<span style="color:var(--err);font-weight:700">⚠️ ${totalIssues} issue${totalIssues>1?'s':''} detected</span>`;
+    document.getElementById('pb-override').style.display = 'block';
+    document.getElementById('pb-preclear-btn').disabled = true;
+  }
+  updatePreClearBadge();
+}
+
+function overrideAndLog(){
+  const key = getPBKey();
+  const reason = document.getElementById('pb-override-reason').value;
+  if(!reason){alert('Please select an override reason.');return;}
+  const now = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const log = `Override logged by JL · ${now} · Reason: "${reason}"`;
+  PB_STATE[key].overrideLog = log;
+  PB_STATE[key].overridden = true;
+  PB_STATE[key].scanClean = true; // overridden = proceed
+  document.getElementById('pb-override-log').textContent = log;
+  document.getElementById('pb-override').style.display = 'none';
+  document.getElementById('pb-scan-badge').innerHTML = `<span style="color:var(--warn);font-weight:700">⚠️ Issues overridden — logged</span>`;
+  document.getElementById('pb-preclear-btn').disabled = false;
+  updatePreClearBadge();
+}
+
+function markPrecleared(){
+  const key = getPBKey();
+  if(!key||!PB_STATE[key]) return;
+  const now = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const [brand,kol] = key.split('::');
+  const badge = `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:8px;font-size:12px"><span style="font-size:18px">🟢</span><div><strong>Pre-cleared</strong><div style="font-size:10.5px;color:#047857">Approved by JL · ${now} · ${PB_STATE[key].overridden?'With override logged':'Scan clean'}</div></div></div>`;
+  document.getElementById('pb-preclear-badge').innerHTML = badge;
+  document.getElementById('pb-save-status').textContent = `✓ Marked pre-cleared · ${now}`;
+  document.getElementById('pb-preclear-btn').textContent = '✓ Pre-cleared';
+  document.getElementById('pb-preclear-btn').style.color = 'var(--ok)';
+  document.getElementById('pb-preclear-btn').disabled = true;
+}
+
+function saveVersion(){
+  const now = new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('pb-save-status').textContent = `✓ Version saved · ${now}`;
+}
+
+function exportPlaybook(){
+  const key = getPBKey();
+  if(!key) return;
+  const [brand,kol] = key.split('::');
+  const state = PB_STATE[key];
+  let text = `ATTENTIV PLAYBOOK — ${brand} × ${kol}\nExported: ${new Date().toLocaleString()}\n\n`;
+  PB_SECTIONS.forEach(sec=>{
+    text += `== ${sec.label.toUpperCase()} ==\n${state?.text[sec.id]||''}\n\n`;
+  });
+  const el = document.createElement('a');
+  el.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  el.download = `playbook_${brand}_${kol.replace(/[^a-zA-Z0-9]/g,'_').slice(0,20)}.txt`;
+  el.click();
+}
+
+function updatePreClearBadge(){
+  const key = getPBKey();
+  const state = PB_STATE[key];
+  if(!state||state.scanClean===null) return;
+  // just enable/disable the button — badge is set by markPrecleared
+}
+
 // INIT
 // ═══════════════════════════════════════════════════
 updateSortOpts();
 renderOverview();
 initFunnel();
 initActions();
+updateKOLList();
 </script>
 </body>
 </html>
