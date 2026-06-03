@@ -452,9 +452,17 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
       </div>
       <div id="f-bm-note" style="font-size:10.5px;color:var(--mid)"></div>
     </div>
+    <!-- Funnel Volume Card — upside-down pyramid -->
     <div class="card">
       <div class="gbar"></div>
-      <div class="row"><div><div class="rtitle">Funnel vs Benchmarks</div><div class="rsub" id="f-sub"></div></div></div>
+      <div class="row"><div><div class="rtitle">Funnel Volume</div><div class="rsub" id="f-vol-sub">Absolute user counts at each stage</div></div></div>
+      <div id="f-pyramid"></div>
+    </div>
+
+    <!-- Stage Benchmark Comparison Card -->
+    <div class="card">
+      <div class="gbar"></div>
+      <div class="row"><div><div class="rtitle">Stage Performance vs Benchmarks</div><div class="rsub" id="f-sub"></div></div></div>
       <div class="do-grid" id="f-dropoff-hero"></div>
       <div id="f-steps"></div>
       <div id="f-summary" style="margin-top:7px;padding:9px 12px;background:var(--gray);border-radius:7px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px"></div>
@@ -1322,6 +1330,59 @@ function renderOverview(){
 // ═══════════════════════════════════════════════════
 // FUNNEL
 // ═══════════════════════════════════════════════════
+function renderPyramid(s){
+  const el = document.getElementById('f-pyramid');
+  if(!el) return;
+  const sub = document.getElementById('f-vol-sub');
+
+  const stages = [
+    {label:'Exposed',     val:s.exposed,   color:'#3A55FF'},
+    {label:'Enter Room',  val:s.entered,   color:'#009BFF'},
+    {label:'Prod. Exposed',val:s.prod_exp, color:'#0096FA', warn:true},
+    {label:'Prod. Click', val:s.clicked,   color:'#84C9F7'},
+    {label:'Orders',      val:s.orders,    color:'#10b981'},
+    {label:'Paid',        val:s.paid,      color:'#047857'},
+  ];
+
+  const isGroup = s.n > 1;
+  if(sub) sub.textContent = isGroup
+    ? `Aggregate across ${s.n} sessions · total user counts`
+    : `${s.kol} · ${s.date} · absolute user counts`;
+
+  if(!s.exposed){
+    el.innerHTML='<div style="padding:16px;color:var(--mid);font-size:12px;text-align:center">UV data not available for this session</div>';
+    return;
+  }
+
+  const top = s.exposed;
+  let html = '<div style="padding:8px 0">';
+  stages.forEach((st,i)=>{
+    const pct = Math.max(st.val/top*100, 3); // min 3% for visibility
+    const lpad = (100-pct)/2;
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+        <div style="width:130px;text-align:right;font-size:11px;font-weight:600;color:var(--sub);flex-shrink:0">${st.label}</div>
+        <div style="flex:1;position:relative;height:38px">
+          <div style="margin:0 ${lpad}%;height:100%;background:${st.color};border-radius:6px;display:flex;align-items:center;justify-content:center;min-width:80px">
+            <span style="font-size:11px;font-weight:700;color:${pct<20?'var(--dark)':'#fff'}">${(st.val||0).toLocaleString()}</span>
+          </div>
+        </div>
+        <div style="width:56px;font-size:10.5px;color:var(--mid);flex-shrink:0;text-align:right">${(st.val/top*100).toFixed(1)}%</div>
+      </div>`;
+    if(i < stages.length-1){
+      const next = stages[i+1].val||0;
+      const cvr = st.val ? (next/st.val*100).toFixed(1) : '—';
+      const lost = (st.val||0)-(next||0);
+      const isLargest = i===1; // Enter→Expose is the biggest leak
+      html += `<div style="padding:1px 0 1px 140px;font-size:10px;color:${isLargest?'#ef4444':'var(--mid)'};font-weight:${isLargest?700:400}">
+        ▼ ${cvr}% converted &nbsp;·&nbsp; <span style="color:#ef4444">−${lost.toLocaleString()} users</span>${isLargest?' ← largest leak':''}
+      </div>`;
+    }
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 function initFunnel(){
   populateGroupDropdown();
   const ss=getFilteredSS();
@@ -1409,6 +1470,9 @@ function renderFunnel(){
     {l:'Refund Rate',v:p1(s.refund||0)},
     {l:'Avg Watch',v:`${Math.round(s.watch||0)}s`}
   ].map(({l,v,sub})=>`<div><div style="font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:var(--mid)">${l}</div><div style="font-weight:700;font-size:15px;letter-spacing:-.3px">${v}</div>${sub?`<div style="font-size:9.5px;color:var(--mid)">${sub}</div>`:''}</div>`).join('');
+
+  // Pyramid funnel chart
+  renderPyramid(s);
 
   // Diagnostics — show all 4 tiers with appropriate styling
   // Wire Action Cards CTA
