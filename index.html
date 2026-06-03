@@ -222,7 +222,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
   <span class="fbar-lbl" style="font-size:10px">Platform</span>
   <div class="fchips" id="plat-chips">
     <button class="fchip active" onclick="setPlatform('Douyin',this)">Douyin</button>
-    <span class="fchip" style="opacity:.4;cursor:not-allowed;user-select:none" title="Coming Q3 — no data ingested yet">RED 小红书 · Q3</span>
+    <span class="fchip" style="opacity:.4;cursor:not-allowed;user-select:none" title="Coming Q3 — no data ingested yet">RED · Coming Soon</span>
   </div>
   <div class="fdiv"></div>
   <span class="fbar-lbl" style="font-size:10px">Time</span>
@@ -244,8 +244,8 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
   <button class="sbitem" id="nav-kol" onclick="showScreen('kol',this)"><span class="si">◎</span><div><div>KOL Analysis</div><div style="font-size:9px;color:var(--muted);font-weight:400">Creator Data</div></div></button>
   <button class="sbitem" id="nav-bridge" onclick="showScreen('bridge',this)"><span class="si">⟷</span><div><div>Bridge</div><div style="font-size:9px;color:var(--muted);font-weight:400">Video→Live</div></div></button>
   <div class="sblbl">Compliance</div>
-  <button class="sbitem" id="nav-risk" onclick="showScreen('risk',this)"><span class="si">⊕</span><div><div>Risk Radar</div><div style="font-size:9px;color:var(--muted);font-weight:400">Dashboard</div></div><span class="sbadge">7</span></button>
-  <button class="sbitem" id="nav-playbook" onclick="showScreen('playbook',this)"><span class="si">📋</span><div><div>Playbook</div><div style="font-size:9px;color:var(--muted);font-weight:400">Builder + Green Pass</div></div></button>
+  <button class="sbitem" id="nav-risk" onclick="showScreen('risk',this)"><span class="si">⊕</span><div><div>Risk Radar</div><div style="font-size:9px;color:var(--muted);font-weight:400">Dashboard</div></div><span style="margin-left:auto;font-size:9px;font-weight:700;background:rgba(58,85,255,.15);color:#84C9F7;border-radius:8px;padding:1px 6px;white-space:nowrap">Day 2</span></button>
+  <button class="sbitem" id="nav-playbook" onclick="showScreen('playbook',this)"><span class="si">📋</span><div><div>Playbook</div><div style="font-size:9px;color:var(--muted);font-weight:400">Builder + Green Pass</div></div><span style="margin-left:auto;font-size:9px;font-weight:700;background:rgba(58,85,255,.15);color:#84C9F7;border-radius:8px;padding:1px 6px;white-space:nowrap">Day 2</span></button>
 </nav>
 
 <main class="main">
@@ -313,6 +313,75 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
           <div style="font-size:10px;font-weight:600;color:#10b981;margin-bottom:3px">Click → Order</div>
           <div style="font-size:20px;font-weight:700;color:#10b981;letter-spacing:-1px">33,417</div>
           <div style="font-size:9.5px;color:var(--muted);margin-top:2px">users lost · 5.7% of leakage</div>
+        </div>
+      </div>
+
+      <!-- Aggregate UV Funnel -->
+      <div style="margin-top:16px">
+        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Aggregate Funnel — 247 Sessions Combined</div>
+        <div style="display:flex;align-items:stretch;gap:0">
+          <!-- Stage: Exposure -->
+          <div style="flex:1;text-align:center;padding:10px 6px;background:rgba(255,255,255,.06);border-radius:8px 0 0 8px">
+            <div style="font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Exposure</div>
+            <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-1px">4.99M</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:2px">unique users</div>
+          </div>
+          <!-- Arrow + drop -->
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">
+            <div style="font-size:10px;font-weight:700;color:#ef4444">▼ 11.7%</div>
+            <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+          </div>
+          <!-- Stage: Enter Room -->
+          <div style="flex:1;text-align:center;padding:10px 6px;background:rgba(255,255,255,.06)">
+            <div style="font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Enter Room</div>
+            <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-1px">586K</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:2px">586,661 viewers</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">
+            <div style="font-size:10px;font-weight:700;color:#ef4444">▼ 29.1%</div>
+            <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+          </div>
+          <!-- Stage: Product Exposed -->
+          <div style="flex:1;text-align:center;padding:10px 6px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3)">
+            <div style="font-size:9.5px;color:#f87171;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Prod. Exposed</div>
+            <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-1px">171K</div>
+            <div style="font-size:9.5px;color:#f87171;margin-top:2px">⚠ Biggest leak</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">
+            <div style="font-size:10px;font-weight:700;color:#f59e0b">▼ 21.8%</div>
+            <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+          </div>
+          <!-- Stage: Product Click -->
+          <div style="flex:1;text-align:center;padding:10px 6px;background:rgba(255,255,255,.06)">
+            <div style="font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Product Click</div>
+            <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-1px">37.3K</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:2px">37,294 users</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">
+            <div style="font-size:10px;font-weight:700;color:#f59e0b">▼ 10.4%</div>
+            <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+          </div>
+          <!-- Stage: Order -->
+          <div style="flex:1;text-align:center;padding:10px 6px;background:rgba(255,255,255,.06)">
+            <div style="font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Order</div>
+            <div style="font-size:18px;font-weight:700;color:#fff;letter-spacing:-1px">3,877</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:2px">orders placed</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">
+            <div style="font-size:10px;font-weight:700;color:#10b981">▼ 93.6%</div>
+            <div style="width:1px;height:20px;background:rgba(255,255,255,.15)"></div>
+          </div>
+          <!-- Stage: Paid GMV -->
+          <div style="flex:1;text-align:center;padding:10px 6px;background:rgba(16,185,129,.15);border-radius:0 8px 8px 0;border:1px solid rgba(16,185,129,.3)">
+            <div style="font-size:9.5px;color:#6ee7b7;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Paid GMV</div>
+            <div style="font-size:18px;font-weight:700;color:#10b981;letter-spacing:-1px">3,629</div>
+            <div style="font-size:9.5px;color:#6ee7b7;margin-top:2px">buyers · ¥1.56M</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.3);margin-top:6px;padding:0 4px">
+          <span>−4,412,300 at Exposure→Enter</span>
+          <span style="color:#ef4444;font-weight:600">−415,821 at Enter→Expose (71.3% of leakage)</span>
+          <span>−133,546 · −33,417 · −248</span>
         </div>
       </div>
     </div>
@@ -501,6 +570,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
 
 <!-- ═══════════════ RISK RADAR SCREEN ═══════════════ -->
 <div class="screen" id="screen-risk">
+  <div style="padding:6px 12px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:7px;border:1px solid #b8c5ff;font-size:11.5px;color:var(--blue);margin-bottom:4px">📋 <strong>Day 2 Feature</strong> — Prototyped to demonstrate the compliance monitoring vision. Not yet in production.</div>
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div><div class="pg-t">Risk Radar</div><div class="pg-s">Post-event audit · Compliance monitoring</div></div>
     <button class="btn-p">Generate Report</button>
@@ -519,6 +589,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
 
 <!-- ═══════════════ PLAYBOOK SCREEN ═══════════════ -->
 <div class="screen" id="screen-playbook">
+  <div style="padding:6px 12px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:7px;border:1px solid #b8c5ff;font-size:11.5px;color:var(--blue);margin-bottom:4px">📋 <strong>Day 2 Feature</strong> — Prototyped to demonstrate the performance → compliance loop. Not yet in production.</div>
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div><div class="pg-t">Playbook Builder</div><div class="pg-s">Account/KOL-level live room playbook · Performance-informed · Green Pass embedded</div></div>
     <div id="pb-preclear-badge"></div>
