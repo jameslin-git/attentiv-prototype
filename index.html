@@ -260,7 +260,10 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
 
   <!-- Sub-filter bar -->
   <div class="sfbar">
-    <input class="sfinput" type="text" id="sf-name" placeholder="Search KOL or store name..." oninput="applySubFilter()">
+    <span class="fbar-lbl" style="font-size:10px;white-space:nowrap">Account / KOL</span>
+    <select class="fsel" id="sf-group" onchange="applySubFilter()" style="min-width:200px">
+      <option value="all">All Accounts</option>
+    </select>
     <div class="fdiv"></div>
     <span class="fbar-lbl" style="font-size:10px;white-space:nowrap">Rating</span>
     <div class="fchips" id="sf-rating-chips">
@@ -270,10 +273,6 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
       <button class="fchip" onclick="setSFRating('MID',this)">🔶 MID</button>
       <button class="fchip" onclick="setSFRating('WEAK',this)">⬛ WEAK</button>
     </div>
-    <div class="fdiv"></div>
-    <span class="fbar-lbl" style="font-size:10px;white-space:nowrap">Sort</span>
-    <select class="fsel" id="sf-sort" onchange="applySubFilter()" style="min-width:110px"></select>
-    <button class="sfdir" id="sf-dir" onclick="toggleSortDir()" title="Toggle sort direction">↓</button>
     <button class="sfclear" onclick="clearSubFilter()">✕ Clear</button>
   </div>
 
@@ -366,7 +365,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
     </div>
     <div class="card">
       <div class="row"><div class="rtitle">Session Leaderboard</div><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--sub);text-transform:uppercase;letter-spacing:.5px">thorne_kc_livestream</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th>Date</th><th>GMV</th><th>Orders</th><th>AOV</th><th>CVR</th><th>Rating</th><th>Compliance</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th class='sortable' onclick="sortTable('date')">Date<span id='sov-date'></span></th><th class='sortable' onclick="sortTable('gmv')">GMV<span id='sov-gmv'></span></th><th class='sortable' onclick="sortTable('paid')">Orders<span id='sov-paid'></span></th><th class='sortable' onclick="sortTable('aov')">AOV<span id='sov-aov'></span></th><th class='sortable' onclick="sortTable('cvr')">CVR<span id='sov-cvr'></span></th><th>Rating</th><th>Compliance</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
       <div class="pgbar" id="ov-pgbar"></div>
     </div>
   </div><!-- /overview layer -->
@@ -391,7 +390,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
     <div id="f-diag"></div>
     <div class="card">
       <div class="row"><div class="rtitle">All Sessions — Tier Comparison</div></div>
-      <div class="tbl-wrap"><table><thead><tr><th>KOL</th><th>Br</th><th>Date</th><th>① Entry</th><th>② ProdExp</th><th>③ CTR</th><th>④ Order</th><th>⑤ Pay</th><th>CVR</th><th>AOV</th><th>Rating</th></tr></thead><tbody id="f-batch"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>KOL</th><th>Br</th><th class='sortable' onclick="sortTable('date')">Date</th><th class='sortable' onclick="sortTable('s1')">① Entry</th><th class='sortable' onclick="sortTable('s2')">② ProdExp</th><th class='sortable' onclick="sortTable('s3')">③ CTR</th><th class='sortable' onclick="sortTable('s4')">④ Order</th><th class='sortable' onclick="sortTable('s5')">⑤ Pay</th><th class='sortable' onclick="sortTable('cvr')">CVR</th><th class='sortable' onclick="sortTable('aov')">AOV</th><th>Rating</th></tr></thead><tbody id="f-batch"></tbody></table></div>
       <div class="pgbar" id="f-pgbar"></div>
     </div>
   </div><!-- /funnel layer -->
@@ -416,7 +415,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
 <!-- ═══════════════ KOL SCREEN ═══════════════ -->
 <div class="screen" id="screen-kol">
   <div><div class="pg-t">KOL / Creator Analysis</div><div class="pg-s" id="kol-sub">Performance by creator</div></div>
-  <div class="card"><div class="row"><div class="rtitle">KOL Leaderboard</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Creator</th><th>Brand</th><th>Type</th><th>Sessions</th><th>Total GMV</th><th>Avg AOV</th><th>Avg CVR</th><th>Best GMV</th></tr></thead><tbody id="kol-tbody"></tbody></table></div><div class="pgbar" id="kol-pgbar"></div></div>
+  <div class="card"><div class="row"><div class="rtitle">KOL Leaderboard</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Creator</th><th>Brand</th><th>Type</th><th>Sessions</th><th class='sortable' onclick="sortTable('gmv')">Total GMV</th><th class='sortable' onclick="sortTable('aov')">Avg AOV</th><th class='sortable' onclick="sortTable('cvr')">Avg CVR</th><th>Best GMV</th></tr></thead><tbody id="kol-tbody"></tbody></table></div><div class="pgbar" id="kol-pgbar"></div></div>
   <div class="g2">
     <div class="card" style="border-left:3px solid var(--blue)">
       <div style="font-weight:700;font-size:13px;margin-bottom:7px">🔷 STAR: Self-Operated Accounts</div>
@@ -920,6 +919,7 @@ function showLayer(id,btn){
 }
 function setBrand(b,btn){
   curBrand=b;
+  SF.group='all'; // reset group on brand change
   document.querySelectorAll('#brand-chips .fchip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
   refresh();
@@ -934,6 +934,7 @@ function setTime(days){
   refresh();
 }
 function refresh(){
+  populateGroupDropdown();
   const ss=getSS();
   document.getElementById('data-count').textContent=ss.length+' sessions';
   renderOverview();
@@ -947,8 +948,9 @@ function refresh(){
 // ═══════════════════════════════════════════════════
 // SUB-FILTER STATE
 // ═══════════════════════════════════════════════════
-const SF = { name:'', rating:'All', sortField:'gmv', sortDir:'desc' };
+const SF = { group:'all', rating:'All', sortField:'gmv', sortDir:'desc' };
 
+// SORT_OPTS kept for reference only — sort is now on table headers
 const SORT_OPTS = {
   overview: [{v:'gmv',l:'GMV'},{v:'paid',l:'Orders'},{v:'aov',l:'AOV'},{v:'cvr',l:'Overall CVR'},{v:'s1',l:'① Entry'},{v:'s2',l:'② ProdExp'},{v:'s3',l:'③ CTR'},{v:'s4',l:'④ Order'},{v:'s5',l:'⑤ Pay'},{v:'date',l:'Date'}],
   funnel:   [{v:'date',l:'Date'},{v:'s1',l:'① Entry'},{v:'s2',l:'② ProdExp'},{v:'s3',l:'③ CTR'},{v:'s4',l:'④ Order'},{v:'s5',l:'⑤ Pay'},{v:'cvr',l:'Overall CVR'},{v:'aov',l:'AOV'},{v:'gmv',l:'GMV'}],
@@ -982,39 +984,122 @@ function toggleSortDir(){
 }
 
 function clearSubFilter(){
-  SF.name=''; SF.rating='All'; SF.sortDir='desc';
-  SF.sortField = (SORT_OPTS[curLayer]||SORT_OPTS.overview)[0].v;
-  document.getElementById('sf-name').value='';
+  SF.group='all'; SF.rating='All'; SF.sortDir='desc'; SF.sortField='gmv';
+  const sg=document.getElementById('sf-group'); if(sg) sg.value='all';
   document.querySelectorAll('#sf-rating-chips .fchip').forEach((c,i)=>c.classList.toggle('active',i===0));
-  document.getElementById('sf-dir').textContent='↓';
-  updateSortOpts();
   applySubFilter();
 }
 
 function applySubFilter(){
-  SF.name = document.getElementById('sf-name').value.trim();
-  SF.sortField = document.getElementById('sf-sort').value;
+  SF.group = document.getElementById('sf-group')?.value || 'all';
   if(curLayer==='overview') renderOverview();
-  else if(curLayer==='funnel') renderFunnel();
+  else if(curLayer==='funnel') initFunnel();
   else if(curLayer==='actions') initActions();
 }
 
 function getFilteredSS(){
   let ss = getSS();
-  if(SF.name){
-    const q=SF.name.toLowerCase();
-    ss=ss.filter(s=>s.kol.toLowerCase().includes(q));
+  // Group filter
+  if(SF.group && SF.group!=='all'){
+    const [gBrand, gType] = SF.group.split('::');
+    if(gType==='Self-Op') ss=ss.filter(s=>s.brand===gBrand && s.type==='Self-Op');
+    else if(gType==='Partner') ss=ss.filter(s=>s.brand===gBrand && s.type==='Partner');
+    else ss=ss.filter(s=>s.brand===gBrand && s.kol===gType);
   }
-  if(SF.rating!=='All'){
-    const rMap={'STAR':'STAR','GOOD':'GOOD','MID':'MID','WEAK':'WEAK'};
-    ss=ss.filter(s=>rating(s).includes(rMap[SF.rating]));
-  }
+  // Rating filter
+  if(SF.rating!=='All') ss=ss.filter(s=>rating(s).includes(SF.rating));
+  // Sort by current SF.sortField
   const dir=SF.sortDir==='asc'?1:-1;
   ss=[...ss].sort((a,b)=>{
     if(SF.sortField==='date') return dir*a.date.localeCompare(b.date);
     return dir*((b[SF.sortField]||0)-(a[SF.sortField]||0));
   });
   return ss;
+}
+
+
+
+// ═══════════════════════════════════════════════════
+// TABLE HEADER SORTING
+// ═══════════════════════════════════════════════════
+function sortTable(field){
+  if(SF.sortField===field) SF.sortDir=SF.sortDir==='desc'?'asc':'desc';
+  else { SF.sortField=field; SF.sortDir='desc'; }
+  if(curLayer==='overview') renderOverview();
+  else if(curLayer==='funnel') renderFunnel();
+  else if(document.getElementById('screen-kol').classList.contains('active')) renderKOL();
+}
+function sortIndicator(field){ return SF.sortField===field?(SF.sortDir==='desc'?' ▼':' ▲'):''; }
+
+// ═══════════════════════════════════════════════════
+// GROUP DROPDOWN + AGGREGATED FUNNEL
+// ═══════════════════════════════════════════════════
+function populateGroupDropdown(){
+  const sel = document.getElementById('sf-group');
+  if(!sel) return;
+  // Build grouped options from data visible under current global brand filter
+  const base = curBrand==='All' ? ALL_SS : ALL_SS.filter(s=>s.brand===curBrand);
+  const brands = curBrand==='All' ? ['Thorne','KC'] : [curBrand];
+  let opts = '<option value="all">All Accounts</option>';
+  brands.forEach(b=>{
+    const bSess = base.filter(s=>s.brand===b);
+    if(!bSess.length) return;
+    opts += `<optgroup label="── ${b} ──">`;
+    const selfOp = bSess.filter(s=>s.type==='Self-Op');
+    if(selfOp.length) opts += `<option value="${b}::Self-Op">${b} · Self-Op (${selfOp.length} sessions)</option>`;
+    const partnerKOLs = {};
+    bSess.filter(s=>s.type==='Partner').forEach(s=>{partnerKOLs[s.kol]=(partnerKOLs[s.kol]||0)+1;});
+    Object.entries(partnerKOLs).sort((a,b2)=>b2[1]-a[1]).forEach(([kol,cnt])=>{
+      opts += `<option value="${b}::${kol}">${kol.length>35?kol.slice(0,33)+'…':kol} (${cnt} sess)</option>`;
+    });
+    opts += '</optgroup>';
+  });
+  const cur = sel.value;
+  sel.innerHTML = opts;
+  // Try restore previous selection
+  if([...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+
+// Check if current group selection is a multi-session group (aggregate mode)
+function isGroupMode(){
+  const g = SF.group;
+  return g && g!=='all' && g.endsWith('::Self-Op') || (g && g!=='all' && g.endsWith('::Partner'));
+}
+
+function getGroupLabel(){
+  const g = SF.group;
+  if(!g||g==='all') return null;
+  const [b,t] = g.split('::');
+  if(t==='Self-Op') return `${b} · Self-Operated`;
+  if(t==='Partner') return `${b} · All Partners`;
+  return t; // specific KOL name
+}
+
+// Compute aggregated funnel for a group of sessions
+function computeGroupFunnel(sessions){
+  if(!sessions.length) return null;
+  const keys = ['s1','s2','s3','s4','s5'];
+  const result = {};
+  keys.forEach(k=>{
+    const vals = sessions.map(s=>s[k]||0).filter(v=>v>0);
+    result[k] = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  });
+  // Aggregate UV counts
+  result.exposed   = sessions.reduce((a,s)=>a+(s.exposed||0),0);
+  result.entered   = sessions.reduce((a,s)=>a+(s.entered||0),0);
+  result.prod_exp  = sessions.reduce((a,s)=>a+(s.prod_exp||0),0);
+  result.clicked   = sessions.reduce((a,s)=>a+(s.clicked||0),0);
+  result.orders    = sessions.reduce((a,s)=>a+(s.orders||0),0);
+  result.paid      = sessions.reduce((a,s)=>a+(s.paid||0),0);
+  result.gmv       = sessions.reduce((a,s)=>a+s.gmv,0);
+  result.aov       = sessions.reduce((a,s)=>a+s.aov,0)/sessions.length;
+  result.cvr       = sessions.reduce((a,s)=>a+s.cvr,0)/sessions.length;
+  result.refund    = sessions.reduce((a,s)=>a+(s.refund||0),0)/sessions.length;
+  result.n         = sessions.length;
+  result.brand     = sessions[0].brand;
+  result.kol       = getGroupLabel() || 'Group';
+  result.type      = sessions[0].type;
+  return result;
 }
 
 // ═══════════════════════════════════════════════════
@@ -1116,16 +1201,43 @@ function renderOverview(){
 // FUNNEL
 // ═══════════════════════════════════════════════════
 function initFunnel(){
+  populateGroupDropdown();
   const ss=getFilteredSS();
-  const sel=document.getElementById('f-sel');
-  sel.innerHTML=ss.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
-  if(!sel.innerHTML)sel.innerHTML='<option>No sessions in range</option>';
+  const group = SF.group || 'all';
+  const isGroup = group!=='all';
+  
+  // Show/hide session selector vs group aggregate banner
+  const selRow = document.getElementById('f-sel-row');
+  const aggRow = document.getElementById('f-agg-row');
+  if(selRow) selRow.style.display = isGroup ? 'none' : 'flex';
+  if(aggRow) aggRow.style.display = isGroup ? 'flex' : 'none';
+  
+  if(!isGroup){
+    const sel=document.getElementById('f-sel');
+    sel.innerHTML=ss.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
+    if(!sel.innerHTML)sel.innerHTML='<option>No sessions in range</option>';
+  } else {
+    // Aggregated mode
+    const agg = computeGroupFunnel(ss);
+    if(aggRow && agg){
+      aggRow.innerHTML=`<span style="font-size:12px;font-weight:600;color:var(--blue)">📊 Aggregated view: <strong>${agg.n} sessions</strong> · ${getGroupLabel()} · Avg GMV ${mon(agg.gmv/agg.n)}/session</span>`;
+    }
+  }
   renderFunnel();
 }
 function renderFunnel(){
-  const ss=getSS(); // session dropdown = full time+brand set, not sub-filtered
-  const selId=document.getElementById('f-sel').value;
-  const s=ss.find(x=>x.id===selId)||ss[0];
+  const isGroup = SF.group && SF.group!=='all';
+  let s;
+  if(isGroup){
+    const groupSS = getFilteredSS();
+    s = computeGroupFunnel(groupSS);
+    if(!s||!groupSS.length){document.getElementById('f-steps').innerHTML='<div style="padding:16px;color:var(--mid);font-size:12px">No sessions in selected group and time range.</div>';return;}
+    s.id = '__group__'; // special marker
+  } else {
+    const ss=getSS();
+    const selId=document.getElementById('f-sel').value;
+    s=ss.find(x=>x.id===selId)||ss[0];
+  }
   if(!s){document.getElementById('f-steps').innerHTML='<div style="padding:16px;color:var(--mid);font-size:12px">No sessions available for selected filters.</div>';return;}
   const bm=getActiveBM(s.brand);
   const bmNote=curBrand==='All'?`Combined benchmark (n=247 sessions)`:`${s.brand}-specific benchmark (n=${BM[s.brand].n} sessions)`;
@@ -1906,6 +2018,7 @@ function updatePreClearBadge(){
 // INIT
 // ═══════════════════════════════════════════════════
 updateSortOpts();
+populateGroupDropdown();
 renderOverview();
 initFunnel();
 initActions();
