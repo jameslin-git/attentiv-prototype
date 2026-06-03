@@ -437,7 +437,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
     </div>
     <div class="card">
       <div class="row"><div><div class="rtitle">Session Performance</div><div class="rsub">Business results per session — GMV, orders, AOV, CVR, compliance</div></div><span style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--sub);text-transform:uppercase;letter-spacing:.5px">thorne_kc_livestream</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th class='sortable' onclick="sortTable('date')">Date<span id='sov-date'></span></th><th class='sortable' onclick="sortTable('gmv')">GMV<span id='sov-gmv'></span></th><th class='sortable' onclick="sortTable('paid')">Orders<span id='sov-paid'></span></th><th class='sortable' onclick="sortTable('aov')">AOV<span id='sov-aov'></span></th><th class='sortable' onclick="sortTable('cvr')">CVR<span id='sov-cvr'></span></th><th>Rating</th><th>Compliance</th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
+      <div class="tbl-wrap"><table><thead><tr><th>#</th><th>KOL / Account</th><th>Brand</th><th>Type</th><th class='sortable' onclick="sortTable('date')">Date<span id='sov-date'></span></th><th class='sortable' onclick="sortTable('gmv')">GMV<span id='sov-gmv'></span></th><th class='sortable' onclick="sortTable('paid')">Orders<span id='sov-paid'></span></th><th class='sortable' onclick="sortTable('aov')">AOV<span id='sov-aov'></span></th><th class='sortable' onclick="sortTable('cvr')">CVR<span id='sov-cvr'></span></th><th>Rating</th><th>Compliance</th><th></th></tr></thead><tbody id="ov-tbody"></tbody></table></div>
       <div class="pgbar" id="ov-pgbar"></div>
     </div>
   </div><!-- /overview layer -->
@@ -458,6 +458,10 @@ th.sortable.desc::after{content:' ▼';font-size:9px}
       <div class="do-grid" id="f-dropoff-hero"></div>
       <div id="f-steps"></div>
       <div id="f-summary" style="margin-top:7px;padding:9px 12px;background:var(--gray);border-radius:7px;display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px"></div>
+    </div>
+    <div id="f-action-cta" style="display:none;padding:10px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff;align-items:center;justify-content:space-between;gap:12px">
+      <div style="font-size:12px;color:var(--blue)"><strong>Diagnostic complete.</strong> See what to fix before the next session with this KOL.</div>
+      <button id="f-action-btn" class="btn-p" style="padding:5px 14px;white-space:nowrap;flex-shrink:0">View Action Cards →</button>
     </div>
     <div id="f-diag"></div>
     <div class="card">
@@ -1236,6 +1240,26 @@ function pgSize(id, size){
 }
 
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// CROSS-LAYER NAVIGATION
+// ═══════════════════════════════════════════════════
+function goToFunnel(sessionId){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-analytics').classList.add('active');
+  document.getElementById('nav-analytics').classList.add('active');
+  showLayer('funnel', document.getElementById('stab-funnel'));
+  setTimeout(()=>{ const sel=document.getElementById('f-sel'); if(sel){sel.value=sessionId; renderFunnel();} }, 50);
+}
+function goToActionCards(sessionId){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-analytics').classList.add('active');
+  document.getElementById('nav-analytics').classList.add('active');
+  showLayer('actions', document.getElementById('stab-actions'));
+  setTimeout(()=>{ const sel=document.getElementById('ac-sel'); if(sel){sel.value=sessionId; renderActions();} }, 50);
+}
+
 // OVERVIEW
 // ═══════════════════════════════════════════════════
 function renderPOCHero(){
@@ -1295,6 +1319,7 @@ function renderOverview(){
         <td style="font-weight:600;color:${s.cvr>=.02?'var(--ok)':'var(--mid)'}">${p1(s.cvr)}</td>
         <td style="font-size:12px">${rating(s)}</td>
         <td><span class="cbadge ${complianceBadge(s).cls}">${complianceBadge(s).label}</span></td>
+        <td><button onclick="goToFunnel('${s.id}')" class="btn" style="font-size:10.5px;padding:3px 9px;color:var(--blue);border-color:var(--blue)">Diagnose →</button></td>
       </tr>`).join('');
   });
 }
@@ -1391,6 +1416,10 @@ function renderFunnel(){
   ].map(({l,v,sub})=>`<div><div style="font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:var(--mid)">${l}</div><div style="font-weight:700;font-size:15px;letter-spacing:-.3px">${v}</div>${sub?`<div style="font-size:9.5px;color:var(--mid)">${sub}</div>`:''}</div>`).join('');
 
   // Diagnostics — show all 4 tiers with appropriate styling
+  // Wire Action Cards CTA
+  const acCta=document.getElementById('f-action-cta');
+  const acBtn=document.getElementById('f-action-btn');
+  if(acCta){acCta.style.display='flex'; if(acBtn) acBtn.onclick=()=>goToActionCards(isGroup?(getFilteredSS()[0]?.id||''):s.id);}
   document.getElementById('f-diag').innerHTML=`<div class="card"><div class="row"><div class="rtitle">Stage Diagnosis</div><div style="display:flex;gap:4px">${['STAR','GOOD','MID','WEAK'].map(t=>`<span class="tier ${t}">${t}</span>`).join('')}</div></div>${
     keys.map((k,i)=>{
       const t=tiers[i];
