@@ -1336,12 +1336,12 @@ function renderPyramid(s){
   const sub = document.getElementById('f-vol-sub');
 
   const STAGES = [
-    {label:'Exposed (UV)',      val:s.exposed,  color:'#3A55FF'},
-    {label:'Enter Room (UV)',   val:s.entered,  color:'#009BFF'},
-    {label:'Prod. Exposed (UV)',val:s.prod_exp, color:'#0096FA', bigLeak:true},
-    {label:'Prod. Click (UV)',  val:s.clicked,  color:'#84C9F7'},
-    {label:'Orders',            val:s.orders,   color:'#10b981'},
-    {label:'Paid Buyers (UV)',  val:s.paid,     color:'#047857'},
+    {label:'Exposed',       val:s.exposed,  color:'#3A55FF'},
+    {label:'Enter Room',    val:s.entered,  color:'#009BFF'},
+    {label:'Prod. Exposed', val:s.prod_exp, color:'#0096FA', bigLeak:true},
+    {label:'Prod. Click',   val:s.clicked,  color:'#84C9F7'},
+    {label:'Orders',        val:s.orders,   color:'#10b981'},
+    {label:'Paid',          val:s.paid,     color:'#047857'},
   ];
 
   if(sub) sub.textContent = (s.n>1)
@@ -1353,61 +1353,36 @@ function renderPyramid(s){
     return;
   }
 
-  // Layout constants — ALL coordinates within viewBox
-  const LABEL_W = 148;  // left label column width
-  const FUNNEL_W = 400; // max funnel bar width
-  const RIGHT_W = 130;  // right stats column
-  const TOTAL_W = LABEL_W + FUNNEL_W + RIGHT_W; // 678
-  const SH = 44;        // stage bar height
-  const GAP = 20;       // gap for drop label between stages
-  const TOTAL_H = STAGES.length * SH + (STAGES.length - 1) * GAP + 10;
-  const FUNNEL_X = LABEL_W; // funnel starts after labels
-  const FUNNEL_CX = FUNNEL_X + FUNNEL_W / 2; // center of funnel
-
   const top = STAGES[0].val || 1;
-
-  // Widths: sqrt scale so small stages are visible, min 24px
-  const widths = STAGES.map(st => Math.max(Math.sqrt((st.val||0)/top) * FUNNEL_W, 24));
-
-  let svg = `<svg viewBox="0 0 ${TOTAL_W} ${TOTAL_H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;font-family:Inter,sans-serif">`;
+  let html = '';
 
   STAGES.forEach((st, i) => {
-    const y = i * (SH + GAP);
-    const w = widths[i];
-    const wNext = i < STAGES.length - 1 ? widths[i+1] : w * 0.6;
+    const pctOfTop = ((st.val||0)/top*100).toFixed(1);
+    const isLeak = st.bigLeak;
 
-    // Trapezoid polygon — within FUNNEL_X..FUNNEL_X+FUNNEL_W
-    const tl = FUNNEL_CX - w/2,    tr = FUNNEL_CX + w/2;
-    const bl = FUNNEL_CX - wNext/2, br = FUNNEL_CX + wNext/2;
-    const pts = `${tl},${y} ${tr},${y} ${br},${y+SH} ${bl},${y+SH}`;
+    // Consistent full-width bar — same shape for every stage, value changes
+    html += `
+      <div style="display:grid;grid-template-columns:130px 1fr 70px;align-items:center;gap:12px;margin-bottom:2px">
+        <div style="font-size:11.5px;font-weight:600;color:var(--sub);text-align:right">${st.label}</div>
+        <div style="height:40px;background:${st.color};border-radius:7px;display:flex;align-items:center;justify-content:space-between;padding:0 14px">
+          <span style="font-size:13px;font-weight:700;color:#fff">${(st.val||0).toLocaleString()} UV</span>
+          <span style="font-size:11px;font-weight:500;color:rgba(255,255,255,.75)">${pctOfTop}% of exposed</span>
+        </div>
+        <div style="font-size:11px;color:var(--mid);font-family:var(--mono)">${pctOfTop}%</div>
+      </div>`;
 
-    svg += `<polygon points="${pts}" fill="${st.color}"/>`;
-
-    // Left label — within 0..LABEL_W
-    svg += `<text x="${LABEL_W-8}" y="${y+SH/2+5}" text-anchor="end" font-size="11" font-weight="600" fill="#535660">${st.label}</text>`;
-
-    // UV count inside bar
-    svg += `<text x="${FUNNEL_CX}" y="${y+SH/2+5}" text-anchor="middle" font-size="12" font-weight="700" fill="white">${(st.val||0).toLocaleString()}</text>`;
-
-    // Right stats — pct of top
-    const pct = ((st.val||0)/top*100).toFixed(1)+'%';
-    svg += `<text x="${FUNNEL_X+FUNNEL_W+10}" y="${y+SH/2+5}" text-anchor="start" font-size="11" fill="#535660">${pct}</text>`;
-
-    // Drop-off label between stages
-    if(i < STAGES.length-1){
-      const nv = STAGES[i+1].val||0;
-      const cvr = st.val ? (nv/st.val*100).toFixed(1)+'%' : '—';
-      const lost = (st.val||0)-nv;
-      const gy = y + SH + GAP/2 + 3;
-      const isLeak = st.bigLeak;
-      const col = isLeak ? '#ef4444' : '#9badc4';
-      const fw = isLeak ? '700' : '400';
-      svg += `<text x="${FUNNEL_CX}" y="${gy}" text-anchor="middle" font-size="10" fill="${col}" font-weight="${fw}">▼ ${cvr} continue · −${lost.toLocaleString()} lost${isLeak?' ◀ largest leak':''}</text>`;
+    // Drop-off connector
+    if(i < STAGES.length - 1){
+      const nv = STAGES[i+1].val || 0;
+      const cvr = st.val ? (nv/st.val*100).toFixed(1) : '—';
+      const lost = (st.val||0) - nv;
+      html += `<div style="padding:4px 0 4px 142px;font-size:10.5px;color:${isLeak?'#ef4444':'var(--mid)'};font-weight:${isLeak?700:400}">
+        ▼ ${cvr}% continue &nbsp;·&nbsp; <span style="color:#ef4444">−${lost.toLocaleString()} UV lost</span>${isLeak?' &nbsp;← largest leak in session':''}
+      </div>`;
     }
   });
 
-  svg += '</svg>';
-  el.innerHTML = svg;
+  el.innerHTML = `<div style="padding:4px 0">${html}</div>`;
 }
 
 function initFunnel(){
@@ -1485,11 +1460,15 @@ function renderFunnel(){
     return `<div style="display:grid;grid-template-columns:160px 72px 1fr 64px 80px 90px;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--gray);background:${t==='WEAK'?'#fff8f8':t==='STAR'?'#f8fffe':'var(--white)'}">
       <div style="font-size:11.5px;font-weight:600;color:var(--dark)">${lbls[i]}</div>
       <div style="font-size:14px;font-weight:800;color:${tc[t]};letter-spacing:-.5px;font-family:var(--mono)">${p2(v)}</div>
-      <div style="position:relative;height:10px;background:#eef1f8;border-radius:5px">
-        <div style="position:absolute;left:${p25x}%;top:-3px;bottom:-3px;width:1.5px;background:#c4d3e3;border-radius:1px" title="P25=${p2(b.p25)}"></div>
-        <div style="position:absolute;left:${p50x}%;top:-3px;bottom:-3px;width:2px;background:#9badc4" title="P50=${p2(b.p50)}"></div>
-        <div style="position:absolute;left:${p75x}%;top:-3px;bottom:-3px;width:1.5px;background:#3A55FF;border-radius:1px" title="P75=${p2(b.p75)}"></div>
-        <div style="position:absolute;left:${vx}%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:${tc[t]};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.2)"></div>
+      <div style="position:relative;height:28px">
+        <div style="position:absolute;top:8px;left:0;right:0;height:8px;background:#eef1f8;border-radius:4px"></div>
+        <div style="position:absolute;left:${p25x}%;top:4px;bottom:0;width:1.5px;background:#c4d3e3"></div>
+        <div style="position:absolute;left:${p50x}%;top:4px;bottom:0;width:2px;background:#9badc4"></div>
+        <div style="position:absolute;left:${p75x}%;top:4px;bottom:0;width:1.5px;background:#3A55FF"></div>
+        <div style="position:absolute;left:${vx}%;top:6px;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:${tc[t]};border:2.5px solid white;box-shadow:0 1px 4px rgba(0,0,0,.25)"></div>
+        <div style="position:absolute;left:${p25x}%;top:18px;transform:translateX(-50%);font-size:8.5px;color:var(--muted);white-space:nowrap">${p2(b.p25)}</div>
+        <div style="position:absolute;left:${p50x}%;top:18px;transform:translateX(-50%);font-size:8.5px;color:var(--mid);white-space:nowrap">${p2(b.p50)}</div>
+        <div style="position:absolute;left:${p75x}%;top:18px;transform:translateX(-50%);font-size:8.5px;color:#3A55FF;white-space:nowrap">${p2(b.p75)}</div>
       </div>
       <span class="tier ${t}" style="justify-self:center">${t}</span>
       <div style="font-size:11px;font-weight:600;color:${gapCol};text-align:right;font-family:var(--mono)">${gapToP50}</div>
