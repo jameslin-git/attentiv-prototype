@@ -1247,21 +1247,34 @@ function pgSize(id, size){
 // ═══════════════════════════════════════════════════
 // CROSS-LAYER NAVIGATION
 // ═══════════════════════════════════════════════════
+function _inheritSessionFilter(sessionId){
+  // Set SF.group to match the session so filters are inherited on navigation
+  const s = ALL_SS.find(x=>x.id===sessionId);
+  if(s){
+    const grpKey = s.type==='Self-Op' ? `${s.brand}::Self-Op` : `${s.brand}::${s.kol}`;
+    SF.group = grpKey;
+    const sg = document.getElementById('sf-group');
+    if(sg && [...sg.options].some(o=>o.value===grpKey)) sg.value = grpKey;
+    else if(sg) sg.value = 'all'; // fallback if not in dropdown yet
+  }
+}
 function goToFunnel(sessionId){
+  _inheritSessionFilter(sessionId);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-analytics').classList.add('active');
   document.getElementById('nav-analytics').classList.add('active');
   showLayer('funnel', document.getElementById('stab-funnel'));
-  setTimeout(()=>{ const sel=document.getElementById('f-sel'); if(sel){sel.value=sessionId; renderFunnel();} }, 50);
+  setTimeout(()=>{ const sel=document.getElementById('f-sel'); if(sel){sel.value=sessionId; renderFunnel();} }, 80);
 }
 function goToActionCards(sessionId){
+  // Preserve existing SF.group (already set by goToFunnel or current filter state)
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-analytics').classList.add('active');
   document.getElementById('nav-analytics').classList.add('active');
   showLayer('actions', document.getElementById('stab-actions'));
-  setTimeout(()=>{ const sel=document.getElementById('ac-sel'); if(sel){sel.value=sessionId; renderActions();} }, 50);
+  setTimeout(()=>{ const sel=document.getElementById('ac-sel'); if(sel){sel.value=sessionId; renderActions();} }, 80);
 }
 
 // OVERVIEW
@@ -1276,75 +1289,103 @@ function renderChannelCompare(){
 
   const avg = (arr,f) => arr.length ? arr.reduce((a,s)=>a+(s[f]||0),0)/arr.length : 0;
 
-  const METRICS = [
-    {key:'s1',  label:'① Entry CTR',       fmt:'pct', note:'Partners attract more viewers into the room'},
-    {key:'s2',  label:'② Prod. Exposure',   fmt:'pct', note:'Self-Op dominates via permanent product shelf — the largest structural gap'},
-    {key:'s3',  label:'③ Product CTR',      fmt:'pct', note:'Self-Op drives more clicks once products are shown'},
-    {key:'s4',  label:'④ Order Rate',       fmt:'pct', note:'Partners convert clicks to orders more efficiently'},
-    {key:'cvr', label:'Overall CVR',         fmt:'pct', note:'Self-Op\'s step 2 advantage translates to 18× higher end-to-end conversion'},
-    {key:'aov', label:'Avg Order Value',     fmt:'cny', note:'Partners sell higher-AOV products (e.g. premium supplements)'},
-    {key:'gmv', label:'Avg GMV / Session',   fmt:'cny', note:'Self-Op generates 2.4× more GMV per session despite smaller audience'},
+  // Compute avg funnel steps
+  const soS = {s1:avg(so,'s1'),s2:avg(so,'s2'),s3:avg(so,'s3'),s4:avg(so,'s4'),cvr:avg(so,'cvr'),aov:avg(so,'aov'),gmv:avg(so,'gmv')};
+  const paS = {s1:avg(pa,'s1'),s2:avg(pa,'s2'),s3:avg(pa,'s3'),s4:avg(pa,'s4'),cvr:avg(pa,'cvr'),aov:avg(pa,'aov'),gmv:avg(pa,'gmv')};
+
+  // ── Per-1,000-entrants cascade ──
+  // Normalise: start from 1,000 viewers who ENTER the room (post-S1)
+  const BASE = 1000;
+  function cascade(st){
+    const entered  = BASE;
+    const prodExp  = Math.round(entered  * st.s2);
+    const clicked  = Math.round(prodExp  * st.s3);
+    const ordered  = Math.round(clicked  * st.s4);
+    return [entered, prodExp, clicked, ordered];
+  }
+  const soC = cascade(soS);
+  const paC = cascade(paS);
+  const CLABELS = ['Enter room','See a product','Click product','Place an order'];
+  const CCOLORS = ['#3A55FF','#0096FA','#10b981','#047857'];
+
+  // ── Business results ──
+  const RESULTS = [
+    {label:'Overall CVR',   so:(soS.cvr*100).toFixed(2)+'%', pa:(paS.cvr*100).toFixed(2)+'%', soWins:soS.cvr>paS.cvr, note:'End-to-end conversion'},
+    {label:'Avg Order Value',so:'¥'+Math.round(soS.aov).toLocaleString(), pa:'¥'+Math.round(paS.aov).toLocaleString(), soWins:soS.aov>paS.aov, note:'Per paid order'},
+    {label:'Avg GMV / Session',so:'¥'+Math.round(soS.gmv).toLocaleString(), pa:'¥'+Math.round(paS.gmv).toLocaleString(), soWins:soS.gmv>paS.gmv, note:'Revenue per broadcast'},
   ];
 
-  const soVals = METRICS.map(m=>avg(so,m.key));
-  const paVals = METRICS.map(m=>avg(pa,m.key));
-
-  // For each metric, determine who wins to colour accordingly
-  const KEY_METRIC = 's2'; // the structural story
   let html = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div style="text-align:center;padding:10px 16px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff">
-        <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px">Self-Operated Account</div>
-        <div style="font-size:12px;color:var(--mid);margin-top:2px">${so.length} sessions across all brands</div>
+    <!-- Header chips -->
+    <div style="display:grid;grid-template-columns:180px 1fr 1fr;gap:10px;margin-bottom:16px;align-items:center">
+      <div></div>
+      <div style="text-align:center;padding:8px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff">
+        <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1px">Self-Operated</div>
+        <div style="font-size:10.5px;color:var(--mid)">${so.length} sessions</div>
       </div>
-      <div style="text-align:center;padding:10px 16px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:9px;border:1px solid #fcd34d">
+      <div style="text-align:center;padding:8px 14px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:9px;border:1px solid #fcd34d">
         <div style="font-size:10px;font-weight:700;color:#b45309;text-transform:uppercase;letter-spacing:1px">Partner KOL</div>
-        <div style="font-size:12px;color:var(--mid);margin-top:2px">${pa.length} sessions across all brands</div>
+        <div style="font-size:10.5px;color:var(--mid)">${pa.length} sessions</div>
       </div>
-    </div>`;
+    </div>
 
-  METRICS.forEach((m,i)=>{
-    const sv=soVals[i], pv=paVals[i];
-    const isKey = m.key===KEY_METRIC || m.key==='cvr' || m.key==='gmv';
-    const soWins = sv>pv;
-    const fmt = v => m.fmt==='pct' ? (v*100).toFixed(2)+'%' : '¥'+Math.round(v).toLocaleString();
-    const maxV = Math.max(sv,pv,0.001);
-    const soW = Math.min(sv/maxV*100,100);
-    const paW = Math.min(pv/maxV*100,100);
-    const diffLabel = m.fmt==='pct'
-      ? (sv>pv?'+':'')+((sv-pv)*100).toFixed(1)+'pp'
-      : (sv>pv?'+':'')+Math.round(sv-pv).toLocaleString();
+    <!-- Entry CTR row (before normalisation) -->
+    <div style="display:grid;grid-template-columns:180px 1fr 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray);align-items:center">
+      <div style="font-size:11.5px;color:var(--sub)">① Entry CTR</div>
+      <div style="font-size:13px;font-weight:600;color:var(--mid);text-align:center">${(soS.s1*100).toFixed(1)}% of exposed</div>
+      <div style="font-size:13px;font-weight:700;color:#009BFF;text-align:center">${(paS.s1*100).toFixed(1)}% of exposed <span style="font-size:10px;font-weight:500;color:var(--mid)">↑ Partners attract more viewers</span></div>
+    </div>
 
-    html += `<div style="padding:10px 0;border-bottom:1px solid var(--gray)${isKey?';background:#fafbff':''};margin:0 -2px;padding-left:2px;padding-right:2px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-        <div style="font-size:12px;font-weight:${isKey?700:500};color:var(--dark)">${m.label}</div>
-        <div style="font-size:10.5px;color:var(--mid);font-style:italic;max-width:320px;text-align:right">${m.note}</div>
+    <!-- Per-1000 section -->
+    <div style="padding:10px 0 6px;font-size:10px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:1px">Per 1,000 viewers who enter the room →</div>`;
+
+  soC.forEach((sv,i)=>{
+    const pv = paC[i];
+    const maxV = Math.max(sv,pv,1);
+    const soW = sv/maxV*100;
+    const paW = pv/maxV*100;
+    const diff = sv-pv;
+    const isKey = i===1; // product exposure is the big story
+    html += `<div style="display:grid;grid-template-columns:180px 1fr 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray);align-items:center;${isKey?'background:#fff8f0;margin:0 -4px;padding-left:4px;padding-right:4px;border-radius:4px':''}">
+      <div style="font-size:11.5px;font-weight:${isKey?700:500};color:${isKey?'#b45309':'var(--sub)'}">
+        ${CLABELS[i]}${isKey?' ← key gap':''}
       </div>
-      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center">
-        <div>
-          <div style="height:28px;display:flex;align-items:center;gap:8px">
-            <div style="flex:1;height:100%;background:#eef1f8;border-radius:5px;overflow:hidden;position:relative">
-              <div style="position:absolute;right:0;top:0;bottom:0;width:${soW}%;background:${soWins?'#3A55FF':'#c4d3e3'};border-radius:5px;transition:width .4s"></div>
-              <div style="position:absolute;top:50%;right:8px;transform:translateY(-50%);font-size:11.5px;font-weight:700;color:${soWins?'#fff':'var(--sub)'};">${fmt(sv)}</div>
-            </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:15px;font-weight:800;color:${CCOLORS[i]};min-width:36px">${sv.toLocaleString()}</div>
+          <div style="flex:1;height:10px;background:#eef1f8;border-radius:5px;overflow:hidden">
+            <div style="height:100%;width:${soW}%;background:${CCOLORS[i]};border-radius:5px"></div>
           </div>
         </div>
-        <div style="font-size:10px;font-weight:700;color:${soWins?'#3A55FF':'#b45309'};text-align:center;white-space:nowrap;min-width:52px">${diffLabel}</div>
-        <div>
-          <div style="height:28px;display:flex;align-items:center;gap:8px">
-            <div style="flex:1;height:100%;background:#eef1f8;border-radius:5px;overflow:hidden;position:relative">
-              <div style="position:absolute;left:0;top:0;bottom:0;width:${paW}%;background:${!soWins?'#f59e0b':'#c4d3e3'};border-radius:5px;transition:width .4s"></div>
-              <div style="position:absolute;top:50%;left:8px;transform:translateY(-50%);font-size:11.5px;font-weight:700;color:${!soWins?'#fff':'var(--sub)'};">${fmt(pv)}</div>
-            </div>
+        ${i>0?`<div style="font-size:10px;color:var(--mid);margin-top:2px">${(soC[i]/soC[i-1]*100).toFixed(0)}% of prior stage</div>`:''}
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:15px;font-weight:800;color:${isKey?'#ef4444':'#9badc4'};min-width:36px">${pv.toLocaleString()}</div>
+          <div style="flex:1;height:10px;background:#eef1f8;border-radius:5px;overflow:hidden">
+            <div style="height:100%;width:${paW}%;background:${isKey?'#ef4444':'#C4D3E3'};border-radius:5px"></div>
           </div>
         </div>
+        ${i>0?`<div style="font-size:10px;color:var(--mid);margin-top:2px">${(paC[i]/paC[i-1]*100).toFixed(0)}% of prior stage</div>`:''}
       </div>
+    </div>
+    ${isKey?`<div style="font-size:11px;color:#ef4444;font-weight:600;padding:4px 4px 6px;background:#fff8f0;margin:-2px 0 0">⚠ Of 1,000 entrants: Self-Op shows product to ${sv} — Partner shows to only ${pv}. ${sv-pv} users lost to zero product exposure.</div>`:''}`;
+  });
+
+  // Business results
+  html += `<div style="padding:10px 0 6px;margin-top:8px;font-size:10px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:1px">Business Results (avg per session)</div>`;
+  RESULTS.forEach(r=>{
+    html += `<div style="display:grid;grid-template-columns:180px 1fr 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray);align-items:center">
+      <div style="font-size:11.5px;color:var(--sub)">${r.label}<div style="font-size:10px;color:var(--muted)">${r.note}</div></div>
+      <div style="font-size:15px;font-weight:800;color:${r.soWins?'var(--blue)':'var(--mid)'};text-align:center">${r.so}${r.soWins?' ✓':''}</div>
+      <div style="font-size:15px;font-weight:800;color:${!r.soWins?'#f59e0b':'var(--mid)'};text-align:center">${r.pa}${!r.soWins?' ✓':''}</div>
     </div>`;
   });
 
   html += `<div style="margin-top:12px;padding:10px 14px;background:var(--gray);border-radius:8px;font-size:11.5px;line-height:1.8;color:var(--sub)">
-    <strong style="color:var(--dark)">Read the numbers together:</strong> Partners bring <strong>2× more viewers</strong> in (Step 1) but lose <strong>82%</strong> of them before they see any product (Step 2: 18% vs 89%). Self-Op's permanent shelf captures nearly every entrant — producing <strong>18× higher CVR</strong> and <strong>2.4× more GMV per session</strong>, even with a smaller initial audience. Partners compensate with <strong>56% higher AOV</strong>, reflecting premium product mix (e.g. high-value supplements).
+    <strong style="color:var(--dark)">The numbers tell one story:</strong> Partners bring more viewers in, but 818 of every 1,000 entrants leave without seeing a product. Self-Op captures 893 of those 1,000 — turning channel reach into orders at <strong style="color:var(--blue)">10× the rate</strong>. Partners compensate with higher AOV, reflecting premium product positioning. The structural fix for partners: pin the hero product in the first 5 minutes.
   </div>`;
+
   el.innerHTML = html;
 }
 
