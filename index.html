@@ -999,14 +999,14 @@ function setHdrPlatform(p){
 }
 function setHdrBrand(b){
   curBrand=b; curAccount='all'; curSession='all';
-  populateHdrAccount(); populateHdrSession(); refresh();
+  populateHdrAccount(); populateHdrSession(); refresh(); saveFilters();
 }
 function setHdrAccount(a){
   curAccount=a; curSession='all';
-  populateHdrSession(); refresh();
+  populateHdrSession(); refresh(); saveFilters();
 }
 function setHdrSession(sid){
-  curSession=sid;
+  curSession=sid; saveFilters();
   if(sid!=='all'){
     // Navigate to Live Funnel with this session pre-selected
     SF.group='all';
@@ -1018,8 +1018,7 @@ function setHdrSession(sid){
     setTimeout(()=>{
       const fsel=document.getElementById('f-sel');
       if(fsel&&[...fsel.options].some(o=>o.value===sid)){fsel.value=sid;renderFunnel();}
-      const chart=document.getElementById('f-pyramid');
-      if(chart) chart.scrollIntoView({behavior:'smooth',block:'start'});
+      setTimeout(scrollToFunnelChart, 80);
     },120);
   } else {
     refresh();
@@ -2724,12 +2723,43 @@ function updatePreClearBadge(){
   // just enable/disable the button — badge is set by markPrecleared
 }
 
+
+
+function scrollToFunnelChart(){
+  // Use the .main scrollable container, not window.scrollIntoView
+  const main=document.querySelector('.main');
+  const chart=document.getElementById('f-pyramid');
+  if(!main||!chart) return;
+  const mainTop=main.getBoundingClientRect().top;
+  const chartTop=chart.getBoundingClientRect().top;
+  main.scrollBy({top: chartTop-mainTop-16, behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════
+// FILTER PERSISTENCE (localStorage)
+// ═══════════════════════════════════════════════════
+const FILTER_KEY = 'attentiv_v2_filters';
+function saveFilters(){
+  try{ localStorage.setItem(FILTER_KEY, JSON.stringify({curBrand,curAccount,curSession})); }catch(e){}
+}
+function loadFilters(){
+  try{
+    const s=JSON.parse(localStorage.getItem(FILTER_KEY)||'{}');
+    if(s.curBrand) curBrand=s.curBrand;
+    if(s.curAccount) curAccount=s.curAccount;
+    if(s.curSession) curSession=s.curSession;
+  }catch(e){}
+}
+
 // INIT
 // ═══════════════════════════════════════════════════
+loadFilters();
 updateSortOpts();
 populateGroupDropdown();
 populateHdrAccount();
 populateHdrSession();
+// Restore header brand dropdown to match loaded state
+const _hb=document.getElementById('hdr-brand');if(_hb)_hb.value=curBrand;
 renderOverview();
 initFunnel();
 initActions();
