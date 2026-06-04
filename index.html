@@ -268,14 +268,9 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
     <button class="stab" id="stab-actions" onclick="showLayer('actions',this)">Action Cards</button>
   </div>
 
-  <!-- Sub-filter bar -->
-  <div class="sfbar">
-    <span class="fbar-lbl" style="font-size:10px;white-space:nowrap">Account / KOL</span>
-    <select class="fsel" id="sf-group" onchange="applySubFilter()" style="min-width:200px">
-      <option value="all">All Accounts</option>
-    </select>
-    <div class="fdiv"></div>
-    <span class="fbar-lbl" style="font-size:10px;white-space:nowrap">Rating</span>
+  <!-- Sub-filter: Rating only — Account/Session controlled by global header -->
+  <div class="sfbar" style="padding:6px 12px">
+    <span class="fbar-lbl" style="font-size:10px;white-space:nowrap">Filter by Rating</span>
     <div class="fchips" id="sf-rating-chips">
       <button class="fchip active" onclick="setSFRating('All',this)">All</button>
       <button class="fchip" onclick="setSFRating('STAR',this)">⭐ STAR</button>
@@ -464,14 +459,12 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
 
   <!-- ── FUNNEL LAYER ── -->
   <div class="layer" id="layer-funnel">
-    <div class="card" style="padding:12px">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <span style="font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap">Session:</span>
-        <select class="ssel" id="f-sel" onchange="renderFunnel()" style="flex:1;min-width:220px"></select>
-        <div id="f-meta" style="font-size:11px;color:var(--mid)"></div>
-      </div>
+    <!-- Session controlled by global header — shown as info bar -->
+    <div style="padding:8px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div id="f-meta" style="font-size:12px;color:var(--blue);font-weight:500"></div>
       <div id="f-bm-note" style="font-size:10.5px;color:var(--mid)"></div>
     </div>
+    <select id="f-sel" style="display:none"></select>
     <!-- Funnel Volume Card — upside-down pyramid -->
     <div class="card">
       <div class="gbar"></div>
@@ -499,13 +492,11 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
     <div style="padding:10px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff;font-size:11.5px;color:var(--blue);margin-bottom:4px">
       <strong>Session Diagnostic Engine:</strong> Select a past session to see exactly what leaked and what to fix before the next session with that KOL. Statistical layer detects leaks · LLM prescribes actions. No analyst required.
     </div>
-    <div class="card" style="padding:12px">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap">Diagnose session:</span>
-        <select class="ssel" id="ac-sel" onchange="renderActions()" style="flex:1;min-width:220px"></select>
-        <div id="ac-meta" style="font-size:11px;color:var(--mid)"></div>
-      </div>
+    <!-- Session controlled by global header — shown as info bar -->
+    <div style="padding:8px 14px;background:linear-gradient(135deg,#eef1ff,#e6f5ff);border-radius:9px;border:1px solid #b8c5ff;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div id="ac-meta" style="font-size:12px;color:var(--blue);font-weight:500;flex:1"></div>
     </div>
+    <select id="ac-sel" style="display:none"></select>
     <div id="action-cards"></div>
   </div><!-- /actions layer -->
 
@@ -514,13 +505,7 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
 <!-- ═══════════════ KOL SCREEN ═══════════════ -->
 <div class="screen" id="screen-kol">
   <div><div class="pg-t">KOL / Creator Analysis</div><div class="pg-s" id="kol-sub">Performance by creator</div></div>
-  <!-- KOL sub-filter bar — same pattern as Analytics sfbar -->
-  <div class="sfbar">
-    <span class="fbar-lbl" style="font-size:10px">Account / KOL</span>
-    <select class="fsel" id="kol-group" onchange="renderKOL()" style="min-width:180px"></select>
-
-    <button class="sfclear" onclick="clearKOLFilter()">✕ Clear</button>
-  </div>
+  <select id="kol-group" style="display:none"></select>
   <div class="card"><div class="row"><div class="rtitle">KOL Leaderboard</div></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Creator</th><th>Brand</th><th>Type</th><th class='sortable' data-sort='sessions' onclick="sortTable('sessions')">Sessions</th><th class='sortable' data-sort='gmv' onclick="sortTable('gmv')">Total GMV</th><th class='sortable' data-sort='aov' onclick="sortTable('aov')">Avg AOV</th><th class='sortable' data-sort='cvr' onclick="sortTable('cvr')">Avg CVR</th><th class='sortable' data-sort='bestgmv' onclick="sortTable('bestgmv')">Best GMV</th></tr></thead><tbody id="kol-tbody"></tbody></table></div><div class="pgbar" id="kol-pgbar"></div></div>
   <div class="g2">
     <div class="card" style="border-left:3px solid var(--blue)">
@@ -1330,8 +1315,10 @@ function pgSize(id, size){
 // CROSS-LAYER NAVIGATION
 // ═══════════════════════════════════════════════════
 function goToFunnel(sessionId){
-  // Force individual-session mode: reset group so session selector is visible
-  // and the specific session can be pre-selected. User can apply group filter after.
+  // Set global session state and update header dropdown
+  curSession=sessionId; saveFilters();
+  const hdrS=document.getElementById('hdr-session');
+  if(hdrS&&[...hdrS.options].some(o=>o.value===sessionId)) hdrS.value=sessionId;
   SF.group = 'all';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
@@ -1624,6 +1611,8 @@ function initFunnel(){
     const sorted=[...allBrand].sort((a,b)=>b.date.localeCompare(a.date));
     sel.innerHTML=sorted.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
     if(!sel.innerHTML)sel.innerHTML='<option>No sessions available</option>';
+    // Pre-select from global header session state
+    if(curSession!=='all'&&[...sel.options].some(o=>o.value===curSession)) sel.value=curSession;
     // Pre-select global session if set
     if(curSession!=='all'&&[...sel.options].some(o=>o.value===curSession)) sel.value=curSession;
   } else {
