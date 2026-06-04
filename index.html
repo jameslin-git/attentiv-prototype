@@ -188,6 +188,14 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
 .cbadge.flagged{background:#fffbeb;color:#b45309}
 .cbadge.violation{background:#fef2f2;color:#b91c1c}
 
+
+/* Header dropdowns */
+.hdrsel{font-family:var(--font);font-size:12px;font-weight:500;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;color:rgba(255,255,255,.88);padding:4px 10px;cursor:pointer;outline:none}
+.hdrsel:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.3)}
+.hdrsel:focus{border-color:rgba(58,85,255,.7)}
+.hdrsel option,.hdrsel optgroup{background:#090A0F;color:#fff}
+.hdr-lbl{font-size:9px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+
 /* Pagination */
 .pgbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0 2px;flex-wrap:wrap;gap:8px}
 .pginfo{font-size:11px;color:var(--mid)}
@@ -208,33 +216,31 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
 <header class="hdr">
   <div class="logo"><div class="lmark">A</div><div><div class="lname">Attentiv</div><div class="lby">by Pattern</div></div></div>
   <div class="hdiv"></div>
-  <span class="htag">Social Commerce AI</span>
-  <div class="hauto"><div class="avt">JL</div></div>
-</header>
-
-<!-- FILTER BAR -->
-<div class="fbar">
-  <span class="fbar-lbl">Filters</span>
-  <div class="fdiv"></div>
-  <span class="fbar-lbl" style="font-size:10px">Brand</span>
-  <div class="fchips" id="brand-chips">
-    <button class="fchip active" onclick="setBrand('All',this)">All Brands</button>
-    <button class="fchip" onclick="setBrand('Thorne',this)">Thorne</button>
-    <button class="fchip" onclick="setBrand('KC',this)">KELO-COTE</button>
-  </div>
-  <div class="fdiv"></div>
-  <span class="fbar-lbl" style="font-size:10px">Platform</span>
-  <div class="fchips" id="plat-chips">
-    <button class="fchip active" onclick="setPlatform('Douyin',this)">Douyin</button>
-    <span class="fchip" style="opacity:.4;cursor:not-allowed;user-select:none" title="Coming Q3 — no data ingested yet">RED · Coming Soon</span>
-  </div>
-  <div class="fdiv"></div>
-  <span class="fbar-lbl" style="font-size:10px">Time</span>
-  <select class="fsel" id="time-sel" disabled style="opacity:.5;cursor:not-allowed">
-    <option value="all" selected>All Historical</option>
+  <span class="hdr-lbl">Brand</span>
+  <select class="hdrsel" id="hdr-brand" onchange="setHdrBrand(this.value)">
+    <option value="All">All Brands</option>
+    <option value="Thorne">Thorne</option>
+    <option value="KC">KELO-COTE</option>
   </select>
-  <span class="fsrc" id="data-count">20 sessions</span>
-</div>
+  <div class="hdiv"></div>
+  <span class="hdr-lbl">Platform</span>
+  <select class="hdrsel" disabled style="opacity:.4;cursor:not-allowed"><option>Douyin (RED: Coming Soon)</option></select>
+  <div class="hdiv"></div>
+  <span class="hdr-lbl">Account / KOL</span>
+  <select class="hdrsel" id="hdr-account" onchange="setHdrAccount(this.value)" style="min-width:170px">
+    <option value="all">All Accounts</option>
+  </select>
+  <div class="hdiv"></div>
+  <span class="hdr-lbl">Session</span>
+  <select class="hdrsel" id="hdr-session" onchange="setHdrSession(this.value)" style="min-width:200px">
+    <option value="all">All Sessions</option>
+  </select>
+  <div class="hauto">
+    <span style="font-size:10px;color:rgba(255,255,255,.4);white-space:nowrap">All Historical</span>
+    <span class="fsrc" id="data-count" style="margin-left:8px">247 sessions</span>
+    <div class="avt">JL</div>
+  </div>
+</header>
 
 <div class="body">
 <!-- SIDEBAR -->
@@ -933,7 +939,82 @@ const SUBS={'治愈':'改善/缓解','根治':'长期改善','神药':'本品','
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
-let curBrand='All', curDays='all';
+let curBrand='All', curDays='all', curAccount='all', curSession='all';
+
+function populateHdrAccount(){
+  const sel=document.getElementById('hdr-account');
+  if(!sel) return;
+  const base=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  const brands=curBrand==='All'?['Thorne','KC']:[curBrand];
+  let opts='<option value="all">All Accounts</option>';
+  brands.forEach(b=>{
+    const bSess=base.filter(s=>s.brand===b);
+    if(!bSess.length) return;
+    opts+=`<optgroup label="── ${b} ──">`;
+    const selfOp=bSess.filter(s=>s.type==='Self-Op');
+    if(selfOp.length) opts+=`<option value="${b}::Self-Op">${b} · Self-Op (${selfOp.length})</option>`;
+    const kols={};
+    bSess.filter(s=>s.type==='Partner').forEach(s=>{kols[s.kol]=(kols[s.kol]||0)+1;});
+    Object.entries(kols).sort((a,b2)=>b2[1]-a[1]).forEach(([kol,cnt])=>{
+      const lbl=kol.length>32?kol.slice(0,30)+'…':kol;
+      opts+=`<option value="${b}::${kol}">${lbl} (${cnt})</option>`;
+    });
+    opts+='</optgroup>';
+  });
+  sel.innerHTML=opts;
+  if([...sel.options].some(o=>o.value===curAccount)) sel.value=curAccount;
+  else sel.value='all';
+}
+
+function populateHdrSession(){
+  const sel=document.getElementById('hdr-session');
+  if(!sel) return;
+  let base=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  if(curAccount!=='all'){
+    const[ab,at]=curAccount.split('::');
+    if(at==='Self-Op') base=base.filter(s=>s.brand===ab&&s.type==='Self-Op');
+    else base=base.filter(s=>s.brand===ab&&s.kol===at);
+  }
+  const sorted=[...base].sort((a,b)=>b.date.localeCompare(a.date));
+  let opts='<option value="all">All Sessions</option>';
+  sorted.forEach(s=>{
+    const lbl=`${s.kol.split('(')[0].trim().slice(0,20)} · ${s.date.slice(5)} · ${mon(s.gmv)}`;
+    opts+=`<option value="${s.id}">${lbl}</option>`;
+  });
+  sel.innerHTML=opts;
+  if([...sel.options].some(o=>o.value===curSession)) sel.value=curSession;
+  else{ sel.value='all'; curSession='all'; }
+  document.getElementById('data-count').textContent=`${sorted.length} sessions`;
+}
+
+function setHdrBrand(b){
+  curBrand=b; curAccount='all'; curSession='all';
+  populateHdrAccount(); populateHdrSession(); refresh();
+}
+function setHdrAccount(a){
+  curAccount=a; curSession='all';
+  populateHdrSession(); refresh();
+}
+function setHdrSession(sid){
+  curSession=sid;
+  if(sid!=='all'){
+    // Navigate to Live Funnel with this session pre-selected
+    SF.group='all';
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
+    document.getElementById('screen-analytics').classList.add('active');
+    document.getElementById('nav-analytics').classList.add('active');
+    showLayer('funnel',document.getElementById('stab-funnel'));
+    setTimeout(()=>{
+      const fsel=document.getElementById('f-sel');
+      if(fsel&&[...fsel.options].some(o=>o.value===sid)){fsel.value=sid;renderFunnel();}
+      const chart=document.getElementById('f-pyramid');
+      if(chart) chart.scrollIntoView({behavior:'smooth',block:'start'});
+    },120);
+  } else {
+    refresh();
+  }
+}
 
 // ═══════════════════════════════════════════════════
 // UTILS
@@ -958,14 +1039,16 @@ function rating(s){
 // Benchmark follows the brand filter: All Brands → combined 247, specific brand → brand-specific
 function getActiveBM(brand){return curBrand==='All'?BM_COMBINED:(BM[brand]||BM_COMBINED);}
 
-// Time filter — 'all' returns full brand-filtered dataset
+// getSS: brand + account filter (time always 'all' for prototype)
 function getSS(){
-  const base = curBrand==='All' ? ALL_SS : ALL_SS.filter(s=>s.brand===curBrand);
-  if(curDays==='all') return base;
-  const cutoff=new Date('2026-04-30');
-  cutoff.setDate(cutoff.getDate()-(parseInt(curDays)-1));
-  const cutStr=cutoff.toISOString().slice(0,10);
-  return base.filter(s=>s.date>=cutStr);
+  let base = curBrand==='All' ? ALL_SS : ALL_SS.filter(s=>s.brand===curBrand);
+  if(curAccount!=='all'){
+    const[ab,at]=curAccount.split('::');
+    if(at==='Self-Op') base=base.filter(s=>s.brand===ab&&s.type==='Self-Op');
+    else if(at==='Partner') base=base.filter(s=>s.brand===ab&&s.type==='Partner');
+    else base=base.filter(s=>s.brand===ab&&s.kol===at);
+  }
+  return base;
 }
 
 // ═══════════════════════════════════════════════════
@@ -991,13 +1074,7 @@ function showLayer(id,btn){
   else if(id==='actions')initActions();
   else renderOverview();
 }
-function setBrand(b,btn){
-  curBrand=b;
-  SF.group='all'; // reset group on brand change
-  document.querySelectorAll('#brand-chips .fchip').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  refresh();
-}
+// setBrand removed — replaced by setHdrBrand
 function setPlatform(p,btn){
   document.querySelectorAll('#plat-chips .fchip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
@@ -1009,6 +1086,8 @@ function setTime(days){
 }
 function refresh(){
   populateGroupDropdown();
+  populateHdrAccount();
+  populateHdrSession();
   const ss=getSS();
   document.getElementById('data-count').textContent=ss.length+' sessions';
   renderOverview();
@@ -1072,17 +1151,10 @@ function applySubFilter(){
 }
 
 function getFilteredSS(){
-  let ss = getSS();
-  // Group filter
-  if(SF.group && SF.group!=='all'){
-    const [gBrand, gType] = SF.group.split('::');
-    if(gType==='Self-Op') ss=ss.filter(s=>s.brand===gBrand && s.type==='Self-Op');
-    else if(gType==='Partner') ss=ss.filter(s=>s.brand===gBrand && s.type==='Partner');
-    else ss=ss.filter(s=>s.brand===gBrand && s.kol===gType);
-  }
-  // Rating filter
+  let ss = getSS(); // already has brand + account applied
+  // Rating filter from sfbar chips
   if(SF.rating!=='All') ss=ss.filter(s=>rating(s).includes(SF.rating));
-  // Sort by current SF.sortField
+  // Sort
   const dir=SF.sortDir==='asc'?1:-1;
   ss=[...ss].sort((a,b)=>{
     if(SF.sortField==='date') return dir*a.date.localeCompare(b.date);
@@ -1267,18 +1339,19 @@ function goToFunnel(sessionId){
   }, 120);
 }
 function goToActionCards(sessionId){
-  SF.group = 'all'; // force individual mode so session is in the selector
+  curSession=sessionId;
+  const hdrSel=document.getElementById('hdr-session');
+  if(hdrSel&&[...hdrSel.options].some(o=>o.value===sessionId)) hdrSel.value=sessionId;
+  SF.group='all';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-analytics').classList.add('active');
   document.getElementById('nav-analytics').classList.add('active');
-  showLayer('actions', document.getElementById('stab-actions'));
+  showLayer('actions',document.getElementById('stab-actions'));
   setTimeout(()=>{
     const sel=document.getElementById('ac-sel');
-    if(sel && [...sel.options].some(o=>o.value===sessionId)){
-      sel.value=sessionId; renderActions();
-    }
-  }, 120);
+    if(sel&&[...sel.options].some(o=>o.value===sessionId)){sel.value=sessionId;renderActions();}
+  },120);
 }
 
 // OVERVIEW
@@ -2626,6 +2699,8 @@ function updatePreClearBadge(){
 // ═══════════════════════════════════════════════════
 updateSortOpts();
 populateGroupDropdown();
+populateHdrAccount();
+populateHdrSession();
 renderOverview();
 initFunnel();
 initActions();
