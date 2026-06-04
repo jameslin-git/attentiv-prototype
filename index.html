@@ -1133,10 +1133,11 @@ function populateGroupDropdown(){
     });
     opts += '</optgroup>';
   });
-  const cur = sel.value;
   sel.innerHTML = opts;
-  // Try restore previous selection
-  if([...sel.options].some(o=>o.value===cur)) sel.value = cur;
+  // Use SF.group as authoritative source (not DOM value which may be stale)
+  const target = SF.group || 'all';
+  if([...sel.options].some(o=>o.value===target)) sel.value = target;
+  else { sel.value = 'all'; SF.group = 'all'; }
 }
 
 // Aggregate mode ONLY for type groups (Self-Op, Partner). Specific KOL → filtered session list.
@@ -1248,14 +1249,10 @@ function pgSize(id, size){
 // CROSS-LAYER NAVIGATION
 // ═══════════════════════════════════════════════════
 function _inheritSessionFilter(sessionId){
-  // Set SF.group to match the session so filters are inherited on navigation
+  // Set SF.group state — populateGroupDropdown will sync the UI when it runs
   const s = ALL_SS.find(x=>x.id===sessionId);
   if(s){
-    const grpKey = s.type==='Self-Op' ? `${s.brand}::Self-Op` : `${s.brand}::${s.kol}`;
-    SF.group = grpKey;
-    const sg = document.getElementById('sf-group');
-    if(sg && [...sg.options].some(o=>o.value===grpKey)) sg.value = grpKey;
-    else if(sg) sg.value = 'all'; // fallback if not in dropdown yet
+    SF.group = s.type==='Self-Op' ? `${s.brand}::Self-Op` : `${s.brand}::${s.kol}`;
   }
 }
 function goToFunnel(sessionId){
