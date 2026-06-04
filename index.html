@@ -230,11 +230,8 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
   </div>
   <div class="fdiv"></div>
   <span class="fbar-lbl" style="font-size:10px">Time</span>
-  <select class="fsel" id="time-sel" onchange="setTime(this.value)">
-    <option value="90">Last 90 Days</option>
-    <option value="60" selected>Last 60 Days</option>
-    <option value="30">Last 30 Days</option>
-    <option value="14">Last 14 Days</option>
+  <select class="fsel" id="time-sel" disabled style="opacity:.5;cursor:not-allowed">
+    <option value="all" selected>All Historical</option>
   </select>
   <span class="fsrc" id="data-count">20 sessions</span>
 </div>
@@ -936,7 +933,7 @@ const SUBS={'治愈':'改善/缓解','根治':'长期改善','神药':'本品','
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
-let curBrand='All', curDays=60;
+let curBrand='All', curDays='all';
 
 // ═══════════════════════════════════════════════════
 // UTILS
@@ -961,12 +958,14 @@ function rating(s){
 // Benchmark follows the brand filter: All Brands → combined 247, specific brand → brand-specific
 function getActiveBM(brand){return curBrand==='All'?BM_COMBINED:(BM[brand]||BM_COMBINED);}
 
-// Time filter — cutoff date based on latest session (2026-04-28)
+// Time filter — 'all' returns full brand-filtered dataset
 function getSS(){
-  const cutoff=new Date('2026-04-28');
-  cutoff.setDate(cutoff.getDate()-(curDays-1));
+  const base = curBrand==='All' ? ALL_SS : ALL_SS.filter(s=>s.brand===curBrand);
+  if(curDays==='all') return base;
+  const cutoff=new Date('2026-04-30');
+  cutoff.setDate(cutoff.getDate()-(parseInt(curDays)-1));
   const cutStr=cutoff.toISOString().slice(0,10);
-  return ALL_SS.filter(s=>(curBrand==='All'||s.brand===curBrand)&&s.date>=cutStr);
+  return base.filter(s=>s.date>=cutStr);
 }
 
 // ═══════════════════════════════════════════════════
@@ -1005,7 +1004,7 @@ function setPlatform(p,btn){
   // RED is coming Q3 — no data change needed
 }
 function setTime(days){
-  curDays=parseInt(days);
+  curDays = days==='all' ? 'all' : parseInt(days);
   refresh();
 }
 function refresh(){
@@ -1248,15 +1247,10 @@ function pgSize(id, size){
 // ═══════════════════════════════════════════════════
 // CROSS-LAYER NAVIGATION
 // ═══════════════════════════════════════════════════
-function _inheritSessionFilter(sessionId){
-  // Set SF.group state — populateGroupDropdown will sync the UI when it runs
-  const s = ALL_SS.find(x=>x.id===sessionId);
-  if(s){
-    SF.group = s.type==='Self-Op' ? `${s.brand}::Self-Op` : `${s.brand}::${s.kol}`;
-  }
-}
 function goToFunnel(sessionId){
-  _inheritSessionFilter(sessionId);
+  // Force individual-session mode: reset group so session selector is visible
+  // and the specific session can be pre-selected. User can apply group filter after.
+  SF.group = 'all';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-analytics').classList.add('active');
@@ -1264,19 +1258,27 @@ function goToFunnel(sessionId){
   showLayer('funnel', document.getElementById('stab-funnel'));
   setTimeout(()=>{
     const sel=document.getElementById('f-sel');
-    if(sel){sel.value=sessionId; renderFunnel();}
+    if(sel && [...sel.options].some(o=>o.value===sessionId)){
+      sel.value=sessionId;
+      renderFunnel();
+    }
     const chart=document.getElementById('f-pyramid');
     if(chart) chart.scrollIntoView({behavior:'smooth', block:'start'});
-  }, 80);
+  }, 120);
 }
 function goToActionCards(sessionId){
-  // Preserve existing SF.group (already set by goToFunnel or current filter state)
+  SF.group = 'all'; // force individual mode so session is in the selector
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sbitem').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-analytics').classList.add('active');
   document.getElementById('nav-analytics').classList.add('active');
   showLayer('actions', document.getElementById('stab-actions'));
-  setTimeout(()=>{ const sel=document.getElementById('ac-sel'); if(sel){sel.value=sessionId; renderActions();} }, 80);
+  setTimeout(()=>{
+    const sel=document.getElementById('ac-sel');
+    if(sel && [...sel.options].some(o=>o.value===sessionId)){
+      sel.value=sessionId; renderActions();
+    }
+  }, 120);
 }
 
 // OVERVIEW
@@ -1423,7 +1425,8 @@ function renderOverview(){
   renderChannelCompare();
   const ss=getFilteredSS();
   const rawCount=getSS().length;
-  const label=`${curBrand==='All'?'All brands':curBrand} · Last ${curDays} days · ${ss.length}${ss.length!==rawCount?' of '+rawCount:''} sessions`;
+  const timeLabel = curDays==='all' ? 'All historical' : `Last ${curDays} days`;
+  const label=`${curBrand==='All'?'All brands':curBrand} · ${timeLabel} · ${ss.length}${ss.length!==rawCount?' of '+rawCount:''} sessions`;
   document.getElementById('ov-sub').textContent=label;
   const sorted=[...ss].sort((a,b)=>b.gmv-a.gmv).slice(0,12);
   if(!sorted.length){document.getElementById('gmv-bars').innerHTML='<div style="padding:20px;color:var(--mid);font-size:12px">No sessions in selected time range</div>';document.getElementById('ov-tbody').innerHTML='';return;}
@@ -1531,11 +1534,13 @@ function initFunnel(){
   if(aggRow) aggRow.style.display = isGroup ? 'flex' : 'none';
   
   if(!isGroup){
-    // Use getFilteredSS() so specific KOL selections filter the session list
-    const filteredSS = getFilteredSS();
+    // Populate from ALL_SS (brand filter only, no time filter) so every session is always reachable
+    const allBrand = curBrand==='All' ? ALL_SS : ALL_SS.filter(s=>s.brand===curBrand);
     const sel=document.getElementById('f-sel');
-    sel.innerHTML=filteredSS.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
-    if(!sel.innerHTML)sel.innerHTML='<option>No sessions in range</option>';
+    // Sort by date desc so most recent sessions appear first
+    const sorted=[...allBrand].sort((a,b)=>b.date.localeCompare(a.date));
+    sel.innerHTML=sorted.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
+    if(!sel.innerHTML)sel.innerHTML='<option>No sessions available</option>';
   } else {
     // Aggregated mode
     const agg = computeGroupFunnel(ss);
