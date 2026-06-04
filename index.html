@@ -224,7 +224,10 @@ th.sortable.desc::after{content:' ▼';font-size:9px;color:#84C9F7}
   </select>
   <div class="hdiv"></div>
   <span class="hdr-lbl">Platform</span>
-  <select class="hdrsel" disabled style="opacity:.4;cursor:not-allowed"><option>Douyin (RED: Coming Soon)</option></select>
+  <select class="hdrsel" id="hdr-platform" onchange="setHdrPlatform(this.value)">
+    <option value="douyin">Douyin</option>
+    <option value="red" disabled style="color:#9badc4">RED 小红书 · Day 2</option>
+  </select>
   <div class="hdiv"></div>
   <span class="hdr-lbl">Account / KOL</span>
   <select class="hdrsel" id="hdr-account" onchange="setHdrAccount(this.value)" style="min-width:170px">
@@ -987,6 +990,13 @@ function populateHdrSession(){
   document.getElementById('data-count').textContent=`${sorted.length} sessions`;
 }
 
+function setHdrPlatform(p){
+  if(p==='red'){
+    // Revert to Douyin — RED not available
+    document.getElementById('hdr-platform').value='douyin';
+  }
+  // Douyin is the only active platform — no data change needed
+}
 function setHdrBrand(b){
   curBrand=b; curAccount='all'; curSession='all';
   populateHdrAccount(); populateHdrSession(); refresh();
