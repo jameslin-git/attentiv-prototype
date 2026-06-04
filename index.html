@@ -1262,7 +1262,12 @@ function goToFunnel(sessionId){
   document.getElementById('screen-analytics').classList.add('active');
   document.getElementById('nav-analytics').classList.add('active');
   showLayer('funnel', document.getElementById('stab-funnel'));
-  setTimeout(()=>{ const sel=document.getElementById('f-sel'); if(sel){sel.value=sessionId; renderFunnel();} }, 80);
+  setTimeout(()=>{
+    const sel=document.getElementById('f-sel');
+    if(sel){sel.value=sessionId; renderFunnel();}
+    const chart=document.getElementById('f-pyramid');
+    if(chart) chart.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 80);
 }
 function goToActionCards(sessionId){
   // Preserve existing SF.group (already set by goToFunnel or current filter state)
