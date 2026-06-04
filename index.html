@@ -1072,6 +1072,7 @@ function showScreen(id,btn){
   if(id==='kol')renderKOL();
   if(id==='risk')renderRisk();
   if(id==='playbook'){updateKOLList();}
+  if(id==='kol'){populateKOLGroupDropdown();renderKOL();}
 }
 function showLayer(id,btn){
   document.querySelectorAll('.layer').forEach(l=>l.classList.remove('active'));
@@ -1624,6 +1625,8 @@ function initFunnel(){
     const sorted=[...allBrand].sort((a,b)=>b.date.localeCompare(a.date));
     sel.innerHTML=sorted.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
     if(!sel.innerHTML)sel.innerHTML='<option>No sessions available</option>';
+    // Pre-select global session if set
+    if(curSession!=='all'&&[...sel.options].some(o=>o.value===curSession)) sel.value=curSession;
   } else {
     // Aggregated mode
     const agg = computeGroupFunnel(ss);
@@ -1801,14 +1804,25 @@ function populateKOLGroupDropdown(){
 
 function renderKOL(){
   populateKOLGroupDropdown();
-  // Use ALL_SS filtered by brand only — KOL analysis needs full historical picture
+  // Start from ALL_SS with brand filter (full historical picture)
   let ss=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
-  // Apply group dropdown filter (same logic as analytics sf-group)
-  const grp=document.getElementById('kol-group')?.value||'all';
-  if(grp!=='all'){
-    const [gb,gt]=grp.split('::');
-    if(gt==='Self-Op') ss=ss.filter(s=>s.brand===gb&&s.type==='Self-Op');
-    else ss=ss.filter(s=>s.brand===gb&&s.kol===gt);
+  // Apply global Account/KOL from header first
+  if(curAccount!=='all'){
+    const[ab,at]=curAccount.split('::');
+    if(at==='Self-Op') ss=ss.filter(s=>s.brand===ab&&s.type==='Self-Op');
+    else if(at==='Partner') ss=ss.filter(s=>s.brand===ab&&s.type==='Partner');
+    else ss=ss.filter(s=>s.brand===ab&&s.kol===at);
+    // Sync KOL-specific dropdown to match header
+    const kolSel=document.getElementById('kol-group');
+    if(kolSel&&[...kolSel.options].some(o=>o.value===curAccount)) kolSel.value=curAccount;
+  } else {
+    // Then apply KOL-screen-specific dropdown if set
+    const grp=document.getElementById('kol-group')?.value||'all';
+    if(grp!=='all'){
+      const [gb,gt]=grp.split('::');
+      if(gt==='Self-Op') ss=ss.filter(s=>s.brand===gb&&s.type==='Self-Op');
+      else ss=ss.filter(s=>s.brand===gb&&s.kol===gt);
+    }
   }
   // Apply rating filter — based on each session's rating
   if(KOL_RATING!=='All') ss=ss.filter(s=>rating(s).includes(KOL_RATING));
@@ -1953,7 +1967,12 @@ const AC_DIAG = {
 function initActions(){
   const ss=getFilteredSS();
   const sel=document.getElementById('ac-sel');
-  sel.innerHTML=ss.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
+  // Populate from ALL_SS (brand filter) sorted by date desc so any session is reachable
+  const base=curBrand==='All'?ALL_SS:ALL_SS.filter(s=>s.brand===curBrand);
+  const sorted=[...base].sort((a,b)=>b.date.localeCompare(a.date));
+  sel.innerHTML=sorted.map(s=>`<option value="${s.id}">[${s.brand}] ${s.kol} · ${s.date} · ${mon(s.gmv)}</option>`).join('');
+  // Pre-select global session if set
+  if(curSession!=='all'&&[...sel.options].some(o=>o.value===curSession)) sel.value=curSession;
   renderActions();
 }
 
