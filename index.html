@@ -1331,8 +1331,7 @@ function goToFunnel(sessionId){
       sel.value=sessionId;
       renderFunnel();
     }
-    const chart=document.getElementById('f-pyramid');
-    if(chart) chart.scrollIntoView({behavior:'smooth', block:'start'});
+    setTimeout(scrollToFunnelChart, 80);
   }, 120);
 }
 function goToActionCards(sessionId){
